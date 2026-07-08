@@ -8,6 +8,8 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ## [Unreleased]
 
+## [1.2.2] - 2026-07-08
+
 ### Added
 - `SPEC.md` — normative MotionSpec 1.0 specification (RFC-2119 MUST/SHOULD/MAY over the JSON Schema, with the ADR-based change process).
 - `CONFORMANCE.md` — the five-check certification procedure (schema, diagnostics, output, determinism, accessibility) against the published `test/golden` corpus.
