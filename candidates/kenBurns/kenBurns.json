@@ -1,0 +1,16 @@
+{
+  "name": "kenBurns",
+  "version": "1.0.0",
+  "purpose": "Langsamer Ken-Burns-Effekt — kontinuierliches, sanftes Zoomen und Driften (fuer Hero-Bilder/Hintergruende; nur transform).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "scale": { "type": "number", "default": 1.1, "min": 1.01, "max": 1.4 },
+    "duration": { "type": "number", "default": 20, "min": 6, "max": 60 }
+  },
+  "triggerDefaults": {},
+  "performance": { "verified": false, "lcpSafe": true, "cost": 1 },
+  "a11y": { "reducedMotionFallback": "static" },
+  "template": "{{css target}} { animation: motion-kenBurns-{{css id}} {{css params.duration}}s ease-in-out infinite alternate; }\n@keyframes motion-kenBurns-{{css id}} { from { transform: scale(1) translate(0, 0) } to { transform: scale({{css params.scale}}) translate(-2%, -2%) } }",
+  "demo": { "html": "<div class=\"d-kenBurns\" style=\"display:inline-flex;align-items:center;justify-content:center;width:10rem;height:6rem;border-radius:14px;background:var(--surface);border:1px solid var(--line)\">KEN BURNS</div>", "params": { "scale": 1.15, "duration": 12 } }
+}

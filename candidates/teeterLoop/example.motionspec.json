@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "53fb7228902654cd",
+  "meta": {
+    "project": "teeterLoop-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-e"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "teeterLoop-1",
+      "primitive": "teeterLoop",
+      "target": ".d-teeterLoop",
+      "params": {
+        "angle": 8,
+        "duration": 2
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "source": "(hover.*(sink|senk|runter|nach.?unten))",
+  "flags": "i",
+  "primitive": "hoverSink",
+  "target": ".card",
+  "params": {
+    "distance": "4px"
+  }
+}

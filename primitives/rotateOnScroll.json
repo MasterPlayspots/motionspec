@@ -1,0 +1,39 @@
+{
+  "name": "rotateOnScroll",
+  "version": "1.0.0",
+  "purpose": "Rotation tied to scroll progress — the element rotates as it scrolls through the viewport (scrubbed).",
+  "output": "js",
+  "engine": "gsap.ScrollTrigger",
+  "paramSchema": {
+    "degrees": {
+      "type": "number",
+      "default": 15,
+      "min": -180,
+      "max": 180
+    },
+    "scrub": {
+      "type": "number",
+      "default": 1,
+      "min": 0,
+      "max": 3
+    }
+  },
+  "triggerDefaults": {
+    "start": "top bottom",
+    "end": "bottom top"
+  },
+  "performance": {
+    "verified": true,
+    "lcpSafe": true,
+    "cost": 1,
+    "verifiedAt": "2026-07-04"
+  },
+  "a11y": {
+    "reducedMotionFallback": "static"
+  },
+  "template": "gsap.fromTo({{target}}, { rotation: 0 }, { rotation: {{params.degrees}}, ease: 'none', scrollTrigger: { trigger: {{target}}, start: {{trigger.start}}, end: {{trigger.end}}, scrub: {{params.scrub}} } });",
+  "demo": {
+    "html": "<div class=\"d-rotateOnScroll\" style=\"display:inline-flex;align-items:center;justify-content:center;width:8rem;height:8rem;border-radius:14px;background:var(--surface);border:1px solid var(--line);margin:20vh auto\">ROTATE</div>",
+    "params": { "degrees": 20, "scrub": 1 }
+  }
+}

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Audit fixture 3 — marquee element + runtime motion</title>
+</head>
+<body>
+  <!-- Check 4: a deprecated <marquee> element (autoplaying, not pausable). -->
+  <marquee behavior="scroll" direction="left">Breaking news ticker</marquee>
+
+  <!-- Runtime motion that the static scan must DISCLOSE as "nicht geprüft (V2)". -->
+  <script>
+    const el = document.querySelector('.box');
+    if (el) el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400 });
+    function loop() { requestAnimationFrame(loop); }
+    loop();
+  </script>
+</body>
+</html>

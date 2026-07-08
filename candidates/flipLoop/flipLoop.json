@@ -1,0 +1,15 @@
+{
+  "name": "flipLoop",
+  "version": "1.0.0",
+  "purpose": "Endloser 3D-Muenzwurf — kontinuierliche Drehung um die Y-Achse (rotateY, GPU-beschleunigt).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "duration": { "type": "number", "default": 4, "min": 1, "max": 30 }
+  },
+  "triggerDefaults": {},
+  "performance": { "verified": false, "lcpSafe": true, "cost": 1 },
+  "a11y": { "reducedMotionFallback": "static" },
+  "template": "{{css target}} { animation: motion-flipLoop-{{css id}} {{css params.duration}}s linear infinite; }\n@keyframes motion-flipLoop-{{css id}} { from { transform: perspective(600px) rotateY(0deg) } to { transform: perspective(600px) rotateY(360deg) } }",
+  "demo": { "html": "<div class=\"d-flipLoop\" style=\"display:inline-flex;align-items:center;justify-content:center;width:6rem;height:6rem;border-radius:14px;background:var(--surface);border:1px solid var(--line)\">FLIP</div>", "params": { "duration": 4 } }
+}

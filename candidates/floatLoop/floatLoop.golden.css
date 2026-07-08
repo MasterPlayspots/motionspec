@@ -1,0 +1,6 @@
+/* MotionSpec-Compiler vX - generiertes Artefakt. */
+@media (prefers-reduced-motion: no-preference) {
+  /* hero-float (floatLoop) */
+  .hero .badge { animation: motion-floatLoop-hero-float 3s ease-in-out infinite alternate; }
+  @keyframes motion-floatLoop-hero-float { from { transform: translatey(0) } to { transform: translatey(-10px) } }
+}

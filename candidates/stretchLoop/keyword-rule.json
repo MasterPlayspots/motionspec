@@ -1,0 +1,9 @@
+{
+  "source": "(stretch|dehn.*breit|breite.*puls|gummi.*breit)",
+  "flags": "i",
+  "primitive": "stretchLoop",
+  "target": ".badge",
+  "params": {
+    "scaleX": 1.12
+  }
+}

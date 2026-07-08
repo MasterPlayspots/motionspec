@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "a0a405b4556fcab4",
+  "meta": {
+    "project": "stretchLoop-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-c"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "stretchLoop-1",
+      "primitive": "stretchLoop",
+      "target": ".d-stretchLoop",
+      "params": {
+        "scaleX": 1.2,
+        "duration": 2
+      }
+    }
+  ]
+}

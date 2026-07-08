@@ -1,0 +1,6 @@
+/* MotionSpec-Compiler vX - generated artifact. */
+@media (prefers-reduced-motion: no-preference) {
+  /* cta-button (cssTransition) */
+  .cta-button { transition: transform 0.25s ease-out; }
+  .cta-button:hover { transform: translateY(-4px); }
+}

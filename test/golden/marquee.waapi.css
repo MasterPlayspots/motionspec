@@ -1,0 +1,9 @@
+/* MotionSpec WAAPI lowering (no GSAP) - generated CSS artifact. */
+@media (prefers-reduced-motion: no-preference) {
+  /* logo-band (marquee) */
+  .logos .track { display: flex; gap: 2rem; overflow: hidden; }
+  .logos .track > * { flex-shrink: 0; animation: motion-marquee-logo-band 30s linear infinite normal; }
+  @keyframes motion-marquee-logo-band { from { transform: translateX(0) } to { transform: translateX(-100%) } }
+}
+/* pauseControls: WCAG 2.2.2 pause path (data-ms-paused). Outside the reduced-motion guard. */
+html[data-ms-paused] .logos .track, html[data-ms-paused] .logos .track > * { animation-play-state: paused !important; }

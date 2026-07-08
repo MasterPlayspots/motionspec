@@ -1,0 +1,17 @@
+{
+  "name": "marqueeVertical",
+  "version": "1.0.0",
+  "purpose": "Endloses vertikales Laufband — Inhalt scrollt gleichmaessig nach oben (Ticker, Testimonials). Erwartet doppelten Inhalt fuer eine nahtlose Schleife.",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "duration": { "type": "number", "default": 20, "min": 4, "max": 120 },
+    "direction": { "type": "string", "default": "normal", "pattern": "^(normal|reverse)$" },
+    "gap": { "type": "string", "default": "1rem", "pattern": "^[0-9]*\\.?[0-9]+(px|rem|em)$" }
+  },
+  "triggerDefaults": {},
+  "performance": { "verified": false, "lcpSafe": true, "cost": 1 },
+  "a11y": { "reducedMotionFallback": "static" },
+  "template": "{{css target}} { display: flex; flex-direction: column; gap: {{css params.gap}}; overflow: hidden; }\n{{css target}} > * { flex-shrink: 0; animation: motion-marqueeVertical-{{css id}} {{css params.duration}}s linear infinite {{css params.direction}}; }\n@keyframes motion-marqueeVertical-{{css id}} { from { transform: translateY(0) } to { transform: translateY(-100%) } }",
+  "demo": { "html": "<div class=\"d-marqueeVertical\" style=\"height:8rem;width:9rem;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:0 .8rem\"><div>News 1</div><div>News 2</div><div>News 3</div><div>News 4</div><div>News 1</div><div>News 2</div><div>News 3</div><div>News 4</div></div>", "params": { "duration": 12, "direction": "normal", "gap": "0.6rem" } }
+}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Audit fixture — clean (reduced-motion-safe)</title>
+  <style>
+    /* Everything is guarded by prefers-reduced-motion, transform/opacity only,
+       and every infinite loop has a data-ms-paused pause path — exactly what
+       the MotionSpec compiler emits. This page must earn the badge. */
+    @media (prefers-reduced-motion: no-preference) {
+      .fade { transition: opacity 0.3s ease; }
+      .card { transition: transform 0.2s ease; }
+      .loader { animation: spin 4s linear infinite; }
+    }
+    @keyframes spin { from { transform: rotate(0) } to { transform: rotate(360deg) } }
+
+    /* Pause path (WCAG 2.2.2), outside the reduced-motion guard. */
+    html[data-ms-paused] .loader,
+    html[data-ms-paused] .loader > * { animation-play-state: paused !important; }
+  </style>
+</head>
+<body>
+  <div class="fade">fades</div>
+  <div class="card">lifts</div>
+  <div class="loader">spins (pausable)</div>
+</body>
+</html>

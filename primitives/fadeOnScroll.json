@@ -1,0 +1,45 @@
+{
+  "name": "fadeOnScroll",
+  "version": "1.0.0",
+  "purpose": "Opacity tied to scroll progress — the element softly fades out or in as you scroll (scrubbed).",
+  "output": "js",
+  "engine": "gsap.ScrollTrigger",
+  "paramSchema": {
+    "fromOpacity": {
+      "type": "number",
+      "default": 1,
+      "min": 0,
+      "max": 1
+    },
+    "toOpacity": {
+      "type": "number",
+      "default": 0,
+      "min": 0,
+      "max": 1
+    },
+    "scrub": {
+      "type": "number",
+      "default": 1,
+      "min": 0,
+      "max": 3
+    }
+  },
+  "triggerDefaults": {
+    "start": "top top",
+    "end": "bottom top"
+  },
+  "performance": {
+    "verified": true,
+    "lcpSafe": true,
+    "cost": 1,
+    "verifiedAt": "2026-07-04"
+  },
+  "a11y": {
+    "reducedMotionFallback": "instant-visible"
+  },
+  "template": "gsap.fromTo({{target}}, { opacity: {{params.fromOpacity}} }, { opacity: {{params.toOpacity}}, ease: 'none', scrollTrigger: { trigger: {{target}}, start: {{trigger.start}}, end: {{trigger.end}}, scrub: {{params.scrub}} } });",
+  "demo": {
+    "html": "<div class=\"d-fadeOnScroll\" style=\"display:inline-flex;align-items:center;justify-content:center;width:8rem;height:8rem;border-radius:14px;background:var(--surface);border:1px solid var(--line);margin:20vh auto\">FADE</div>",
+    "params": { "fromOpacity": 1, "toOpacity": 0.15, "scrub": 1 }
+  }
+}

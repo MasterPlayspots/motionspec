@@ -1,0 +1,24 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "951874ddfc911d78",
+  "meta": {
+    "project": "fadeOnScroll-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-a"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "fadeOnScroll-1",
+      "primitive": "fadeOnScroll",
+      "target": ".d-fadeOnScroll",
+      "params": {
+        "fromOpacity": 1,
+        "toOpacity": 0.15,
+        "scrub": 1
+      }
+    }
+  ]
+}

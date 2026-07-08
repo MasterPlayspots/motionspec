@@ -1,0 +1,16 @@
+{
+  "_comment": "Seed build-queue for the Catalog Forge. Shape mirrors bin/forge.js loadGaps: an array of { what, target } OR this object form { gaps, telemetry }. Each gap is a real motion INTENT the current 40-primitive catalog does not cover (verified against primitives/ on 2026-07-06). Placeholder-but-realistic — a gate-1 reviewer curates this before enabling the schedule. `node bin/forge.js queue` prioritizes these deterministically; telemetry amplifies matching patterns by count.",
+  "gaps": [
+    { "what": "hero headline splits into words that stagger in on scroll", "target": ".hero h1", "reason": "no catalog primitive matches the intent" },
+    { "what": "hero headline splits into words that stagger in on scroll", "target": ".page-title", "reason": "no catalog primitive matches the intent" },
+    { "what": "svg logo path draws itself stroke by stroke", "target": "svg.logo path", "reason": "no catalog primitive matches the intent" },
+    { "what": "text types out one character at a time", "target": ".terminal .line", "reason": "no catalog primitive matches the intent" },
+    { "what": "image blurs into focus as it enters the viewport", "target": ".gallery img", "reason": "no catalog primitive matches the intent" },
+    { "what": "section wipes in behind a clip-path mask on scroll", "target": ".feature-panel", "reason": "no catalog primitive matches the intent" },
+    { "what": "button pulls toward the cursor with a magnetic hover", "target": ".cta-magnetic", "reason": "no catalog primitive matches the intent" }
+  ],
+  "telemetry": [
+    { "pattern": "svg logo path draws itself stroke by stroke", "count": 4 },
+    { "pattern": "text types out one character at a time", "count": 2 }
+  ]
+}

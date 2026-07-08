@@ -1,0 +1,16 @@
+{
+  "name": "hoverGrow",
+  "version": "1.0.0",
+  "purpose": "Hover micro-interaction — the element scales up gently on hover (transform only).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "scale": { "type": "number", "default": 1.05, "min": 1.01, "max": 1.3 },
+    "duration": { "type": "number", "default": 0.2, "min": 0.05, "max": 1 }
+  },
+  "triggerDefaults": {},
+  "performance": { "verified": true, "lcpSafe": true, "cost": 1, "verifiedAt": "2026-07-04" },
+  "a11y": { "reducedMotionFallback": "static" },
+  "template": "{{css target}} { transition: transform {{css params.duration}}s cubic-bezier(0.22, 0.61, 0.36, 1); }\n{{css target}}:hover { transform: scale({{css params.scale}}); }",
+  "demo": { "html": "<div class=\"d-hoverGrow\" style=\"display:inline-flex;align-items:center;justify-content:center;width:8rem;height:5rem;border-radius:14px;background:var(--surface);border:1px solid var(--line);cursor:pointer\">Hover — grow</div>", "params": { "scale": 1.08, "duration": 0.2 } }
+}

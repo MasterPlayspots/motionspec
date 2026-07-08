@@ -1,0 +1,37 @@
+{
+  "name": "swayLoop",
+  "version": "1.0.0",
+  "purpose": "Gentle, endless swaying — continuous back-and-forth tilting through a small angle (compositor-friendly, decorative).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "angle": {
+      "type": "number",
+      "default": 3,
+      "min": 0.5,
+      "max": 20
+    },
+    "duration": {
+      "type": "number",
+      "default": 4,
+      "min": 1,
+      "max": 15
+    }
+  },
+  "triggerDefaults": {},
+  "performance": {
+    "verified": true,
+    "lcpSafe": true,
+    "cost": 1,
+    "verifiedAt": "2026-07-04"
+  },
+  "a11y": {
+    "reducedMotionFallback": "static",
+    "persistent": true
+  },
+  "template": "{{css target}} { animation: motion-swayLoop-{{css id}} {{css params.duration}}s ease-in-out infinite alternate; }\n@keyframes motion-swayLoop-{{css id}} { from { transform: rotate(-{{css params.angle}}deg) } to { transform: rotate({{css params.angle}}deg) } }",
+  "demo": {
+    "html": "<div class=\"d-swayLoop\" style=\"display:inline-flex;align-items:center;justify-content:center;width:6rem;height:6rem;border-radius:14px;background:var(--surface);border:1px solid var(--line)\">SWAY</div>",
+    "params": { "angle": 4, "duration": 4 }
+  }
+}

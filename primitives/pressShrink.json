@@ -1,0 +1,16 @@
+{
+  "name": "pressShrink",
+  "version": "1.0.0",
+  "purpose": "Press feedback — the element briefly shrinks on activation (:active) and springs back (transform only).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "scale": { "type": "number", "default": 0.96, "min": 0.8, "max": 1 },
+    "duration": { "type": "number", "default": 0.12, "min": 0.05, "max": 0.5 }
+  },
+  "triggerDefaults": {},
+  "performance": { "verified": true, "lcpSafe": true, "cost": 1, "verifiedAt": "2026-07-04" },
+  "a11y": { "reducedMotionFallback": "static" },
+  "template": "{{css target}} { transition: transform {{css params.duration}}s cubic-bezier(0.22, 0.61, 0.36, 1); }\n{{css target}}:active { transform: scale({{css params.scale}}); }",
+  "demo": { "html": "<button class=\"d-pressShrink\" style=\"background:var(--teal);color:var(--on-teal);border:none;border-radius:10px;padding:.7rem 1.2rem;font-weight:600;cursor:pointer\">Press me</button>", "params": { "scale": 0.94, "duration": 0.12 } }
+}

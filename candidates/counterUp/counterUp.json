@@ -1,0 +1,53 @@
+{
+  "name": "counterUp",
+  "version": "1.0.0",
+  "purpose": "Zahl zaehlt beim Einblenden in den Viewport von 0 bis zum Zielwert hoch.",
+  "output": "js",
+  "engine": "gsap.ScrollTrigger",
+  "paramSchema": {
+    "duration": {
+      "type": "number",
+      "default": 1.6,
+      "min": 0.2,
+      "max": 5
+    },
+    "ease": {
+      "type": "string",
+      "default": "power1.out",
+      "pattern": "^[A-Za-z0-9.()]{1,40}$"
+    },
+    "step": {
+      "type": "number",
+      "default": 1,
+      "min": 0.01,
+      "max": 1000
+    },
+    "locale": {
+      "type": "string",
+      "default": "de-DE",
+      "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+    }
+  },
+  "triggerDefaults": {
+    "start": "top 85%",
+    "once": true
+  },
+  "performance": {
+    "verified": false,
+    "lcpSafe": true,
+    "cost": 1
+  },
+  "a11y": {
+    "reducedMotionFallback": "instant-visible"
+  },
+  "template": "document.querySelectorAll({{target}}).forEach(function(el){ var end=parseFloat(el.getAttribute('data-count')||el.textContent); if(!isFinite(end)) end=0; var o={v:0}; gsap.to(o,{v:end,duration:{{params.duration}},ease:{{params.ease}},snap:{v:{{params.step}}},onUpdate:function(){el.textContent=o.v.toLocaleString({{params.locale}})},scrollTrigger:{trigger:el,start:{{trigger.start}},once:{{trigger.once}}}}); });",
+  "demo": {
+    "html": "<p class=\"counter d-counterUp\" data-count=\"12847\">12.847</p>\n<p class=\"counter d-counterUp\" data-count=\"99\">99</p>",
+    "params": {
+      "duration": 2,
+      "ease": "power2.out",
+      "step": 1,
+      "locale": "de-DE"
+    }
+  }
+}

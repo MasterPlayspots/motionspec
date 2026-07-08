@@ -1,0 +1,9 @@
+{
+  "source": "(hover.*(rotate|dreh|neig|kipp)|beim.*hover.*dreh)",
+  "flags": "i",
+  "primitive": "hoverRotate",
+  "target": ".card",
+  "params": {
+    "degrees": 3
+  }
+}

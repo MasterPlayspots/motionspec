@@ -1,0 +1,8 @@
+/* MotionSpec WAAPI lowering (no GSAP) - generated CSS artifact. */
+@media (prefers-reduced-motion: no-preference) {
+  /* chip-jello (jelloLoop) */
+  .chip { animation: motion-jelloLoop-chip-jello 2s ease-in-out infinite alternate; }
+  @keyframes motion-jelloLoop-chip-jello { from { transform: skewX(-6deg) skewY(-6deg) } to { transform: skewX(6deg) skewY(6deg) } }
+}
+/* pauseControls: WCAG 2.2.2 pause path (data-ms-paused). Outside the reduced-motion guard. */
+html[data-ms-paused] .chip, html[data-ms-paused] .chip > * { animation-play-state: paused !important; }

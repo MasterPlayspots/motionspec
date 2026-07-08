@@ -1,0 +1,9 @@
+{
+  "source": "(skew.*scroll|scroll.*skew|neig.*(beim|on).*scroll)",
+  "flags": "i",
+  "primitive": "skewOnScroll",
+  "target": ".skew-on-scroll",
+  "params": {
+    "skewDegrees": 6
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "flipLoop",
+  "version": "1.0.0",
+  "purpose": "Endless 3D coin flip — continuous rotation around the Y axis (rotateY, GPU-accelerated).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "duration": { "type": "number", "default": 4, "min": 1, "max": 30 }
+  },
+  "triggerDefaults": {},
+  "performance": { "verified": true, "lcpSafe": true, "cost": 1, "verifiedAt": "2026-07-04" },
+  "a11y": { "reducedMotionFallback": "static", "persistent": true },
+  "template": "{{css target}} { animation: motion-flipLoop-{{css id}} {{css params.duration}}s linear infinite; }\n@keyframes motion-flipLoop-{{css id}} { from { transform: perspective(600px) rotateY(0deg) } to { transform: perspective(600px) rotateY(360deg) } }",
+  "demo": { "html": "<div class=\"d-flipLoop\" style=\"display:inline-flex;align-items:center;justify-content:center;width:6rem;height:6rem;border-radius:14px;background:var(--surface);border:1px solid var(--line)\">FLIP</div>", "params": { "duration": 4 } }
+}

@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "4d2bf6b7f7fcd781",
+  "meta": {
+    "project": "hoverSkew-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-d"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "hoverSkew-1",
+      "primitive": "hoverSkew",
+      "target": ".d-hoverSkew",
+      "params": {
+        "skew": 6,
+        "duration": 0.2
+      }
+    }
+  ]
+}

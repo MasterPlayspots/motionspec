@@ -1,0 +1,6 @@
+/* MotionSpec WAAPI lowering (no GSAP) - generated CSS artifact. */
+@media (prefers-reduced-motion: no-preference) {
+  /* card-hspin (hoverSpin) */
+  .card { transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1); }
+  .card:hover { transform: rotate(360deg); }
+}

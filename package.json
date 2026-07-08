@@ -1,0 +1,80 @@
+{
+  "name": "motionspec",
+  "version": "1.2.1",
+  "mcpName": "io.github.MasterPlayspots/motionspec",
+  "description": "MotionSpec — a formal intermediate language for scroll-driven web motion. A small model writes schema-validated specs; a deterministic compiler emits GSAP/CSS, hallucination-proof by construction with enforced reduced-motion fallbacks.",
+  "license": "MIT",
+  "author": "Kevin Fröba <security@motionspec.dev>",
+  "keywords": [
+    "gsap",
+    "scrolltrigger",
+    "animation",
+    "motion",
+    "scroll",
+    "mcp",
+    "llm",
+    "accessibility",
+    "compiler",
+    "json-schema"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MasterPlayspots/motionspec.git"
+  },
+  "homepage": "https://github.com/MasterPlayspots/motionspec",
+  "bugs": {
+    "url": "https://github.com/MasterPlayspots/motionspec/issues"
+  },
+  "bin": {
+    "motion": "bin/motion.js",
+    "motionspec": "src/mcp/server.mjs"
+  },
+  "main": "src/compiler/compile.js",
+  "files": [
+    "src",
+    "bin/motion.js",
+    "bin/promote-gate.js",
+    "primitives",
+    "schema",
+    "catalog.lock.json"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js test/*.test.mjs",
+    "coverage": "node --test --experimental-test-coverage --test-coverage-exclude=test/** --test-coverage-exclude=bin/** --test-coverage-lines=90 --test-coverage-functions=90 --test-coverage-branches=75 test/*.test.js test/*.test.mjs",
+    "e2e": "playwright test",
+    "sbom": "npm sbom --sbom-format cyclonedx | node bin/sbom-check.js --filter > sbom.cdx.json",
+    "sbom:check": "node bin/sbom-check.js",
+    "catalog-lock": "node bin/catalog-lock.js",
+    "catalog-lock:check": "node bin/catalog-lock.js --check",
+    "mcp": "node src/mcp/server.mjs",
+    "test:golden-update": "UPDATE_GOLDEN=1 node --test test/compile.test.js",
+    "compile": "node bin/motion.js compile",
+    "route": "node bin/motion.js route",
+    "pipeline": "node bin/motion.js pipeline",
+    "catalog": "node bin/motion.js catalog",
+    "stats": "node bin/motion.js stats",
+    "prepublishOnly": "npm test && npm run catalog-lock:check && npm run sbom && npm run sbom:check && node bin/license-check.js && node -e \"if(!require('fs').existsSync('CHANGELOG.md'))throw new Error('CHANGELOG.md fehlt')\"",
+    "release": "npm test && npm run catalog-lock:check && npm run sbom && npm run sbom:check && node bin/license-check.js && npm publish",
+    "lint": "eslint .",
+    "prepare": "husky"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "overrides": {
+    "conventional-commits-parser": "7.0.1"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.50.0",
+    "eslint": "^10.5.0",
+    "globals": "^17.6.0",
+    "husky": "^9.1.7"
+  }
+}

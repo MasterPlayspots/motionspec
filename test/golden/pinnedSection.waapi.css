@@ -1,0 +1,6 @@
+/* MotionSpec WAAPI lowering (no GSAP) - generated CSS artifact. */
+@media (prefers-reduced-motion: no-preference) {
+  /* pin-hero (pinnedSection) */
+  /* pinnedSection via position:sticky (best-effort; see ADR-0002 — NOT a faithful GSAP pin) */
+  .pin-section { position: -webkit-sticky; position: sticky; top: 0; }
+}

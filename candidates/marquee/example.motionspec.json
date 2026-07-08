@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "meta": {
+    "project": "marquee-demo",
+    "target": "vanilla-gsap",
+    "createdWith": "MotionSpec-Generator"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "logo-band",
+      "primitive": "marquee",
+      "target": ".d-marquee",
+      "params": {
+        "duration": 20,
+        "gap": "2rem",
+        "direction": "normal"
+      }
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "4d2bf6b7f7fcd781",
+  "meta": {
+    "project": "hoverRotate-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-d"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "hoverRotate-1",
+      "primitive": "hoverRotate",
+      "target": ".d-hoverRotate",
+      "params": {
+        "degrees": 4,
+        "duration": 0.2
+      }
+    }
+  ]
+}

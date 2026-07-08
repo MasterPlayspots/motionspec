@@ -1,0 +1,35 @@
+{
+  "name": "parallaxLayer",
+  "version": "1.1.0",
+  "purpose": "Depth offset: the layer moves slower or faster than the rest as you scroll.",
+  "output": "js",
+  "engine": "gsap.ScrollTrigger",
+  "paramSchema": {
+    "yPercent": {
+      "type": "number",
+      "default": -20,
+      "min": -100,
+      "max": 100
+    },
+    "scrub": {
+      "type": "number",
+      "default": 1,
+      "min": 0,
+      "max": 4
+    }
+  },
+  "triggerDefaults": {
+    "start": "top bottom",
+    "end": "bottom top"
+  },
+  "performance": {
+    "verified": true,
+    "lcpSafe": true,
+    "cost": 2,
+    "verifiedAt": "2026-06-12"
+  },
+  "a11y": {
+    "reducedMotionFallback": "instant-visible"
+  },
+  "template": "gsap.to({{target}}, { yPercent: {{params.yPercent}}, ease: 'none', scrollTrigger: { trigger: {{target}}, start: {{trigger.start}}, end: {{trigger.end}}, scrub: {{params.scrub}} } });"
+}

@@ -1,0 +1,50 @@
+# spinLoop
+
+> Endless, uniform rotation — continuous 360-degree spinning (compositor-friendly, e.g. a loader or decorative element).
+
+| Field | Value |
+| --- | --- |
+| Name | `spinLoop` |
+| Version | `1.0.0` |
+| Output | `css` |
+| Engine | `native-css` |
+
+## Parameters
+
+| Parameter | Type | Default | Min | Max | Constraint |
+| --- | --- | --- | --- | --- | --- |
+| `direction` | `string` | `normal` | — | — | `^(normal\|reverse)$` |
+| `duration` | `number` | `6` | `1` | `60` | — |
+
+## Accessibility
+
+- Reduced-motion fallback: `static`
+- Persistent animation (runs continuously): a WCAG 2.2.2 pause control is enforced by the compiler.
+
+## Performance
+
+- Verified: yes
+- LCP-safe: yes
+- Cost budget: `1`
+- Verified at: `2026-07-04`
+
+## Demo
+
+Demo parameters:
+
+```json
+{
+  "direction": "normal",
+  "duration": 6
+}
+```
+
+Demo markup:
+
+```html
+<div class="d-spinLoop" style="display:inline-flex;align-items:center;justify-content:center;width:6rem;height:6rem;border-radius:14px;background:var(--surface);border:1px solid var(--line)">SPIN</div>
+```
+
+---
+
+_Generated from `primitives/spinLoop.json` by `bin/catalog-docs.js`. Do not edit by hand._

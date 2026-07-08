@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Audit fixture 1 — unguarded + infinite</title>
+  <style>
+    /* Check 1: animation with NO prefers-reduced-motion guard.
+       Check 3: infinite animation with NO pause path. */
+    .spinner {
+      animation: spin 6s linear infinite;
+    }
+    @keyframes spin { from { transform: rotate(0) } to { transform: rotate(360deg) } }
+  </style>
+</head>
+<body>
+  <div class="spinner">loading</div>
+</body>
+</html>

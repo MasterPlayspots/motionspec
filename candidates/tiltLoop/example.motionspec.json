@@ -1,0 +1,24 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "4d2bf6b7f7fcd781",
+  "meta": {
+    "project": "tiltLoop-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-d"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "tiltLoop-1",
+      "primitive": "tiltLoop",
+      "target": ".d-tiltLoop",
+      "params": {
+        "angle": 5,
+        "scale": 1.06,
+        "duration": 2
+      }
+    }
+  ]
+}

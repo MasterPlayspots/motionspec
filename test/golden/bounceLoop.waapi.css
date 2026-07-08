@@ -1,0 +1,8 @@
+/* MotionSpec WAAPI lowering (no GSAP) - generated CSS artifact. */
+@media (prefers-reduced-motion: no-preference) {
+  /* ball-bounce (bounceLoop) */
+  .ball { animation: motion-bounceLoop-ball-bounce 1s cubic-bezier(0.28, 0.84, 0.42, 1) infinite; }
+  @keyframes motion-bounceLoop-ball-bounce { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-16px) } }
+}
+/* pauseControls: WCAG 2.2.2 pause path (data-ms-paused). Outside the reduced-motion guard. */
+html[data-ms-paused] .ball, html[data-ms-paused] .ball > * { animation-play-state: paused !important; }

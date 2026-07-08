@@ -1,0 +1,9 @@
+{
+  "source": "(hover.*(lift|heb|anheb)|beim.*hover.*heb)",
+  "flags": "i",
+  "primitive": "hoverLift",
+  "target": ".card",
+  "params": {
+    "distance": "6px"
+  }
+}

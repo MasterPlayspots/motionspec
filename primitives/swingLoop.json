@@ -1,0 +1,16 @@
+{
+  "name": "swingLoop",
+  "version": "1.0.0",
+  "purpose": "Endless swinging — continuous pendulum motion around a top pivot (transform-origin top, compositor-friendly).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "angle": { "type": "number", "default": 8, "min": 1, "max": 30 },
+    "duration": { "type": "number", "default": 2, "min": 0.5, "max": 10 }
+  },
+  "triggerDefaults": {},
+  "performance": { "verified": true, "lcpSafe": true, "cost": 1, "verifiedAt": "2026-07-04" },
+  "a11y": { "reducedMotionFallback": "static", "persistent": true },
+  "template": "{{css target}} { transform-origin: top center; animation: motion-swingLoop-{{css id}} {{css params.duration}}s ease-in-out infinite alternate; }\n@keyframes motion-swingLoop-{{css id}} { from { transform: rotate(-{{css params.angle}}deg) } to { transform: rotate({{css params.angle}}deg) } }",
+  "demo": { "html": "<div class=\"d-swingLoop\" style=\"display:inline-flex;align-items:center;justify-content:center;width:6rem;height:6rem;border-radius:14px;background:var(--surface);border:1px solid var(--line)\">SWING</div>", "params": { "angle": 10, "duration": 2 } }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "pinnedSection",
+  "version": "2.0.0",
+  "purpose": "Pin a section in place while its content scrolls through.",
+  "output": "js",
+  "engine": "gsap.ScrollTrigger",
+  "paramSchema": {
+    "distance": {
+      "type": "string",
+      "default": "+=100%",
+      "pattern": "^\\+=[0-9]{1,6}(\\.[0-9]{1,3})?(px|%|vh|vw|em|rem)?$"
+    },
+    "pinSpacing": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "triggerDefaults": {
+    "start": "top top"
+  },
+  "performance": {
+    "verified": true,
+    "lcpSafe": true,
+    "cost": 2,
+    "verifiedAt": "2026-06-12"
+  },
+  "a11y": {
+    "reducedMotionFallback": "instant-visible"
+  },
+  "template": "ScrollTrigger.create({ trigger: {{target}}, start: {{trigger.start}}, end: {{params.distance}}, pin: true, pinSpacing: {{params.pinSpacing}} });"
+}

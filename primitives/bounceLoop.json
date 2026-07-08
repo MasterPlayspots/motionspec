@@ -1,0 +1,16 @@
+{
+  "name": "bounceLoop",
+  "version": "1.0.0",
+  "purpose": "Endless bouncing — the element springs up and falls back (translateY, 0-50-100 keyframes with ease-out; compositor-friendly).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "distance": { "type": "string", "default": "16px", "pattern": "^[0-9]*\\.?[0-9]+(px|rem|em)$" },
+    "duration": { "type": "number", "default": 1, "min": 0.4, "max": 6 }
+  },
+  "triggerDefaults": {},
+  "performance": { "verified": true, "lcpSafe": true, "cost": 1, "verifiedAt": "2026-07-04" },
+  "a11y": { "reducedMotionFallback": "static", "persistent": true },
+  "template": "{{css target}} { animation: motion-bounceLoop-{{css id}} {{css params.duration}}s cubic-bezier(0.28, 0.84, 0.42, 1) infinite; }\n@keyframes motion-bounceLoop-{{css id}} { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-{{css params.distance}}) } }",
+  "demo": { "html": "<div class=\"d-bounceLoop\" style=\"display:inline-flex;align-items:center;justify-content:center;width:6rem;height:6rem;border-radius:14px;background:var(--surface);border:1px solid var(--line)\">BOUNCE</div>", "params": { "distance": "16px", "duration": 1 } }
+}

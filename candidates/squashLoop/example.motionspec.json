@@ -1,0 +1,24 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "4d2bf6b7f7fcd781",
+  "meta": {
+    "project": "squashLoop-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-d"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "squashLoop-1",
+      "primitive": "squashLoop",
+      "target": ".d-squashLoop",
+      "params": {
+        "scaleX": 1.2,
+        "scaleY": 0.85,
+        "duration": 1.5
+      }
+    }
+  ]
+}

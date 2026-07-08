@@ -1,0 +1,11 @@
+# Code owners — GitHub auto-requests review from these owners on matching paths.
+# Every change requires review from @MasterPlayspots (extend per TASK-032 / bus-factor).
+* @MasterPlayspots
+
+# Trust-boundary & contract surfaces — extra care, never merge without owner review.
+schema/ @MasterPlayspots
+src/compiler/validate.js @MasterPlayspots
+src/compiler/compile.js @MasterPlayspots
+.github/workflows/ @MasterPlayspots
+package.json @MasterPlayspots
+catalog.lock.json @MasterPlayspots

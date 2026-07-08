@@ -1,0 +1,7 @@
+{
+  "source": "(fade.*scroll|scroll.*(ausblend|einblend|fade)|ausblenden beim scroll)",
+  "flags": "i",
+  "primitive": "fadeOnScroll",
+  "target": ".fade-on-scroll",
+  "params": {}
+}

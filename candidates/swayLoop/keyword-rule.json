@@ -1,0 +1,10 @@
+{
+  "source": "(sway|wippe|wackel|neig|rock|schaukel)",
+  "flags": "i",
+  "primitive": "swayLoop",
+  "target": ".badge",
+  "params": {
+    "angle": 3,
+    "duration": 4
+  }
+}

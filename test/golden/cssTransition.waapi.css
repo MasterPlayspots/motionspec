@@ -1,0 +1,6 @@
+/* MotionSpec WAAPI lowering (no GSAP) - generated CSS artifact. */
+@media (prefers-reduced-motion: no-preference) {
+  /* btn-hover (cssTransition) */
+  .btn { transition: transform 0.25s ease-out; }
+  .btn:hover { transform: translateY(-4px); }
+}

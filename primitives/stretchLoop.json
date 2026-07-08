@@ -1,0 +1,16 @@
+{
+  "name": "stretchLoop",
+  "version": "1.0.0",
+  "purpose": "Endless horizontal stretching — continuous, non-uniform scaling of the width (scaleX; compositor-friendly).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "scaleX": { "type": "number", "default": 1.12, "min": 1.01, "max": 1.5 },
+    "duration": { "type": "number", "default": 2, "min": 0.5, "max": 10 }
+  },
+  "triggerDefaults": {},
+  "performance": { "verified": true, "lcpSafe": true, "cost": 1, "verifiedAt": "2026-07-04" },
+  "a11y": { "reducedMotionFallback": "static", "persistent": true },
+  "template": "{{css target}} { animation: motion-stretchLoop-{{css id}} {{css params.duration}}s ease-in-out infinite alternate; }\n@keyframes motion-stretchLoop-{{css id}} { from { transform: scaleX(1) } to { transform: scaleX({{css params.scaleX}}) } }",
+  "demo": { "html": "<div class=\"d-stretchLoop\" style=\"display:inline-flex;align-items:center;justify-content:center;width:8rem;height:6rem;border-radius:14px;background:var(--surface);border:1px solid var(--line)\">STRETCH</div>", "params": { "scaleX": 1.2, "duration": 2 } }
+}

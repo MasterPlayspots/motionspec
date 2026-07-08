@@ -1,0 +1,10 @@
+{
+  "source": "(atmen|breathe|pulsierende.?opazit|sanft.*ein.?ausblend|glow.*loop)",
+  "flags": "i",
+  "primitive": "breatheLoop",
+  "target": ".badge",
+  "params": {
+    "minOpacity": 0.6,
+    "duration": 3
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "source": "(glide|gleit|diagonal.*drift)",
+  "flags": "i",
+  "primitive": "glideLoop",
+  "target": ".badge",
+  "params": {}
+}

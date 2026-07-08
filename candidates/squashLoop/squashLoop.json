@@ -1,0 +1,17 @@
+{
+  "name": "squashLoop",
+  "version": "1.0.0",
+  "purpose": "Endloses Stauchen und Dehnen — nicht-uniformes Skalieren (breiter + flacher; Squash-and-Stretch-Prinzip, compositor-guenstig).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "scaleX": { "type": "number", "default": 1.15, "min": 1.01, "max": 1.5 },
+    "scaleY": { "type": "number", "default": 0.9, "min": 0.5, "max": 0.99 },
+    "duration": { "type": "number", "default": 1.5, "min": 0.5, "max": 8 }
+  },
+  "triggerDefaults": {},
+  "performance": { "verified": false, "lcpSafe": true, "cost": 1 },
+  "a11y": { "reducedMotionFallback": "static" },
+  "template": "{{css target}} { animation: motion-squashLoop-{{css id}} {{css params.duration}}s ease-in-out infinite alternate; }\n@keyframes motion-squashLoop-{{css id}} { from { transform: scaleX(1) scaleY(1) } to { transform: scaleX({{css params.scaleX}}) scaleY({{css params.scaleY}}) } }",
+  "demo": { "html": "<div class=\"d-squashLoop\" style=\"display:inline-flex;align-items:center;justify-content:center;width:6rem;height:6rem;border-radius:14px;background:var(--surface);border:1px solid var(--line)\">SQUASH</div>", "params": { "scaleX": 1.2, "scaleY": 0.85, "duration": 1.5 } }
+}

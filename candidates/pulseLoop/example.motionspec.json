@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "951874ddfc911d78",
+  "meta": {
+    "project": "pulseLoop-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-a"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "pulseLoop-1",
+      "primitive": "pulseLoop",
+      "target": ".d-pulseLoop",
+      "params": {
+        "scale": 1.08,
+        "duration": 2
+      }
+    }
+  ]
+}

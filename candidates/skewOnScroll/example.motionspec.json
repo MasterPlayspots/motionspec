@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "a0a405b4556fcab4",
+  "meta": {
+    "project": "skewOnScroll-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-c"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "skewOnScroll-1",
+      "primitive": "skewOnScroll",
+      "target": ".d-skewOnScroll",
+      "params": {
+        "skewDegrees": 10,
+        "scrub": 1
+      }
+    }
+  ]
+}

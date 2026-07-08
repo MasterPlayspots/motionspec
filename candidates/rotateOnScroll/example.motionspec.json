@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "951874ddfc911d78",
+  "meta": {
+    "project": "rotateOnScroll-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-a"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "rotateOnScroll-1",
+      "primitive": "rotateOnScroll",
+      "target": ".d-rotateOnScroll",
+      "params": {
+        "degrees": 20,
+        "scrub": 1
+      }
+    }
+  ]
+}

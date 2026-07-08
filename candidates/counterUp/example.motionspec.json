@@ -1,0 +1,28 @@
+{
+  "specVersion": "1.0",
+  "meta": {
+    "project": "counterUp-example",
+    "target": "vanilla-gsap",
+    "createdWith": "MotionSpec Generator v0.2"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "hero-stats-counter",
+      "primitive": "counterUp",
+      "target": ".d-counterUp",
+      "params": {
+        "duration": 2,
+        "ease": "power2.out",
+        "step": 1,
+        "locale": "de-DE"
+      },
+      "trigger": {
+        "start": "top 85%",
+        "once": true
+      }
+    }
+  ]
+}

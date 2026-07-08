@@ -1,0 +1,9 @@
+{
+  "source": "(parallax.*(x|horizontal|seit)|horizontal.*parallax|seitlich.*scroll)",
+  "flags": "i",
+  "primitive": "parallaxX",
+  "target": ".parallax-x",
+  "params": {
+    "xPercent": -20
+  }
+}

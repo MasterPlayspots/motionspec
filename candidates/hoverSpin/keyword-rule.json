@@ -1,0 +1,7 @@
+{
+  "source": "(hover.*(spin|360)|beim.*hover.*komplett.*dreh)",
+  "flags": "i",
+  "primitive": "hoverSpin",
+  "target": ".card",
+  "params": {}
+}

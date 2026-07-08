@@ -1,0 +1,9 @@
+{
+  "source": "(swing|pendel|schwing|glocke)",
+  "flags": "i",
+  "primitive": "swingLoop",
+  "target": ".badge",
+  "params": {
+    "angle": 8
+  }
+}

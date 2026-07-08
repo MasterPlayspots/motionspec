@@ -1,0 +1,32 @@
+{
+  "specVersion": "1.0",
+  "meta": {
+    "project": "blocked-demo",
+    "target": "vanilla-gsap"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "zu-lang",
+      "primitive": "scrollReveal",
+      "target": ".intro h2",
+      "params": {
+        "from": {
+          "opacity": 0,
+          "y": 40
+        },
+        "duration": 12
+      }
+    },
+    {
+      "id": "halluziniert",
+      "primitive": "nbMagnetic",
+      "target": ".magic",
+      "params": {
+        "speed": 3
+      }
+    }
+  ]
+}

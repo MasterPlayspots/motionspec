@@ -1,0 +1,70 @@
+{
+  "specVersion": "1.0",
+  "meta": {
+    "project": "demo-hero",
+    "target": "vanilla-gsap",
+    "createdWith": "manuell"
+  },
+  "globals": {
+    "respectReducedMotion": true,
+    "defaultEase": "power3.out"
+  },
+  "motions": [
+    {
+      "id": "hero-headline",
+      "primitive": "scrollReveal",
+      "target": ".hero h1",
+      "params": {
+        "from": {
+          "opacity": 0,
+          "y": 48
+        },
+        "duration": 0.8,
+        "stagger": 0.08
+      },
+      "trigger": {
+        "start": "top 80%",
+        "once": true
+      }
+    },
+    {
+      "id": "feature-cards",
+      "primitive": "staggerReveal",
+      "target": ".features .card",
+      "params": {
+        "from": {
+          "opacity": 0,
+          "y": 32
+        },
+        "stagger": 0.12
+      }
+    },
+    {
+      "id": "hero-bg",
+      "primitive": "parallaxLayer",
+      "target": ".hero .bg",
+      "params": {
+        "yPercent": -25,
+        "scrub": 1
+      }
+    },
+    {
+      "id": "showcase",
+      "primitive": "pinnedSection",
+      "target": ".showcase",
+      "params": {
+        "distance": "+=120%",
+        "pinSpacing": true
+      }
+    },
+    {
+      "id": "cta-button",
+      "primitive": "cssTransition",
+      "target": ".cta-button",
+      "params": {
+        "hoverValue": "translateY(-4px)",
+        "duration": 0.25
+      }
+    }
+  ]
+}

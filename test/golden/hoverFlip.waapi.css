@@ -1,0 +1,6 @@
+/* MotionSpec WAAPI lowering (no GSAP) - generated CSS artifact. */
+@media (prefers-reduced-motion: no-preference) {
+  /* card-hflip (hoverFlip) */
+  .card { transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1); }
+  .card:hover { transform: perspective(600px) rotateY(180deg); }
+}

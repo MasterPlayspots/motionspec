@@ -1,0 +1,22 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "53fb7228902654cd",
+  "meta": {
+    "project": "flipLoop-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-e"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "flipLoop-1",
+      "primitive": "flipLoop",
+      "target": ".d-flipLoop",
+      "params": {
+        "duration": 4
+      }
+    }
+  ]
+}

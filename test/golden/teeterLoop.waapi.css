@@ -1,0 +1,8 @@
+/* MotionSpec WAAPI lowering (no GSAP) - generated CSS artifact. */
+@media (prefers-reduced-motion: no-preference) {
+  /* sign-teeter (teeterLoop) */
+  .sign { transform-origin: bottom center; animation: motion-teeterLoop-sign-teeter 2s ease-in-out infinite alternate; }
+  @keyframes motion-teeterLoop-sign-teeter { from { transform: rotate(-8deg) } to { transform: rotate(8deg) } }
+}
+/* pauseControls: WCAG 2.2.2 pause path (data-ms-paused). Outside the reduced-motion guard. */
+html[data-ms-paused] .sign, html[data-ms-paused] .sign > * { animation-play-state: paused !important; }

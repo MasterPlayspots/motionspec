@@ -1,0 +1,9 @@
+{
+  "source": "(flip|umklapp|3d.?dreh.*ein|aufklapp|karten.?flip)",
+  "flags": "i",
+  "primitive": "flipReveal",
+  "target": ".card",
+  "params": {
+    "degrees": 90
+  }
+}

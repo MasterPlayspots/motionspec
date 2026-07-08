@@ -1,0 +1,9 @@
+{
+  "source": "(hover.*(skew|verzerr|schraeg))",
+  "flags": "i",
+  "primitive": "hoverSkew",
+  "target": ".card",
+  "params": {
+    "skew": 4
+  }
+}

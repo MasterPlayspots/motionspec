@@ -1,0 +1,35 @@
+{
+  "name": "pulseLoop",
+  "version": "1.0.0",
+  "purpose": "Sanftes, endloses Pulsieren — kontinuierliches Skalieren zwischen Ruhe und Ziel (compositor-guenstig, z. B. dezenter Aufmerksamkeits-Puls auf CTAs).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "scale": {
+      "type": "number",
+      "default": 1.05,
+      "min": 1.01,
+      "max": 1.5
+    },
+    "duration": {
+      "type": "number",
+      "default": 2,
+      "min": 0.5,
+      "max": 10
+    }
+  },
+  "triggerDefaults": {},
+  "performance": {
+    "verified": false,
+    "lcpSafe": true,
+    "cost": 1
+  },
+  "a11y": {
+    "reducedMotionFallback": "static"
+  },
+  "template": "{{css target}} { animation: motion-pulseLoop-{{css id}} {{css params.duration}}s ease-in-out infinite alternate; }\n@keyframes motion-pulseLoop-{{css id}} { from { transform: scale(1) } to { transform: scale({{css params.scale}}) } }",
+  "demo": {
+    "html": "<div class=\"d-pulseLoop\" style=\"display:inline-flex;align-items:center;justify-content:center;width:6rem;height:6rem;border-radius:14px;background:var(--surface);border:1px solid var(--line)\">PULSE</div>",
+    "params": { "scale": 1.08, "duration": 2 }
+  }
+}

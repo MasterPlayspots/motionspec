@@ -1,0 +1,6 @@
+{
+  "longTasksTotalMs": 200,
+  "longestLongTaskMs": 50,
+  "cls": 0.1,
+  "note": "Forge perf budget (building block 3). Measured DURING programmatic scroll in a real browser. longTasksTotalMs/longestLongTaskMs in milliseconds; cls dimensionless (Cumulative Layout Shift). Initial values — adjustable without code changes."
+}

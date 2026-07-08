@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "3fb558c0786b33fb",
+  "meta": {
+    "project": "pressShrink-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-b"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "pressShrink-1",
+      "primitive": "pressShrink",
+      "target": ".d-pressShrink",
+      "params": {
+        "scale": 0.94,
+        "duration": 0.12
+      }
+    }
+  ]
+}

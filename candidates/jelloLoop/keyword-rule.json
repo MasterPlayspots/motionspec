@@ -1,0 +1,9 @@
+{
+  "source": "(jello|wackelpudding|wobble|gummi|weich.*wackel)",
+  "flags": "i",
+  "primitive": "jelloLoop",
+  "target": ".badge",
+  "params": {
+    "skew": 4
+  }
+}

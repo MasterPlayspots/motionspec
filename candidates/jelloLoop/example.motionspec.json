@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "a0a405b4556fcab4",
+  "meta": {
+    "project": "jelloLoop-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-c"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "jelloLoop-1",
+      "primitive": "jelloLoop",
+      "target": ".d-jelloLoop",
+      "params": {
+        "skew": 6,
+        "duration": 2
+      }
+    }
+  ]
+}

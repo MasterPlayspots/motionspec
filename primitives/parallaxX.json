@@ -1,0 +1,16 @@
+{
+  "name": "parallaxX",
+  "version": "1.0.0",
+  "purpose": "Horizontal parallax — the element shifts sideways tied to scroll progress (depth, scrubbed).",
+  "output": "js",
+  "engine": "gsap.ScrollTrigger",
+  "paramSchema": {
+    "xPercent": { "type": "number", "default": -20, "min": -100, "max": 100 },
+    "scrub": { "type": "number", "default": 1, "min": 0, "max": 3 }
+  },
+  "triggerDefaults": { "start": "top bottom", "end": "bottom top" },
+  "performance": { "verified": true, "lcpSafe": true, "cost": 1, "verifiedAt": "2026-07-04" },
+  "a11y": { "reducedMotionFallback": "static" },
+  "template": "gsap.fromTo({{target}}, { xPercent: 0 }, { xPercent: {{params.xPercent}}, ease: 'none', scrollTrigger: { trigger: {{target}}, start: {{trigger.start}}, end: {{trigger.end}}, scrub: {{params.scrub}} } });",
+  "demo": { "html": "<div class=\"d-parallaxX\" style=\"display:inline-flex;align-items:center;justify-content:center;width:8rem;height:8rem;border-radius:14px;background:var(--surface);border:1px solid var(--line);margin:20vh auto\">PARALLAX-X</div>", "params": { "xPercent": -30, "scrub": 1 } }
+}

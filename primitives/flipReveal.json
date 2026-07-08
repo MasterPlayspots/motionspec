@@ -1,0 +1,17 @@
+{
+  "name": "flipReveal",
+  "version": "1.0.0",
+  "purpose": "3D flip on entering the viewport — the element swings open from a tilted position and fades in (fade + rotateX, GPU-accelerated).",
+  "output": "js",
+  "engine": "gsap.ScrollTrigger",
+  "paramSchema": {
+    "degrees": { "type": "number", "default": 90, "min": 15, "max": 90 },
+    "duration": { "type": "number", "default": 0.7, "min": 0.1, "max": 3 },
+    "ease": { "type": "string", "default": "power3.out", "pattern": "^[A-Za-z0-9.()]{1,40}$" }
+  },
+  "triggerDefaults": { "start": "top 80%", "once": true },
+  "performance": { "verified": true, "lcpSafe": true, "cost": 1, "verifiedAt": "2026-07-04" },
+  "a11y": { "reducedMotionFallback": "instant-visible" },
+  "template": "gsap.from({{target}}, { opacity: 0, rotationX: {{params.degrees}}, transformPerspective: 800, transformOrigin: 'center top', duration: {{params.duration}}, ease: {{params.ease}}, scrollTrigger: { trigger: {{target}}, start: {{trigger.start}}, once: {{trigger.once}} } });",
+  "demo": { "html": "<div class=\"d-flipReveal\" style=\"display:inline-flex;align-items:center;justify-content:center;width:10rem;height:6rem;border-radius:14px;background:var(--surface);border:1px solid var(--line)\">FLIP</div>", "params": { "degrees": 90, "duration": 0.7 } }
+}

@@ -1,0 +1,7 @@
+{
+  "source": "(squash|stauch|quetsch|breiter.*flacher)",
+  "flags": "i",
+  "primitive": "squashLoop",
+  "target": ".badge",
+  "params": {}
+}

@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "3fb558c0786b33fb",
+  "meta": {
+    "project": "parallaxX-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-b"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "parallaxX-1",
+      "primitive": "parallaxX",
+      "target": ".d-parallaxX",
+      "params": {
+        "xPercent": -30,
+        "scrub": 1
+      }
+    }
+  ]
+}

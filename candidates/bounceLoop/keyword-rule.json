@@ -1,0 +1,7 @@
+{
+  "source": "(bounce|huepf|hopp|springen.*endlos)",
+  "flags": "i",
+  "primitive": "bounceLoop",
+  "target": ".badge",
+  "params": {}
+}

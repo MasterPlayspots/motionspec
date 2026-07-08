@@ -1,0 +1,9 @@
+{
+  "source": "(pop.?in|aufpoppen|reveal.*scale|scale.*reveal|einblenden.*(scale|gross))",
+  "flags": "i",
+  "primitive": "revealScale",
+  "target": ".card",
+  "params": {
+    "fromScale": 0.9
+  }
+}

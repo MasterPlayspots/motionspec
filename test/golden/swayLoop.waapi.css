@@ -1,0 +1,8 @@
+/* MotionSpec WAAPI lowering (no GSAP) - generated CSS artifact. */
+@media (prefers-reduced-motion: no-preference) {
+  /* badge-sway (swayLoop) */
+  .badge { animation: motion-swayLoop-badge-sway 4s ease-in-out infinite alternate; }
+  @keyframes motion-swayLoop-badge-sway { from { transform: rotate(-4deg) } to { transform: rotate(4deg) } }
+}
+/* pauseControls: WCAG 2.2.2 pause path (data-ms-paused). Outside the reduced-motion guard. */
+html[data-ms-paused] .badge, html[data-ms-paused] .badge > * { animation-play-state: paused !important; }

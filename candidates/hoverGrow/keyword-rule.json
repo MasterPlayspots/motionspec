@@ -1,0 +1,9 @@
+{
+  "source": "(hover.*(grow|groess|scale|zoom)|beim.*hover.*groess)",
+  "flags": "i",
+  "primitive": "hoverGrow",
+  "target": ".card",
+  "params": {
+    "scale": 1.05
+  }
+}

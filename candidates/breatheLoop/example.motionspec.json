@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "3fb558c0786b33fb",
+  "meta": {
+    "project": "breatheLoop-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-b"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "breatheLoop-1",
+      "primitive": "breatheLoop",
+      "target": ".d-breatheLoop",
+      "params": {
+        "minOpacity": 0.4,
+        "duration": 3
+      }
+    }
+  ]
+}

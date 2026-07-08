@@ -1,0 +1,8 @@
+/* MotionSpec WAAPI lowering (no GSAP) - generated CSS artifact. */
+@media (prefers-reduced-motion: no-preference) {
+  /* badge-tilt (tiltLoop) */
+  .badge { animation: motion-tiltLoop-badge-tilt 2s ease-in-out infinite alternate; }
+  @keyframes motion-tiltLoop-badge-tilt { from { transform: rotate(-5deg) scale(1) } to { transform: rotate(5deg) scale(1.06) } }
+}
+/* pauseControls: WCAG 2.2.2 pause path (data-ms-paused). Outside the reduced-motion guard. */
+html[data-ms-paused] .badge, html[data-ms-paused] .badge > * { animation-play-state: paused !important; }

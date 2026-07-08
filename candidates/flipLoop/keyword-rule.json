@@ -1,0 +1,7 @@
+{
+  "source": "(flip.?loop|coin.?flip|3d.?spin|muenzwurf)",
+  "flags": "i",
+  "primitive": "flipLoop",
+  "target": ".badge",
+  "params": {}
+}

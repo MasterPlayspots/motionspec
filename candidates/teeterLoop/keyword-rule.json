@@ -1,0 +1,7 @@
+{
+  "source": "(teeter|wippe.*unten|kipp.*stand|wackel.*fuss)",
+  "flags": "i",
+  "primitive": "teeterLoop",
+  "target": ".badge",
+  "params": {}
+}

@@ -1,0 +1,9 @@
+{
+  "source": "(hover.*(flip|umklapp|3d)|karte.*hover.*dreh)",
+  "flags": "i",
+  "primitive": "hoverFlip",
+  "target": ".card",
+  "params": {
+    "degrees": 180
+  }
+}

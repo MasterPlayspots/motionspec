@@ -1,0 +1,8 @@
+{
+  "specVersion": "1.0",
+  "meta": { "project": "floatLoop-candidate", "target": "vanilla-gsap", "createdWith": "claude-code" },
+  "globals": { "respectReducedMotion": true },
+  "motions": [
+    { "id": "hero-float", "primitive": "floatLoop", "target": ".hero .badge", "params": { "distance": "10px", "duration": 3, "axis": "y" } }
+  ]
+}

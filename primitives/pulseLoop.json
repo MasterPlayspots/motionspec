@@ -1,0 +1,37 @@
+{
+  "name": "pulseLoop",
+  "version": "1.0.0",
+  "purpose": "Gentle, endless pulsing — continuous scaling between rest and target (compositor-friendly, e.g. a subtle attention pulse on CTAs).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "scale": {
+      "type": "number",
+      "default": 1.05,
+      "min": 1.01,
+      "max": 1.5
+    },
+    "duration": {
+      "type": "number",
+      "default": 2,
+      "min": 0.5,
+      "max": 10
+    }
+  },
+  "triggerDefaults": {},
+  "performance": {
+    "verified": true,
+    "lcpSafe": true,
+    "cost": 1,
+    "verifiedAt": "2026-07-04"
+  },
+  "a11y": {
+    "reducedMotionFallback": "static",
+    "persistent": true
+  },
+  "template": "{{css target}} { animation: motion-pulseLoop-{{css id}} {{css params.duration}}s ease-in-out infinite alternate; }\n@keyframes motion-pulseLoop-{{css id}} { from { transform: scale(1) } to { transform: scale({{css params.scale}}) } }",
+  "demo": {
+    "html": "<div class=\"d-pulseLoop\" style=\"display:inline-flex;align-items:center;justify-content:center;width:6rem;height:6rem;border-radius:14px;background:var(--surface);border:1px solid var(--line)\">PULSE</div>",
+    "params": { "scale": 1.08, "duration": 2 }
+  }
+}

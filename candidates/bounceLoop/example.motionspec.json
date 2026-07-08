@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "53fb7228902654cd",
+  "meta": {
+    "project": "bounceLoop-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-e"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "bounceLoop-1",
+      "primitive": "bounceLoop",
+      "target": ".d-bounceLoop",
+      "params": {
+        "distance": "16px",
+        "duration": 1
+      }
+    }
+  ]
+}

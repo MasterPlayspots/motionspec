@@ -1,0 +1,41 @@
+{
+  "name": "cssTransition",
+  "version": "2.0.0",
+  "purpose": "Simple hover micro-interaction with no JavaScript at all.",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "property": {
+      "type": "string",
+      "default": "transform",
+      "pattern": "^(transform|opacity|color|background-color|border-color|filter|width|height)$"
+    },
+    "hoverValue": {
+      "type": "string",
+      "default": "translateY(-4px)",
+      "pattern": "^[A-Za-z0-9#%.,()-]+( [A-Za-z0-9#%.,()-]+)?( [A-Za-z0-9#%.,()-]+)?$"
+    },
+    "duration": {
+      "type": "number",
+      "default": 0.25,
+      "min": 0.05,
+      "max": 1
+    },
+    "easing": {
+      "type": "string",
+      "default": "ease-out",
+      "pattern": "^(ease|ease-in|ease-out|ease-in-out|linear|step-start|step-end|cubic-bezier\\([-0-9., ]{1,40}\\))$"
+    }
+  },
+  "triggerDefaults": {},
+  "performance": {
+    "verified": true,
+    "lcpSafe": true,
+    "cost": 0,
+    "verifiedAt": "2026-06-12"
+  },
+  "a11y": {
+    "reducedMotionFallback": "none-needed"
+  },
+  "template": "{{css target}} { transition: {{css params.property}} {{css params.duration}}s {{css params.easing}}; }\n{{css target}}:hover { {{css params.property}}: {{css params.hoverValue}}; }"
+}

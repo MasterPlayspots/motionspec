@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Audit fixture 2 — non-transform prop + autoplay &gt;5s</title>
+  <style>
+    /* Check 2: animated NON-transform/opacity property (transition on `left`).
+       Wrapped in a reduced-motion guard so check 1 does NOT also fire here. */
+    @media (prefers-reduced-motion: no-preference) {
+      .drawer { transition: left 0.4s ease; }
+      /* Check 4: autoplaying animation running > 5s, no pause path. */
+      .hero-bg { animation: kenburns 20s ease-in-out; }
+    }
+    @keyframes kenburns { from { transform: scale(1) } to { transform: scale(1.2) } }
+  </style>
+</head>
+<body>
+  <aside class="drawer">menu</aside>
+  <div class="hero-bg"></div>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "source": "(ken.?burns|langsam.*zoom|hero.*zoom|hintergrund.*zoom.*drift)",
+  "flags": "i",
+  "primitive": "kenBurns",
+  "target": ".hero-bg",
+  "params": {
+    "scale": 1.1
+  }
+}

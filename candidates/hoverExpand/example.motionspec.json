@@ -1,0 +1,24 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "53fb7228902654cd",
+  "meta": {
+    "project": "hoverExpand-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-e"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "hoverExpand-1",
+      "primitive": "hoverExpand",
+      "target": ".d-hoverExpand",
+      "params": {
+        "scale": 1.08,
+        "lift": "4px",
+        "duration": 0.2
+      }
+    }
+  ]
+}

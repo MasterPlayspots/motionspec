@@ -1,0 +1,45 @@
+{
+  "name": "marquee",
+  "version": "1.0.0",
+  "purpose": "Endlessly scrolling horizontal marquee — author the content as TWO identical groups (seamless loop).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "duration": {
+      "type": "number",
+      "default": 24,
+      "min": 4,
+      "max": 120
+    },
+    "gap": {
+      "type": "string",
+      "default": "3rem",
+      "pattern": "^[0-9]*\\.?[0-9]+(px|rem|em|vw|ch|%)$"
+    },
+    "direction": {
+      "type": "string",
+      "default": "normal",
+      "pattern": "^(normal|reverse)$"
+    }
+  },
+  "triggerDefaults": {},
+  "performance": {
+    "verified": true,
+    "lcpSafe": true,
+    "cost": 1,
+    "verifiedAt": "2026-06-12"
+  },
+  "a11y": {
+    "reducedMotionFallback": "static",
+    "persistent": true
+  },
+  "template": "{{css target}} { display: flex; gap: {{css params.gap}}; overflow: hidden; }\n{{css target}} > * { flex-shrink: 0; animation: motion-marquee-{{css id}} {{css params.duration}}s linear infinite {{css params.direction}}; }\n@keyframes motion-marquee-{{css id}} { from { transform: translateX(0) } to { transform: translateX(-100%) } }",
+  "demo": {
+    "html": "<div class=\"marquee-track\"><div class=\"d-marquee\"><div><span style=\"padding:0 2rem\">ALPHA</span><span style=\"padding:0 2rem\">BETA</span><span style=\"padding:0 2rem\">GAMMA</span><span style=\"padding:0 2rem\">DELTA</span></div><div><span style=\"padding:0 2rem\">ALPHA</span><span style=\"padding:0 2rem\">BETA</span><span style=\"padding:0 2rem\">GAMMA</span><span style=\"padding:0 2rem\">DELTA</span></div></div></div>",
+    "params": {
+      "duration": 24,
+      "gap": "3rem",
+      "direction": "normal"
+    }
+  }
+}

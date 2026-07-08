@@ -1,0 +1,28 @@
+{
+  "specVersion": "1.0",
+  "meta": {
+    "project": "scaleOnScroll-demo",
+    "target": "vanilla-gsap",
+    "createdWith": "MotionSpec-Generator"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "feature-image-scale",
+      "primitive": "scaleOnScroll",
+      "target": ".d-scaleOnScroll",
+      "params": {
+        "fromScale": 0.6,
+        "toScale": 1,
+        "transformOrigin": "center center",
+        "scrub": 1.5
+      },
+      "trigger": {
+        "start": "top bottom",
+        "end": "center center"
+      }
+    }
+  ]
+}

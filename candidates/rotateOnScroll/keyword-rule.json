@@ -1,0 +1,9 @@
+{
+  "source": "(rotate.*scroll|scroll.*(dreh|rotier)|dreh.*(beim|on).*scroll)",
+  "flags": "i",
+  "primitive": "rotateOnScroll",
+  "target": ".rotate-on-scroll",
+  "params": {
+    "degrees": 15
+  }
+}

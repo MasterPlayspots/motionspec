@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "53fb7228902654cd",
+  "meta": {
+    "project": "hoverFlip-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-e"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "hoverFlip-1",
+      "primitive": "hoverFlip",
+      "target": ".d-hoverFlip",
+      "params": {
+        "degrees": 180,
+        "duration": 0.5
+      }
+    }
+  ]
+}

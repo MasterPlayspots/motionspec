@@ -1,0 +1,7 @@
+{
+  "source": "(vertikal.*(laufband|ticker|marquee)|marquee.*vertikal|news.?ticker.*vertikal|testimonial.*lauf)",
+  "flags": "i",
+  "primitive": "marqueeVertical",
+  "target": ".v-marquee",
+  "params": {}
+}

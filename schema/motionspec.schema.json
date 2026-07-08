@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://motionspec.dev/schema/1.0/motionspec.schema.json",
+  "title": "MotionSpec",
+  "description": "Formale Zwischensprache fuer Web-Motion. FROZEN v1 (ADR-0001, 2026-06-15). Field shape is the published, stable contract. specVersion \"1.0\" is stable; \"0.1\" was accepted for one deprecated minor cycle and is REMOVED at v1.2 (now rejected). Static contract; the dynamic check (Primitive-Allow-List, per-primitive params) is the Trust-Boundary-Validator in compiler/validate.js. responsive is a known-but-deferred key (rejected at runtime until a future minor).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["specVersion", "meta", "motions"],
+  "properties": {
+    "specVersion": { "type": "string", "enum": ["1.0"] },
+    "catalogVersion": { "type": "string", "pattern": "^[0-9a-f]{16}$", "description": "Optional reproducibility pin (ADR-0001 D2): the 16-char catalog hash this spec was authored against. Rejected at runtime if it does not match the loaded catalog." },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target"],
+      "properties": {
+        "project": { "type": "string" },
+        "target": { "type": "string", "enum": ["vanilla-gsap"] },
+        "createdWith": { "type": "string" }
+      }
+    },
+    "globals": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "respectReducedMotion": { "type": "boolean" },
+        "defaultEase": { "type": "string" },
+        "pauseControls": { "type": "string", "enum": ["auto", "api", "off"], "description": "WCAG 2.2.2 pause path for persistent (looping) motions. \"auto\" (default when omitted) injects a pause toggle; \"api\" emits only the CSS pause contract (data-ms-paused); \"off\" emits nothing (warned when persistent motions exist). Fail-safe like respectReducedMotion." },
+        "pauseLabels": { "type": "object", "additionalProperties": false, "properties": { "pause": { "type": "string" }, "play": { "type": "string" } }, "description": "Optional labels for the injected pause toggle (defaults: \"Pause animations\" / \"Play animations\")." }
+      }
+    },
+    "motions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "primitive", "target"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[A-Za-z0-9_-]{1,64}$" },
+          "primitive": { "type": "string", "description": "Muss ein Name aus dem Primitive-Katalog sein. Allow-List, zur Laufzeit geprueft." },
+          "target": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "params": { "type": "object" },
+          "trigger": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "start": { "type": "string" },
+              "end": { "type": "string" },
+              "once": { "type": "boolean" }
+            }
+          },
+          "responsive": { "type": "object" }
+        }
+      }
+    }
+  }
+}

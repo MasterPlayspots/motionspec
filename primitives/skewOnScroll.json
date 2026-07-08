@@ -1,0 +1,16 @@
+{
+  "name": "skewOnScroll",
+  "version": "1.0.0",
+  "purpose": "Skew tied to scroll progress — the element skews (skewY) as it scrolls through the viewport (scrubbed).",
+  "output": "js",
+  "engine": "gsap.ScrollTrigger",
+  "paramSchema": {
+    "skewDegrees": { "type": "number", "default": 6, "min": -30, "max": 30 },
+    "scrub": { "type": "number", "default": 1, "min": 0, "max": 3 }
+  },
+  "triggerDefaults": { "start": "top bottom", "end": "bottom top" },
+  "performance": { "verified": true, "lcpSafe": true, "cost": 1, "verifiedAt": "2026-07-04" },
+  "a11y": { "reducedMotionFallback": "static" },
+  "template": "gsap.fromTo({{target}}, { skewY: 0 }, { skewY: {{params.skewDegrees}}, ease: 'none', scrollTrigger: { trigger: {{target}}, start: {{trigger.start}}, end: {{trigger.end}}, scrub: {{params.scrub}} } });",
+  "demo": { "html": "<div class=\"d-skewOnScroll\" style=\"display:inline-flex;align-items:center;justify-content:center;width:8rem;height:8rem;border-radius:14px;background:var(--surface);border:1px solid var(--line);margin:20vh auto\">SKEW</div>", "params": { "skewDegrees": 10, "scrub": 1 } }
+}

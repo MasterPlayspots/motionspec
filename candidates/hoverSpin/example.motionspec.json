@@ -1,0 +1,22 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "53fb7228902654cd",
+  "meta": {
+    "project": "hoverSpin-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-e"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "hoverSpin-1",
+      "primitive": "hoverSpin",
+      "target": ".d-hoverSpin",
+      "params": {
+        "duration": 0.6
+      }
+    }
+  ]
+}

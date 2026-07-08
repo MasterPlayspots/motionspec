@@ -1,0 +1,36 @@
+{
+  "name": "spinLoop",
+  "version": "1.0.0",
+  "purpose": "Endless, uniform rotation — continuous 360-degree spinning (compositor-friendly, e.g. a loader or decorative element).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "duration": {
+      "type": "number",
+      "default": 6,
+      "min": 1,
+      "max": 60
+    },
+    "direction": {
+      "type": "string",
+      "default": "normal",
+      "pattern": "^(normal|reverse)$"
+    }
+  },
+  "triggerDefaults": {},
+  "performance": {
+    "verified": true,
+    "lcpSafe": true,
+    "cost": 1,
+    "verifiedAt": "2026-07-04"
+  },
+  "a11y": {
+    "reducedMotionFallback": "static",
+    "persistent": true
+  },
+  "template": "{{css target}} { animation: motion-spinLoop-{{css id}} {{css params.duration}}s linear infinite {{css params.direction}}; }\n@keyframes motion-spinLoop-{{css id}} { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }",
+  "demo": {
+    "html": "<div class=\"d-spinLoop\" style=\"display:inline-flex;align-items:center;justify-content:center;width:6rem;height:6rem;border-radius:14px;background:var(--surface);border:1px solid var(--line)\">SPIN</div>",
+    "params": { "duration": 6, "direction": "normal" }
+  }
+}

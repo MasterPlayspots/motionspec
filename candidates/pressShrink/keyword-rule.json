@@ -1,0 +1,7 @@
+{
+  "source": "(press|druck|klick.?feedback|button.*(schrumpf|gedrueckt)|active.*scale)",
+  "flags": "i",
+  "primitive": "pressShrink",
+  "target": ".cta",
+  "params": {}
+}

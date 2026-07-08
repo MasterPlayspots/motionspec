@@ -1,0 +1,24 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "3fb558c0786b33fb",
+  "meta": {
+    "project": "marqueeVertical-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-b"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "marqueeVertical-1",
+      "primitive": "marqueeVertical",
+      "target": ".d-marqueeVertical",
+      "params": {
+        "duration": 12,
+        "direction": "normal",
+        "gap": "0.6rem"
+      }
+    }
+  ]
+}

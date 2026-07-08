@@ -1,0 +1,35 @@
+{
+  "name": "floatLoop",
+  "version": "1.0.0",
+  "purpose": "Sanftes, endloses Schweben dekorativer Elemente — kontinuierliche Loop-Bewegung entlang einer Achse (compositor-guenstig).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "distance": {
+      "type": "string",
+      "default": "8px",
+      "pattern": "^[0-9]*\\.?[0-9]+(px|rem|%)$"
+    },
+    "duration": {
+      "type": "number",
+      "default": 3,
+      "min": 1,
+      "max": 10
+    },
+    "axis": {
+      "type": "string",
+      "default": "y",
+      "pattern": "^(x|y)$"
+    }
+  },
+  "triggerDefaults": {},
+  "performance": {
+    "verified": false,
+    "lcpSafe": true,
+    "cost": 1
+  },
+  "a11y": {
+    "reducedMotionFallback": "static"
+  },
+  "template": "{{css target}} { animation: motion-floatLoop-{{css id}} {{css params.duration}}s ease-in-out infinite alternate; }\n@keyframes motion-floatLoop-{{css id}} { from { transform: translate{{css params.axis}}(0) } to { transform: translate{{css params.axis}}(-{{css params.distance}}) } }"
+}

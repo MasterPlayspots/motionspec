@@ -1,0 +1,13 @@
+{
+  "project": "beispiel-seite",
+  "_hinweis": "Vorlage fuer S2-01. Fuer den echten Kunden: 'what' = was die Seite an Bewegung will (natuerliche Sprache), 'target' = generischer CSS-Selektor (KEINE Kundeninhalte/PII).",
+  "intents": [
+    { "what": "Hero-Headline gleitet beim Scrollen sanft von unten herein", "target": ".hero h1" },
+    { "what": "Drei Feature-Karten erscheinen gestaffelt nacheinander", "target": ".features .card" },
+    { "what": "Kennzahlen im Stats-Block zaehlen beim Sichtbarwerden hoch", "target": ".stats .num" },
+    { "what": "Logo-Band laeuft endlos als Ticker", "target": ".partners .track" },
+    { "what": "Bildsektion skaliert leicht mit dem Scroll-Fortschritt", "target": ".showcase img" },
+    { "what": "CTA-Button hebt sich beim Hover sanft an", "target": ".cta" },
+    { "what": "SVG-Pfad zeichnet sich beim Scrollen Strich fuer Strich", "target": ".diagram path" }
+  ]
+}

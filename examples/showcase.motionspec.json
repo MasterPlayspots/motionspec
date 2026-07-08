@@ -1,0 +1,40 @@
+{
+  "specVersion": "1.0",
+  "meta": {
+    "project": "showcase",
+    "target": "vanilla-gsap",
+    "createdWith": "sprint-1"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "zoom-card",
+      "primitive": "scaleOnScroll",
+      "target": ".case .visual",
+      "params": {
+        "fromScale": 0.7,
+        "scrub": 1
+      }
+    },
+    {
+      "id": "kpi-counter",
+      "primitive": "counterUp",
+      "target": ".kpi .num",
+      "params": {
+        "duration": 2,
+        "locale": "de-DE"
+      }
+    },
+    {
+      "id": "logo-band",
+      "primitive": "marquee",
+      "target": ".logos .track",
+      "params": {
+        "duration": 30,
+        "gap": "2rem"
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "wobbleLoop",
+  "version": "1.0.0",
+  "purpose": "Endless wobbling — continuous back-and-forth of translation and rotation (translateX + rotate; compositor-friendly).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "distance": { "type": "string", "default": "6px", "pattern": "^[0-9]*\\.?[0-9]+(px|rem|em)$" },
+    "angle": { "type": "number", "default": 3, "min": 1, "max": 15 },
+    "duration": { "type": "number", "default": 1.5, "min": 0.5, "max": 8 }
+  },
+  "triggerDefaults": {},
+  "performance": { "verified": true, "lcpSafe": true, "cost": 1, "verifiedAt": "2026-07-04" },
+  "a11y": { "reducedMotionFallback": "static", "persistent": true },
+  "template": "{{css target}} { animation: motion-wobbleLoop-{{css id}} {{css params.duration}}s ease-in-out infinite alternate; }\n@keyframes motion-wobbleLoop-{{css id}} { from { transform: translateX(-{{css params.distance}}) rotate(-{{css params.angle}}deg) } to { transform: translateX({{css params.distance}}) rotate({{css params.angle}}deg) } }",
+  "demo": { "html": "<div class=\"d-wobbleLoop\" style=\"display:inline-flex;align-items:center;justify-content:center;width:6rem;height:6rem;border-radius:14px;background:var(--surface);border:1px solid var(--line)\">WOBBLE</div>", "params": { "distance": "8px", "angle": 4, "duration": 1.5 } }
+}

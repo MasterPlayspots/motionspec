@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.MasterPlayspots/motionspec",
+  "title": "MotionSpec",
+  "description": "Hallucination-proof scroll motion: LLM writes validated specs, deterministic GSAP/CSS compiler.",
+  "repository": {
+    "url": "https://github.com/MasterPlayspots/motionspec",
+    "source": "github"
+  },
+  "version": "1.2.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "motionspec",
+      "version": "1.2.1",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "breatheLoop",
+  "version": "1.0.0",
+  "purpose": "Sanftes, langsames Atmen — kontinuierliches Ein-/Ausblenden der Opazitaet (nur opacity, compositor-guenstig; bewusst langsam).",
+  "output": "css",
+  "engine": "native-css",
+  "paramSchema": {
+    "minOpacity": { "type": "number", "default": 0.6, "min": 0, "max": 0.95 },
+    "duration": { "type": "number", "default": 3, "min": 2, "max": 12 }
+  },
+  "triggerDefaults": {},
+  "performance": { "verified": false, "lcpSafe": true, "cost": 1 },
+  "a11y": { "reducedMotionFallback": "static" },
+  "template": "{{css target}} { animation: motion-breatheLoop-{{css id}} {{css params.duration}}s ease-in-out infinite alternate; }\n@keyframes motion-breatheLoop-{{css id}} { from { opacity: {{css params.minOpacity}} } to { opacity: 1 } }",
+  "demo": { "html": "<div class=\"d-breatheLoop\" style=\"display:inline-flex;align-items:center;justify-content:center;width:6rem;height:6rem;border-radius:14px;background:var(--surface);border:1px solid var(--line)\">BREATHE</div>", "params": { "minOpacity": 0.4, "duration": 3 } }
+}

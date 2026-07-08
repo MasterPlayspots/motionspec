@@ -1,0 +1,7 @@
+{
+  "source": "(tilt.?loop|kipp.*puls|neig.*puls|rotier.*scale.*loop)",
+  "flags": "i",
+  "primitive": "tiltLoop",
+  "target": ".badge",
+  "params": {}
+}

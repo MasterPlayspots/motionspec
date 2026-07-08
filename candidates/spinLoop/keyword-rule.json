@@ -1,0 +1,9 @@
+{
+  "source": "(spinner|loader|endlos.?dreh|rotier.*(endlos|loop)|kreisel)",
+  "flags": "i",
+  "primitive": "spinLoop",
+  "target": ".spinner",
+  "params": {
+    "duration": 6
+  }
+}

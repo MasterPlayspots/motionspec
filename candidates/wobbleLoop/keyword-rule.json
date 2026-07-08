@@ -1,0 +1,7 @@
+{
+  "source": "(wobble|schlinger|torkeln|eiern)",
+  "flags": "i",
+  "primitive": "wobbleLoop",
+  "target": ".badge",
+  "params": {}
+}

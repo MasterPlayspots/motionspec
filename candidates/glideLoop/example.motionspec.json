@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "53fb7228902654cd",
+  "meta": {
+    "project": "glideLoop-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-e"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "glideLoop-1",
+      "primitive": "glideLoop",
+      "target": ".d-glideLoop",
+      "params": {
+        "distance": "12px",
+        "duration": 3
+      }
+    }
+  ]
+}

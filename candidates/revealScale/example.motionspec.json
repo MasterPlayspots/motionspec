@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "951874ddfc911d78",
+  "meta": {
+    "project": "revealScale-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-a"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "revealScale-1",
+      "primitive": "revealScale",
+      "target": ".d-revealScale",
+      "params": {
+        "fromScale": 0.85,
+        "duration": 0.7
+      }
+    }
+  ]
+}

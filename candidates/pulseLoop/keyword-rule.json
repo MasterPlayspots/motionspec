@@ -1,0 +1,10 @@
+{
+  "source": "(puls|pulse|pulsier|heartbeat|attention|atmen)",
+  "flags": "i",
+  "primitive": "pulseLoop",
+  "target": ".cta",
+  "params": {
+    "scale": 1.05,
+    "duration": 2
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "source": "(hover.*(expand|ausdehn)|beim.*hover.*ausdehn)",
+  "flags": "i",
+  "primitive": "hoverExpand",
+  "target": ".card",
+  "params": {}
+}

@@ -1,0 +1,23 @@
+{
+  "specVersion": "1.0",
+  "catalogVersion": "a0a405b4556fcab4",
+  "meta": {
+    "project": "hoverLift-candidate",
+    "target": "vanilla-gsap",
+    "createdWith": "wave-c"
+  },
+  "globals": {
+    "respectReducedMotion": true
+  },
+  "motions": [
+    {
+      "id": "hoverLift-1",
+      "primitive": "hoverLift",
+      "target": ".d-hoverLift",
+      "params": {
+        "distance": "8px",
+        "duration": 0.2
+      }
+    }
+  ]
+}
