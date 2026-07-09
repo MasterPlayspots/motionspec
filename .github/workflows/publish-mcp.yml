@@ -1,0 +1,31 @@
+name: Publish to MCP Registry
+
+# Publishes server.json to the official MCP Registry (registry.modelcontextprotocol.io)
+# so agents can discover MotionSpec. Auth is GitHub OIDC — no secrets, no tokens to
+# rotate; the OIDC token proves this repo owns the io.github.MasterPlayspots/* namespace.
+# npm publishing is handled separately (this workflow does NOT touch npm).
+
+on:
+  push:
+    tags: ["v*"] # e.g. v1.2.2 — publishes the server.json version
+  workflow_dispatch: {} # allow manual runs from the Actions tab
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # required for GitHub OIDC authentication
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+
+      - name: Authenticate to the MCP Registry (GitHub OIDC)
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish server.json
+        run: ./mcp-publisher publish
