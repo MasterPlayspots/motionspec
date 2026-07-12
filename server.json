@@ -7,12 +7,12 @@
     "url": "https://github.com/MasterPlayspots/motionspec",
     "source": "github"
   },
-  "version": "1.2.2",
+  "version": "1.2.3",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "motionspec",
-      "version": "1.2.2",
+      "version": "1.2.3",
       "transport": {
         "type": "stdio"
       }
