@@ -220,6 +220,20 @@ const SAFE_ANIMATED_PROPS = ["transform", "opacity", "filter", "-webkit-transfor
 const COMPOSITOR_SAFE = ["transform", "opacity", "-webkit-transform"];
 
 /* Parse the transition property list of a declaration body -> [propNames]. */
+/* FIX-3: split a CSS list on TOP-LEVEL commas only, so commas inside
+   cubic-bezier(), steps(), etc. are not mistaken for property separators. */
+function splitTopLevelCommas(s) {
+  const out = []; let depth = 0, cur = "";
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (ch === "(") { depth++; cur += ch; }
+    else if (ch === ")") { depth = depth > 0 ? depth - 1 : 0; cur += ch; }
+    else if (ch === "," && depth === 0) { out.push(cur); cur = ""; }
+    else cur += ch;
+  }
+  if (cur.trim() !== "") out.push(cur);
+  return out;
+}
 function transitionProps(body) {
   const props = [];
   const re = /transition(?:-property)?\s*:\s*([^;}]+)/gi;
@@ -227,7 +241,7 @@ function transitionProps(body) {
   while ((m = re.exec(body)) !== null) {
     const val = m[1];
     /* transition shorthand: first token of each comma group is the property */
-    val.split(",").forEach((seg) => {
+    splitTopLevelCommas(val).forEach((seg) => {
       const first = seg.trim().split(/\s+/)[0];
       if (first && first !== "all" && first !== "none") props.push(first.toLowerCase());
       else if (first === "all") props.push("all");
@@ -281,6 +295,18 @@ function riskyAnimatedProps(body) {
  * @returns {{score:number, findings:Array, summary:string, badge:string|null,
  *            disclosures:string[]}}
  */
+/* FIX-4: true only when a rule actually CREATES motion. A reduced-motion reset
+   (animation: none / transition: none / *: none !important) is motion-DISABLING
+   and must not be flagged as unguarded motion. */
+function createsMotion(body) {
+  const re = /(^|[;{\s])animation(-name)?\s*:\s*([^;}]+)/gi;
+  let m;
+  while ((m = re.exec(body)) !== null) {
+    const v = m[3].trim().toLowerCase().replace(/!important/g, "").trim();
+    if (v && v !== "none" && v !== "initial" && v !== "inherit" && v !== "unset") return true;
+  }
+  return transitionProps(body).length > 0;
+}
 function analyze(input) {
   const html = stripHtmlComments(input.html || "");
   const findings = [];
@@ -304,7 +330,7 @@ function analyze(input) {
       anyAnimation = true;
 
       /* Check 1: motion not covered by a prefers-reduced-motion query. */
-      if (!r.inReducedMotionQuery) {
+      if (!r.inReducedMotionQuery && createsMotion(r.body)) {
         add(r.selector, "Motion without prefers-reduced-motion guard", WCAG_2_3_3,
           "@media (prefers-reduced-motion: reduce) { " + r.selector + " { animation: none; transition: none; } }");
       }
