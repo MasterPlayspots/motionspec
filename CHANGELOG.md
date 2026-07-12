@@ -8,6 +8,22 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ## [Unreleased]
 
+## [1.2.4] - 2026-07-12
+
+### Changed
+- Release tooling: an npm `version` lifecycle hook (`scripts/sync-server-version.js`) keeps `server.json` in lockstep with `package.json`, so the MCP-registry manifest version can no longer drift from the npm version. No runtime, compiler, or catalog change.
+
+## [1.2.3] - 2026-07-12
+
+### Fixed
+- `motion_audit` no longer emits false positives for `cubic-bezier()` timing functions or for animations already guarded by `prefers-reduced-motion` (`src/audit/audit.js`; regression test `test/audit-regression-fix-2026-07.test.js`).
+
+### Documentation
+- `SPEC.md` clarifies that `meta.target` is the output **runtime target** (spec 1.x: only `"vanilla-gsap"`), not a CSS selector; only `motions[].target` values are selectors interpolated into emitted CSS (§2.2, §4).
+
+### Added
+- CI workflow publishing `server.json` to the official MCP Registry via GitHub OIDC (`.github/workflows/publish-mcp.yml`) — no stored secrets.
+
 ## [1.2.2] - 2026-07-08
 
 ### Added
