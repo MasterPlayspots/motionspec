@@ -56,7 +56,8 @@
     "prepublishOnly": "npm test && npm run catalog-lock:check && npm run sbom && npm run sbom:check && node bin/license-check.js && node -e \"if(!require('fs').existsSync('CHANGELOG.md'))throw new Error('CHANGELOG.md fehlt')\"",
     "release": "npm test && npm run catalog-lock:check && npm run sbom && npm run sbom:check && node bin/license-check.js && npm publish",
     "lint": "eslint .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "version": "node scripts/sync-server-version.js && git add server.json"
   },
   "engines": {
     "node": ">=18"
