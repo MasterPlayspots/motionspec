@@ -41,11 +41,11 @@ An implementation MUST reject any unknown top-level key (`MS-SPEC-KEY`) and any 
 
 | Key | Required | Type |
 |---|---|---|
-| `target` | **MUST** | string — a CSS selector root (§4). |
+| `target` | **MUST** | string — the output **runtime target**. In spec 1.x the only supported value is `"vanilla-gsap"`. |
 | `project` | OPTIONAL | string |
 | `createdWith` | OPTIONAL | string |
 
-A missing `meta.target` MUST be rejected (`MS-META-TARGET`); unknown `meta` keys MUST be rejected (`MS-META-KEY`).
+`meta.target` names the runtime the compiler emits for; it is **not** a CSS selector. A missing or unsupported `meta.target` MUST be rejected (`MS-META-TARGET`); unknown `meta` keys MUST be rejected (`MS-META-KEY`).
 
 ### 2.3 `motions[]`
 
@@ -92,7 +92,7 @@ Defaults declared in `paramSchema` MUST be applied when a parameter is omitted, 
 
 ## 4. Selector safety
 
-`meta.target` and every `motions[].target` are interpolated into emitted CSS. An implementation MUST validate each selector against a conservative safe grammar and MUST reject any selector that could break out of a rule or inject at-rules, declarations, or comments (`MS-TARGET-UNSAFE`). An implementation MUST NOT emit output for a document containing an unsafe selector.
+Every `motions[].target` is a CSS selector interpolated into emitted CSS (`meta.target` is the runtime enum from §2.2 and is never interpolated). An implementation MUST validate each `motions[].target` against a conservative safe grammar and MUST reject any selector that could break out of a rule or inject at-rules, declarations, or comments (`MS-TARGET-UNSAFE`). An implementation MUST NOT emit output for a document containing an unsafe selector.
 
 ---
 
