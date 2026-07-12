@@ -1,6 +1,6 @@
 {
   "name": "motionspec",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "mcpName": "io.github.MasterPlayspots/motionspec",
   "description": "MotionSpec — a formal intermediate language for scroll-driven web motion. A small model writes schema-validated specs; a deterministic compiler emits GSAP/CSS, hallucination-proof by construction with enforced reduced-motion fallbacks.",
   "license": "MIT",
