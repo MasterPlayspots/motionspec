@@ -1,5 +1,7 @@
 # MotionSpec
 
+<img src="https://motionspec.dev/logo-512.png" alt="MotionSpec logo" width="96" align="right">
+
 [![npm](https://img.shields.io/npm/v/motionspec?color=cb3837&label=npm)](https://www.npmjs.com/package/motionspec)
 [![node](https://img.shields.io/node/v/motionspec?color=339933)](https://www.npmjs.com/package/motionspec)
 [![license](https://img.shields.io/npm/l/motionspec)](./LICENSE)
