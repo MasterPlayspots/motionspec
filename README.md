@@ -41,6 +41,15 @@ motion compile spec.json                     # deterministic build → ./out in 
 
 The host LLM authors the spec; the Trust Boundary stays enforced either way. Listed on the MCP Registry as `io.github.MasterPlayspots/motionspec`. A hosted MCP endpoint is live: keyless `motion_catalog` + `motion_validate` at `https://api.motionspec.dev/mcp` (streamable-http; keyed tiers cover compile/audit/stats) — setup: https://motionspec.dev/docs.
 
+### Claude Code plugin
+
+This repo is also a Claude Code plugin: it bundles the MCP server (`npx motionspec`, all five tools, local, keyless) with two skills — `/motionspec:motion` (the author→validate→compile workflow) and `/motionspec:audit <url>` (motion-accessibility check, WCAG 2.2.2/2.3.3). Try it directly from a clone with `claude --plugin-dir .`, or install it from the community marketplace once listed:
+
+```bash
+/plugin marketplace add anthropics/claude-plugins-community
+/plugin install motionspec@claude-community
+```
+
 ## Status
 
 | | |
