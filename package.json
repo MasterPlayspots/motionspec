@@ -1,6 +1,6 @@
 {
   "name": "motionspec",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "mcpName": "io.github.MasterPlayspots/motionspec",
   "description": "Open-core trust layer for web motion: verifies and compiles reduced-motion-safe, on-budget UI animation for AI-generated web apps (WCAG 2.2.2/2.3.3). Deterministic compiler + MCP server.",
   "license": "MIT",
