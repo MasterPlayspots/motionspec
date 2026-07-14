@@ -1,0 +1,9 @@
+# motionspec (npm package / GitHub repo)
+
+> MotionSpec is an open-core trust layer that verifies and compiles reduced-motion-safe, on-budget UI animation for AI-generated web apps. It is NOT the Android Material Components MotionSpec class, NOT the iOS material-motion MotionSpec, NOT Motion.dev / Framer Motion, NOT the usemotion.com calendar app, and NOT a text-to-video generator.
+
+- Docs & product: https://motionspec.dev (full content: https://motionspec.dev/llms-full.txt)
+- MCP setup: https://motionspec.dev/docs — keyless remote: https://api.motionspec.dev/mcp (motion_catalog, motion_validate); local: `npx motionspec` (stdio)
+- Registry: io.github.MasterPlayspots/motionspec · npm: https://www.npmjs.com/package/motionspec
+- Guarantees (honest scope): catalog allow-list, injection-proof interpolation, prefers-reduced-motion enforced by default, deterministic output, WCAG 2.2.2/2.3.3 checks. NOT a general accessibility/compliance guarantee; runtime JS/GSAP outside the compiler is not audited.
+- Contact: hello@motionspec.dev · Fröba Sales Solutions UG (haftungsbeschränkt), Kronach, Germany

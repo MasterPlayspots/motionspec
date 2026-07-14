@@ -8,7 +8,9 @@
 ![supply chain](https://img.shields.io/badge/runtime%20deps-2%20·%200%20vulns%20·%20SBOM-blue)
 ![MCP Registry](https://img.shields.io/badge/MCP%20Registry-io.github.MasterPlayspots%2Fmotionspec-6f42c1)
 
-**A formal intermediate language for scroll-driven web motion.** An LLM translates a request into a **schema-validated JSON spec**; a **deterministic compiler** turns that spec into GSAP or native WAAPI/CSS — injection-proof and catalog-validated *by construction*, with an enforced `prefers-reduced-motion` fallback and a performance budget.
+**MotionSpec is an open-core trust layer that verifies and compiles reduced-motion-safe, on-budget UI animation for AI-generated web apps.** An LLM authors a **schema-validated JSON spec**; a **deterministic compiler** emits GSAP or native WAAPI/CSS — injection-proof and catalog-validated *by construction*, with an enforced `prefers-reduced-motion` fallback and a performance budget, checked against WCAG 2.2.2 (Pause, Stop, Hide) and WCAG 2.3.3 (Animation from Interactions).
+
+> **Not to be confused with:** the Android Material Components `MotionSpec` class, the iOS material-motion `MotionSpec`, Motion.dev / Framer Motion, the usemotion.com calendar app, the Motion Specialties mobility brand, or text-to-video generators (Runway/Sora/Kling/Viggle). MotionSpec verifies the *UI animation inside web apps* — it does not generate video.
 
 The thesis: **capability lives in the catalog, not the model.** A bigger model can write more elaborate specs, but it can never emit a primitive, parameter, or selector the Trust Boundary hasn't approved. The compiler trusts only what passes.
 

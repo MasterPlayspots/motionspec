@@ -1,31 +1,46 @@
-name: Publish to MCP Registry
+# .github/workflows/publish-mcp.yml — auto-publish server.json to the Official MCP Registry
+# on every tagged release, via GitHub OIDC (no stored secrets). continue-on-error keeps
+# a registry outage from failing the release.
+#
+# Install: copy into MasterPlayspots/motionspec at .github/workflows/publish-mcp.yml
+# (server.json at repo root is already version-synced by scripts/sync-server-version.js —
+#  replace it with DISTRIBUTION/mcp/server.json first to add the streamable-http remote.)
 
-# Publishes server.json to the official MCP Registry (registry.modelcontextprotocol.io)
-# so agents can discover MotionSpec. Auth is GitHub OIDC — no secrets, no tokens to
-# rotate; the OIDC token proves this repo owns the io.github.MasterPlayspots/* namespace.
-# npm publishing is handled separately (this workflow does NOT touch npm).
+name: Publish to MCP Registry
 
 on:
   push:
-    tags: ["v*"] # e.g. v1.2.2 — publishes the server.json version
-  workflow_dispatch: {} # allow manual runs from the Actions tab
+    tags: ["v*"]
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write   # OIDC for mcp-publisher login github-oidc
+  contents: read
 
 jobs:
-  publish:
+  publish-mcp:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write # required for GitHub OIDC authentication
-      contents: read
+    continue-on-error: true
     steps:
-      - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@v4
 
       - name: Install mcp-publisher
         run: |
-          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+          set -euo pipefail
+          curl -sL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/').tar.gz" \
+            | tar xz mcp-publisher
+          ./mcp-publisher --version
 
-      - name: Authenticate to the MCP Registry (GitHub OIDC)
-        run: ./mcp-publisher login github-oidc
+      - name: Validate server.json version matches tag
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME#v}"
+          VER=$(node -p "require('./server.json').version")
+          echo "tag=$TAG server.json=$VER"
+          test "$TAG" = "$VER" || { echo "::warning::server.json version ($VER) != tag ($TAG) — publishing server.json version anyway"; }
 
-      - name: Publish server.json
-        run: ./mcp-publisher publish
+      - name: Login (GitHub OIDC) and publish
+        run: |
+          set -euo pipefail
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish
