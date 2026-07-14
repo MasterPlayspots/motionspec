@@ -39,15 +39,13 @@ npm install -g motionspec                    # or take the CLI:
 motion compile spec.json                     # deterministic build → ./out in your cwd
 ```
 
-The host LLM authors the spec; the Trust Boundary stays enforced either way. Listed on the MCP Registry as `io.github.MasterPlayspots/motionspec`. A hosted, per-key-gated MCP endpoint exists as a private beta (access by arrangement).
-
-> **Source access:** the npm package and the hosted MCP are public-facing; the source repository is private (access by arrangement). Sections marked *(source access)* assume a granted clone.
+The host LLM authors the spec; the Trust Boundary stays enforced either way. Listed on the MCP Registry as `io.github.MasterPlayspots/motionspec`. A hosted MCP endpoint is live: keyless `motion_catalog` + `motion_validate` at `https://api.motionspec.dev/mcp` (streamable-http; keyed tiers cover compile/audit/stats) — setup: https://motionspec.dev/docs.
 
 ## Status
 
 | | |
 |---|---|
-| Version | **v1.2.4** · schema frozen at spec v1 (ADR-0001, signed) |
+| Version | **v1.2.5** · schema frozen at spec v1 (ADR-0001, signed) |
 | Published | **npm `motionspec`** (82 kB packed, 67 files, nothing dev-only ships) · MCP Registry |
 | Tests | **295 green** — injection attacks, 6000-spec fuzz, golden determinism, schema parity, pause-controls, motion-a11y audit · CI on Node 18/20/22 + x86 Playwright e2e |
 | Catalog | **40 primitives**, every one device-verified, reduced-motion-fallback mandatory; the 18 continuous loops also carry a WCAG-2.2.2 pause path |
@@ -55,7 +53,7 @@ The host LLM authors the spec; the Trust Boundary stays enforced either way. Lis
 | Coverage | ≈99% lines / ≈98% functions / ≈80% branches of `src/` + `worker/` (CI gate: 90/90/75) |
 | Last audit | 2026-07-03 — 17/17 integration handshakes evidenced, infra 8.1/10, security: **0 critical**, full-git-history secret scan clean |
 | First client | CHS Computer — live on Vercel |
-| Hosted MCP | **live** — private Cloudflare Worker, per-key gated (hashed keys in KV) · two-stage rate limiting (pre-auth per IP + per key, burst-verified) · per-minute cron canary + external heartbeat (synthetic fault → alert in <5 min, proven on real infra) · Analytics Engine telemetry, PII-scrubbed · gated `/dashboard` |
+| Hosted MCP | **live** — keyless `motion_catalog`/`motion_validate` at api.motionspec.dev/mcp · keyed tier: Cloudflare Worker, per-key gated (hashed keys in KV) · two-stage rate limiting (pre-auth per IP + per key, burst-verified) · per-minute cron canary + external heartbeat (synthetic fault → alert in <5 min, proven on real infra) · Analytics Engine telemetry, PII-scrubbed · gated `/dashboard` |
 
 Schema v1 is frozen: `specVersion "1.0"` is the stable public contract; `"0.1"` is deprecated and accepted until v1.2 (a tripwire test enforces the revisit). The `[MS-XXX]` error-code registry is public API — codes are never reused or redefined.
 
@@ -90,7 +88,7 @@ The **Catalog Forge** (CI workflow, manual dispatch) picks the top telemetry-ran
 | `motion_audit` | static motion-a11y check of a live URL (read-only, open-world) |
 | `motion_stats` | telemetry summary (escalations = catalog growth signal) |
 
-Input is size-capped (`MS-INPUT-TOO-LARGE`, 64 KB). The stdio server exposes one tool factory as the single source of truth, contract-tested in `test/mcp.test.mjs`. A hosted, per-key-gated MCP endpoint is available as a private beta (access by arrangement).
+Input is size-capped (`MS-INPUT-TOO-LARGE`, 64 KB). The stdio server exposes one tool factory as the single source of truth, contract-tested in `test/mcp.test.mjs`. A hosted MCP endpoint is live: keyless `motion_catalog` + `motion_validate` at `https://api.motionspec.dev/mcp`; keyed tiers cover compile/audit/stats.
 
 ## Motion-a11y checker
 
@@ -112,7 +110,7 @@ MotionSpec turns specific legal and normative accessibility requirements into co
 
 Notes: EN 301 549 is the EU harmonised standard whose clause 9 adopts the WCAG success criteria by number. U.S. Section 508 (Revised) incorporates WCAG 2.0 Level A and AA — SC 2.2.2 is Level A and therefore in scope; SC 2.3.3 is Level AAA and is provided as a stronger guarantee than the baseline requires. The European Accessibility Act (EAA) and its German transposition (BFSG, applicable from 28 June 2025) require covered digital products and services to be accessible, with conformance commonly demonstrated against EN 301 549. MotionSpec enforces the *motion* subset of these obligations by construction; it does not by itself make an entire product conformant.
 
-## Quickstart *(source access)*
+## Quickstart (from a clone)
 
 ```bash
 npm ci                                      # install (0 runtime deps beyond MCP SDK + zod)
@@ -141,7 +139,7 @@ Releases run the whole chain plus a canonical-clone guard and finish with a **re
 
 Defense in depth on the hosted path: constant-time admin-secret comparison (no timing side channel on position *or* length) · customer keys stored **hashed** (SHA-256) in KV, fail-closed on any lookup error · pre-auth per-IP rate limiting closes the key-enumeration gap before auth work starts, per-key limiting after · throttled abuse alerts with zero PII · telemetry scrubbed before storage · strict CSP/`X-Frame-Options`/`nosniff` on the only ungated page (a data-free dashboard shell). Full posture incl. reporting: [SECURITY.md](SECURITY.md). Last audit (2026-07-03): no critical findings, no secret ever committed across 197 commits of history.
 
-## Layout *(source access)*
+## Layout
 
 ```
 schema/            MotionSpec JSON schema (static contract, parity-tested against the validator)
@@ -166,7 +164,7 @@ docs/              ADR records (docs/adr/) and per-primitive reference (docs/pri
 
 ## Contributing
 
-The source repository is currently private (access by arrangement). Once granted: [CONTRIBUTING.md](CONTRIBUTING.md) covers setup, the gate-driven PR checklist, commit conventions, golden-file regeneration, and a short architecture tour. Issue templates live under `.github/ISSUE_TEMPLATE/`.
+[CONTRIBUTING.md](CONTRIBUTING.md) covers setup, the gate-driven PR checklist, commit conventions, golden-file regeneration, and a short architecture tour. Issue templates live under `.github/ISSUE_TEMPLATE/`.
 
 ## License
 
