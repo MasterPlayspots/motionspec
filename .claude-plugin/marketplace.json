@@ -1,0 +1,19 @@
+{
+  "$schema": "https://code.claude.com/schemas/marketplace.json",
+  "name": "motionspec",
+  "owner": {
+    "name": "Kevin Fröba",
+    "email": "security@motionspec.dev",
+    "url": "https://motionspec.dev"
+  },
+  "metadata": {
+    "description": "MotionSpec — verified, reduced-motion-safe web motion plus a motion-accessibility audit, packaged as a Claude Code plugin."
+  },
+  "plugins": [
+    {
+      "name": "motionspec",
+      "source": "./",
+      "description": "Author + validate + compile reduced-motion-safe GSAP/CSS from a MotionSpec JSON, and audit any URL for WCAG 2.2.2/2.3.3 motion issues. Bundles the motionspec MCP server (motion_catalog, motion_validate, motion_compile, motion_audit, motion_stats)."
+    }
+  ]
+}
