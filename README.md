@@ -10,7 +10,7 @@
 ![supply chain](https://img.shields.io/badge/runtime%20deps-2%20·%200%20vulns%20·%20SBOM-blue)
 ![MCP Registry](https://img.shields.io/badge/MCP%20Registry-io.github.MasterPlayspots%2Fmotionspec-6f42c1)
 
-**MotionSpec is an open-core trust layer that verifies and compiles reduced-motion-safe, on-budget UI animation for AI-generated web apps.** An LLM authors a **schema-validated JSON spec**; a **deterministic compiler** emits GSAP or native WAAPI/CSS — injection-proof and catalog-validated *by construction*, with an enforced `prefers-reduced-motion` fallback and a performance budget, checked against WCAG 2.2.2 (Pause, Stop, Hide) and WCAG 2.3.3 (Animation from Interactions).
+**MotionSpec is an open-core trust layer that verifies and compiles reduced-motion-safe, on-budget UI animation for AI-generated web apps.** An LLM authors a **schema-validated JSON spec**; a **deterministic compiler** emits vanilla-GSAP JavaScript + CSS — injection-proof and catalog-validated *by construction*, with an enforced `prefers-reduced-motion` fallback and a performance budget, checked against WCAG 2.2.2 (Pause, Stop, Hide) and WCAG 2.3.3 (Animation from Interactions).
 
 > **Not to be confused with:** the Android Material Components `MotionSpec` class, the iOS material-motion `MotionSpec`, Motion.dev / Framer Motion, the usemotion.com calendar app, the Motion Specialties mobility brand, or text-to-video generators (Runway/Sora/Kling/Viggle). MotionSpec verifies the *UI animation inside web apps* — it does not generate video.
 
@@ -81,7 +81,7 @@ Schema v1 is frozen: `specVersion "1.0"` is the stable public contract; `"0.1"` 
 Every catalog primitive compiles through the **same** validated spec to:
 
 - **`vanilla-gsap`** — GSAP + ScrollTrigger, the production default.
-- **WAAPI/CSS lowering** — zero-GSAP output on `Element.animate`, IntersectionObserver, and `@keyframes`/`position: sticky`. Full catalog coverage, byte-identical golden per primitive, same accessibility guard, same CSS safety gate. This is the framework-decoupling hedge: the IR outlives any animation library.
+- **WAAPI/CSS lowering** — zero-GSAP output on `Element.animate`, IntersectionObserver, and `@keyframes`/`position: sticky`. Full catalog coverage, byte-identical golden per primitive, same accessibility guard, same CSS safety gate. This is the framework-decoupling hedge: the IR outlives any animation library. **Internal for now** — not yet exposed through the MCP tools or the CLI (`meta.target` is frozen to `vanilla-gsap`, ADR-0001; engine wiring out of scope, ADR-0002).
 
 ## The catalog grows itself — humans keep the taste
 
