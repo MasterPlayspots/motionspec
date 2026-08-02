@@ -1,46 +1,108 @@
-# .github/workflows/publish-mcp.yml — auto-publish server.json to the Official MCP Registry
-# on every tagged release, via GitHub OIDC (no stored secrets). continue-on-error keeps
-# a registry outage from failing the release.
+# Publish to MCP Registry
 #
-# Install: copy into MasterPlayspots/motionspec at .github/workflows/publish-mcp.yml
-# (server.json at repo root is already version-synced by scripts/sync-server-version.js —
-#  replace it with DISTRIBUTION/mcp/server.json first to add the streamable-http remote.)
-
+# Ordering hazard, proven in run 30751055103 (2026-08-02): the tag push starts this
+# workflow while the npm publish of the same release is still propagating. The MCP
+# registry validates the npm package first and rejected the submission with
+# 'NPM package motionspec exists, but version 1.2.6 was not found (404)'.
+# npm served 1.2.6 six and a half minutes later.
+# Fix: poll registry.npmjs.org until the exact version is served, then publish.
+#
+# The old job-level continue-on-error made that failure look green. The intent
+# (a registry outage must not fail a release) is kept, but split by failure class:
+#   npm or registry unreachable ......... warning, run stays green
+#   npm answered, version still absent .. red  (the npm publish itself failed)
+#   publisher rejects the submission .... red  (auth, schema, validation)
 name: Publish to MCP Registry
 
 on:
   push:
-    tags: ["v*"]
+    tags: ['v*']
   workflow_dispatch: {}
 
 permissions:
-  id-token: write   # OIDC for mcp-publisher login github-oidc
+  id-token: write
   contents: read
 
 jobs:
   publish-mcp:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install mcp-publisher
+      - name: Resolve package and version
+        id: meta
         run: |
-          set -euo pipefail
-          curl -sL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/').tar.gz" \
-            | tar xz mcp-publisher
+          set -uo pipefail
+          PKG=$(jq -r '.packages[0].identifier // empty' server.json)
+          VER=$(jq -r '.version // empty' server.json)
+          if [ ${#PKG} -eq 0 ]; then PKG=$(jq -r '.name // empty' package.json); fi
+          if [ ${#PKG} -eq 0 ] || [ ${#VER} -eq 0 ]; then
+            echo '::error::cannot resolve package name or version from server.json'
+            exit 1
+          fi
+          echo pkg=${PKG} >> ${GITHUB_OUTPUT}
+          echo ver=${VER} >> ${GITHUB_OUTPUT}
+          echo resolved ${PKG}@${VER}
+          if [ x${GITHUB_REF_TYPE} = xtag ]; then
+            TAG=${GITHUB_REF_NAME#v}
+            if [ x${TAG} != x${VER} ]; then
+              echo '::warning::server.json version differs from tag - publishing server.json version'
+            fi
+          else
+            echo '::warning::manual run, no tag to compare against'
+          fi
+
+      - name: Wait for npm to serve the version
+        id: wait
+        env:
+          PKG: ${{ steps.meta.outputs.pkg }}
+          VER: ${{ steps.meta.outputs.ver }}
+        run: |
+          set -uo pipefail
+          DEADLINE=$(( $(date +%s) + 600 ))
+          SLEEP=10; N=0; ANSWERED=0; FOUND=0; CODE=000
+          echo waiting for ${PKG}@${VER} on registry.npmjs.org
+          while :; do
+            N=$(( N + 1 ))
+            CODE=$(curl -sS -L --max-time 25 -H 'Accept: application/vnd.npm.install-v1+json' -o npm.json -w '%{http_code}' https://registry.npmjs.org/${PKG} || true)
+            if [ ${#CODE} -eq 0 ]; then CODE=000; fi
+            if [ x${CODE} = x200 ]; then
+              ANSWERED=1
+              if jq -e --arg v ${VER} '.versions | has($v)' npm.json > /dev/null 2>&1; then FOUND=1; fi
+            elif [ x${CODE} = x404 ]; then
+              ANSWERED=1
+            fi
+            if [ ${FOUND} -eq 1 ]; then echo found after ${N} attempts; break; fi
+            echo attempt ${N}: http=${CODE}, not visible yet
+            if [ $(date +%s) -ge ${DEADLINE} ]; then break; fi
+            sleep ${SLEEP}
+            if [ ${SLEEP} -lt 60 ]; then SLEEP=$(( SLEEP + 10 )); fi
+          done
+          if [ ${FOUND} -eq 1 ]; then echo skip=false >> ${GITHUB_OUTPUT}; exit 0; fi
+          if [ ${ANSWERED} -eq 1 ]; then
+            echo skip=true >> ${GITHUB_OUTPUT}
+            echo '::error::npm answered but never served this version within 600s. The MCP registry validates the npm version, so publishing would fail the same way. Check that npm publish actually succeeded, then re-run via workflow_dispatch.'
+            exit 1
+          fi
+          echo skip=true >> ${GITHUB_OUTPUT}
+          echo '::warning::registry.npmjs.org unreachable for 600s - skipping the MCP publish. The npm release is unaffected; re-run via workflow_dispatch.'
+          exit 0
+
+      - name: Install publisher and publish
+        if: steps.wait.outputs.skip != 'true'
+        run: |
+          set -uo pipefail
+          OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+          ARCH=$(uname -m | sed 's/x86_64/amd64/')
+          URL=https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_${OS}_${ARCH}.tar.gz
+          CODE=$(curl -sSL --retry 5 --retry-delay 5 --retry-all-errors --max-time 180 -o pub.tar.gz -w '%{http_code}' ${URL} || true)
+          if [ ${#CODE} -eq 0 ]; then CODE=000; fi
+          case ${CODE} in
+            2*) : ;;
+            4*) echo '::error::publisher asset returned '${CODE}' - the download URL is wrong'; exit 1 ;;
+            *)  echo '::warning::could not download the publisher (http '${CODE}') - skipping, release unaffected'; exit 0 ;;
+          esac
+          tar xz mcp-publisher < pub.tar.gz || { echo '::error::publisher archive is corrupt'; exit 1; }
           ./mcp-publisher --version
-
-      - name: Validate server.json version matches tag
-        run: |
-          set -euo pipefail
-          TAG="${GITHUB_REF_NAME#v}"
-          VER=$(node -p "require('./server.json').version")
-          echo "tag=$TAG server.json=$VER"
-          test "$TAG" = "$VER" || { echo "::warning::server.json version ($VER) != tag ($TAG) — publishing server.json version anyway"; }
-
-      - name: Login (GitHub OIDC) and publish
-        run: |
-          set -euo pipefail
           ./mcp-publisher login github-oidc
           ./mcp-publisher publish
