@@ -9,6 +9,7 @@
 ![coverage](https://img.shields.io/badge/coverage-%E2%89%8899%25%20lines%20·%2098%25%20funcs-brightgreen)
 ![supply chain](https://img.shields.io/badge/runtime%20deps-2%20·%200%20vulns%20·%20SBOM-blue)
 ![MCP Registry](https://img.shields.io/badge/MCP%20Registry-io.github.MasterPlayspots%2Fmotionspec-6f42c1)
+[![smithery badge](https://smithery.ai/badge/kevin-froeba/motionspec)](https://smithery.ai/servers/kevin-froeba/motionspec)
 
 **MotionSpec is an open-core trust layer that verifies and compiles reduced-motion-safe, on-budget UI animation for AI-generated web apps.** An LLM authors a **schema-validated JSON spec**; a **deterministic compiler** emits vanilla-GSAP JavaScript + CSS — injection-proof and catalog-validated *by construction*, with an enforced `prefers-reduced-motion` fallback and a performance budget, checked against WCAG 2.2.2 (Pause, Stop, Hide) and WCAG 2.3.3 (Animation from Interactions).
 
