@@ -69,7 +69,7 @@
     "release": "npm test && npm run catalog-lock:check && npm run sbom && npm run sbom:check && node bin/license-check.js && npm publish",
     "lint": "eslint .",
     "prepare": "husky",
-    "version": "node scripts/sync-server-version.js && git add server.json"
+    "version": "node scripts/sync-server-version.js && git add server.json .claude-plugin/plugin.json README.md"
   },
   "engines": {
     "node": ">=18"
