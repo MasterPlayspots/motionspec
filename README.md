@@ -59,7 +59,7 @@ This repo is also a Claude Code plugin: it bundles the MCP server (`npx motionsp
 
 | | |
 |---|---|
-| Version | **v1.2.6** · schema frozen at spec v1 (ADR-0001, signed) |
+| Version | **v1.2.7** · schema frozen at spec v1 (ADR-0001, signed) |
 | Published | **npm `motionspec`** (82 kB packed, 67 files, nothing dev-only ships) · MCP Registry |
 | Tests | **295 green** — injection attacks, 6000-spec fuzz, golden determinism, schema parity, pause-controls, motion-a11y audit · CI on Node 18/20/22 + x86 Playwright e2e |
 | Catalog | **40 primitives**, every one device-verified, reduced-motion-fallback mandatory; the 18 continuous loops also carry a WCAG-2.2.2 pause path |

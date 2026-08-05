@@ -1,7 +1,7 @@
 {
   "name": "motionspec",
   "description": "Verified web motion for AI-built sites: write a MotionSpec JSON spec, validate it against a strict schema, and compile deterministic GSAP/CSS with reduced-motion support and performance budgets enforced by construction. Reports WCAG 2.2.2 pause-path candidates (reduced-motion guard = 2.3.3, AAA). Includes a motion-accessibility audit for any URL.",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "author": {
     "name": "Kevin Fröba",
     "email": "security@motionspec.dev",
