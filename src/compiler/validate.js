@@ -38,6 +38,12 @@
  *   MS-PARAM-UNSAFE  string parameter contains a dangerous token (javascript:, expression(, url(, ...)
  *   MS-PARAM-PATTERN string parameter violates the allowed pattern
  *   MS-PARAM-PATTERN-DEF paramSchema.pattern is itself invalid
+ *   MS-PARAM-EASE    "ease" is not a known GSAP ease (vocabulary gate; the
+ *                    catalog pattern can only screen characters, see EASE_RE)
+ *   MS-PARAM-EASE-UNSUPPORTED "ease" is a real GSAP ease but the primitive's
+ *                    charset pattern forbids its characters (multi-argument
+ *                    config); widening the pattern needs a MAJOR bump
+ *   MS-GLOBALS-RRM-TYPE globals.respectReducedMotion is not a boolean
  *   MS-TRANSFORM-KEY disallowed transform key
  *   MS-TRANSFORM-TYPE transform value is not a number
  *   MS-TRIGGER-OBJ   trigger is not an object
@@ -104,6 +110,39 @@ const ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
 const SELECTOR_RE = /^[A-Za-z0-9 _\-#.:,()>+~*=[\]"|^$]{1,200}$/;
 const STRING_PARAM_RE = /^[^\x00-\x1F\x7F`\\]{0,200}$/;
 
+/* ---- `ease` is a VOCABULARY, not a charset -------------------------------
+ * The catalog `pattern` for `ease` can only screen characters: catalog.js caps
+ * every pattern at 100 chars (MAX_PATTERN_CHARS, a ReDoS guard that is itself
+ * asserted in test/forge-promote-gate.test.js), and a GSAP ease vocabulary does
+ * not fit in 100 chars. A charset pattern is INVERTED in practice: it accepts
+ * "banana.out" and rejects "elastic.out(1,0.3)". An invented value passes
+ * validation, is written verbatim into the emitted file, and gsap.parseEase()
+ * silently falls back to the default — the shipped motion is not the specified
+ * one and nothing warns.
+ * Therefore the vocabulary is enforced HERE, where no length screen applies.
+ * The primitive files stay untouched, so catalogVersion does NOT change and no
+ * primitive needs a MAJOR bump. */
+const EASE_ALIASES = ["none", "linear"];
+const EASE_FAMILIES = [
+  "power0", "power1", "power2", "power3", "power4",
+  "back", "bounce", "circ", "cubic", "elastic", "expo",
+  "quad", "quart", "quint", "sine", "strong",
+];
+/* <family>.<in|out|inOut> with an optional numeric config of at most three
+ * numbers, e.g. back.out(1.7) / elastic.out(1, 0.3). All quantifiers are
+ * bounded — no nested unbounded repetition, so no ReDoS surface. */
+const EASE_RE = new RegExp(
+  "^(?:" + EASE_FAMILIES.join("|") + ")\\.(?:in|out|inOut)" +
+  "(?:\\(-?\\d{1,6}(?:\\.\\d{1,6})?(?:,\\s?-?\\d{1,6}(?:\\.\\d{1,6})?){0,2}\\))?$"
+);
+const EASE_STEPS_RE = /^steps\(\d{1,3}\)$/;
+function easeAllowed(v) {
+  return EASE_ALIASES.indexOf(v) !== -1 || EASE_STEPS_RE.test(v) || EASE_RE.test(v);
+}
+const EASE_HINT =
+  'Allowed: "none", "linear", "steps(n)", or <family>.<in|out|inOut> where family is one of ' +
+  EASE_FAMILIES.join(", ") + " — optionally with a numeric config, e.g. back.out(1.7), elastic.out(1, 0.3).";
+
 function safeSelector(s) {
   return (
     typeof s === "string" &&
@@ -134,12 +173,28 @@ function validateParams(prim, params, at, push, partial) {
       if (typeof v !== "string") push("MS-PARAM-TYPE", at + ': "' + k + '" must be a string.');
       else if (!STRING_PARAM_RE.test(v)) push("MS-PARAM-CHARSET", at + ': "' + k + '" contains disallowed characters (control characters, backslash, backtick) or is too long.');
       else if (unsafeToken(v)) push("MS-PARAM-UNSAFE", at + ': "' + k + '" contains a disallowed token "' + unsafeToken(v) + '" (e.g. javascript:, expression(, url(). Rejected.');
-      else if (def.pattern) {
-        let re = null;
-        try { re = new RegExp(def.pattern); }
-        catch { push("MS-PARAM-PATTERN-DEF", at + ': paramSchema.pattern for "' + k + '" is not a valid regular expression.'); }
-        if (re && !re.test(v))
-          push("MS-PARAM-PATTERN", at + ': "' + k + '" = "' + v + '" does not match the allowed pattern ' + def.pattern + ".");
+      else {
+        let screened = true;
+        if (def.pattern) {
+          let re = null;
+          try { re = new RegExp(def.pattern); }
+          catch { push("MS-PARAM-PATTERN-DEF", at + ': paramSchema.pattern for "' + k + '" is not a valid regular expression.'); screened = false; }
+          if (re && !re.test(v)) {
+            /* Name the real cause: a legitimate GSAP ease can still be blocked
+             * by the primitive's charset pattern (a comma or space in a
+             * multi-argument config). Widening that pattern changes the
+             * catalog and therefore needs a MAJOR bump — until then, say so
+             * instead of claiming the value is unknown. */
+            if (k === "ease" && easeAllowed(v))
+              push("MS-PARAM-EASE-UNSUPPORTED", at + ': "ease" = "' + v + '" is a valid GSAP ease, but the catalog pattern for "' + prim.name + '" (' + def.pattern + ') does not permit its characters — a multi-argument config uses a comma. Use a single-argument form such as elastic.out(1), or omit the config.');
+            else
+              push("MS-PARAM-PATTERN", at + ': "' + k + '" = "' + v + '" does not match the allowed pattern ' + def.pattern + ".");
+            screened = false;
+          }
+        }
+        /* Vocabulary gate on top of the charset screen — see EASE_RE above. */
+        if (screened && k === "ease" && !easeAllowed(v))
+          push("MS-PARAM-EASE", at + ': "ease" = "' + v + '" is not a known GSAP ease. ' + EASE_HINT);
       }
     } else if (def.type === "boolean") {
       if (typeof v !== "boolean") push("MS-PARAM-TYPE", at + ': "' + k + '" must be true or false.');
@@ -209,6 +264,13 @@ function validateGlobals(spec, push, warnings) {
   Object.keys(spec.globals).forEach((k) => {
     if (GLOBALS_KEYS.indexOf(k) === -1) push("MS-GLOBALS-KEY", 'globals: unknown key "' + k + '" (allowed: ' + GLOBALS_KEYS.join(", ") + ").");
   });
+  /* Fail-closed on the TYPE (mirrors pauseControls). Without this, any truthy
+   * non-boolean — "nein danke", 0, [] — passes as ok:true AND slips past the
+   * `=== false` check below, so not even the warning is raised. */
+  if (spec.globals.respectReducedMotion !== undefined &&
+      typeof spec.globals.respectReducedMotion !== "boolean")
+    push("MS-GLOBALS-RRM-TYPE", "globals.respectReducedMotion must be true or false (got " + (Array.isArray(spec.globals.respectReducedMotion) ? "array" : typeof spec.globals.respectReducedMotion) + ").");
+
   if (spec.globals.respectReducedMotion === false)
     warnings.push({ code: "MS-GLOBALS-RRM-OFF", message: "globals.respectReducedMotion is explicitly false — the compiler emits no prefers-reduced-motion guard. Recommendation: true." });
 

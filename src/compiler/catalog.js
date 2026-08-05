@@ -96,7 +96,7 @@ function catalogVersion(catalog) {
  * source: the default is all 8 fields; an optional fields subset returns fewer
  * (e.g. for a leaner prompt). Primitives sorted by name. */
 function catalogSummary(catalog, fields) {
-  const ALL = ["name", "version", "purpose", "engine", "cost", "paramSchema", "triggerDefaults", "reducedMotionFallback"];
+  const ALL = ["name", "version", "purpose", "engine", "cost", "paramSchema", "triggerDefaults", "reducedMotionFallback", "persistent"];
   const pick = Array.isArray(fields) ? fields : ALL;
   return Object.keys(catalog).sort().map((name) => {
     const p = catalog[name];
@@ -109,6 +109,10 @@ function catalogSummary(catalog, fields) {
       paramSchema: p.paramSchema || {},
       triggerDefaults: p.triggerDefaults || {},
       reducedMotionFallback: (p.a11y && p.a11y.reducedMotionFallback) || null,
+      /* WCAG 2.2.2 decides on THIS field: a persistent primitive keeps moving
+       * on its own and therefore needs a pause/stop control. Without it in the
+       * summary a caller cannot tell which primitives trigger the criterion. */
+      persistent: !!(p.a11y && p.a11y.persistent),
     };
     if (pick === ALL) return full;
     const o = {};

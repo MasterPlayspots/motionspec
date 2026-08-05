@@ -123,3 +123,79 @@ test("no globals -> r.warnings contains no MS-GLOBALS-RRM-OFF", () => {
     "warnings must not contain MS-GLOBALS-RRM-OFF when globals is missing"
   );
 });
+
+/* ---- 2026-08-04: `ease` is a vocabulary, not a charset ---------------------
+ * The catalog pattern ^[A-Za-z0-9.()]{1,40}$ was INVERTED in practice: it let
+ * every invented value through and rejected real GSAP eases that contain a
+ * comma. An invented value reached the emitted file verbatim and GSAP silently
+ * fell back to its default. A vocabulary regex does not fit the 100-char
+ * catalog screen, so the gate lives in the validator. */
+const easeMotion = (ease) => ({
+  id: "m1",
+  primitive: "scrollReveal",
+  target: ".hero h1",
+  params: { from: { opacity: 0, y: 48 }, ease },
+});
+const easeOk = (e) => validateSpec(baseSpec([easeMotion(e)]), catalog).ok;
+
+test("ease: real GSAP eases are accepted", () => {
+  for (const e of ["none", "linear", "power0.in", "power1.in", "power2.out", "power3.out",
+                   "power4.inOut", "back.out(1.7)", "back.in(2)", "elastic.out(1)",
+                   "bounce.inOut", "sine.in", "circ.out", "expo.inOut",
+                   "quad.out", "cubic.in", "quart.out", "quint.inOut",
+                   "strong.out", "steps(5)", "steps(100)"]) {
+    assert.equal(easeOk(e), true, "must accept the real ease " + JSON.stringify(e));
+  }
+});
+
+/* Known, deliberate residue: a multi-argument config is a valid GSAP ease but
+ * the primitive's charset pattern forbids the comma. Widening that pattern
+ * changes the catalog and needs a MAJOR bump per primitive, so it is out of
+ * scope here — the error must at least name the real cause instead of
+ * claiming the ease is unknown. */
+test("ease: a multi-argument config is refused with the honest reason", () => {
+  for (const e of ["elastic.out(1,0.3)", "elastic.out(1, 0.3)"]) {
+    const r = validateSpec(baseSpec([easeMotion(e)]), catalog);
+    assert.equal(r.ok, false, e + " is still blocked by the catalog charset pattern");
+    assert.ok(
+      r.errors.some((m) => m.includes("MS-PARAM-EASE-UNSUPPORTED")),
+      "must be reported as UNSUPPORTED, not as an unknown ease: " + JSON.stringify(r.errors)
+    );
+  }
+});
+
+test("ease: invented values are rejected (MS-PARAM-EASE)", () => {
+  for (const e of ["quantumBounce9000", "powr3.out", "banana.out", "x", "ZZZ", "1",
+                   "power9.out", "back.sideways", "steps(1234)"]) {
+    const r = validateSpec(baseSpec([easeMotion(e)]), catalog);
+    assert.equal(r.ok, false, "must reject " + JSON.stringify(e));
+    assert.ok(
+      r.errors.some((m) => m.includes("MS-PARAM-EASE") || m.includes("MS-PARAM-PATTERN")),
+      "rejection of " + JSON.stringify(e) + " must name the ease rule"
+    );
+  }
+});
+
+test("ease: exactly one error per invented value (no double report)", () => {
+  const r = validateSpec(baseSpec([easeMotion("banana.out")]), catalog);
+  assert.equal(r.errors.length, 1, "charset screen and vocabulary gate must not both fire");
+  assert.ok(r.errors[0].includes("MS-PARAM-EASE"));
+});
+
+/* ---- 2026-08-04: respectReducedMotion is type-checked ---------------------
+ * Any truthy non-boolean used to pass as ok:true AND slip past the `=== false`
+ * comparison, so not even the warning was raised. */
+test("globals.respectReducedMotion must be a boolean (MS-GLOBALS-RRM-TYPE)", () => {
+  for (const v of ["nein danke", "false", 0, 1, [], {}]) {
+    const spec = {
+      specVersion: "1.0",
+      meta: { project: "t", target: "vanilla-gsap" },
+      globals: { respectReducedMotion: v },
+      motions: [okMotion()],
+    };
+    const r = validateSpec(spec, catalog);
+    assert.equal(r.ok, false, "must reject respectReducedMotion=" + JSON.stringify(v));
+    assert.ok(r.errors.some((m) => m.includes("MS-GLOBALS-RRM-TYPE")));
+  }
+  assert.equal(validateSpec(baseSpec([okMotion()]), catalog).ok, true, "true stays valid");
+});
