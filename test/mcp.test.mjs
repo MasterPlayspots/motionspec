@@ -74,10 +74,17 @@ test("MCP: motion_catalog returns primitives + rules", async () => {
     /* TASK-026 (Finding #23): shared catalogSummary returns all 8 fields per
      * primitive (was split across two divergent local copies). */
     assert.equal(out.primitives.length, 40);
-    const FIELDS = ["name", "version", "purpose", "engine", "cost", "paramSchema", "triggerDefaults", "reducedMotionFallback"];
+    const FIELDS = ["name", "version", "purpose", "engine", "cost", "paramSchema", "triggerDefaults", "reducedMotionFallback", "persistent"];
     for (const p of out.primitives) {
-      assert.deepEqual(Object.keys(p).sort(), [...FIELDS].sort(), "each primitive carries the 8 summary fields");
+      assert.deepEqual(Object.keys(p).sort(), [...FIELDS].sort(), "each primitive carries the 9 summary fields");
     }
+    /* WCAG 2.2.2 is decidable from the catalog alone: without `persistent` a
+     * caller cannot tell which primitives need a pause control. */
+    const persistent = out.primitives.filter((p) => p.persistent);
+    assert.equal(persistent.length, 18, "18 of the 40 primitives are persistent (WCAG 2.2.2 applies)");
+    assert.ok(persistent.some((p) => p.name === "marquee"), "marquee must be flagged persistent");
+    assert.ok(out.primitives.some((p) => p.name === "hoverLift" && p.persistent === false), "a hover primitive is not persistent");
+    assert.ok(out.authoringRules.includes("pauseControls"), "authoring rules must teach pauseControls (2.2.2)");
     assert.ok(out.authoringRules.includes("Never invent"));
     assert.ok(out.catalogVersion.length === 16);
     /* Re-audit 2026-06-15: the MCP layer is the contract surface the model
@@ -121,6 +128,37 @@ test("MCP: motion_validate reports precise errors", async () => {
     const r = await c.callTool({ name: "motion_validate", arguments: { spec: bad } });
     assert.equal(r.structuredContent.ok, false);
     assert.ok(r.structuredContent.errors[0].includes("maximum"));
+  });
+});
+
+/* Regression for the 2026-08-03 finding: validate.js computed both WCAG 2.2.2
+ * warnings and register-tools.js built the response without the field, so the
+ * only publicly reachable checker answered ok:true for a spec with
+ * reduced-motion off, pause off, a 120 s marquee and a 60 s spin. */
+test("MCP: motion_validate surfaces the WCAG 2.2.2 warnings (they are not dropped)", async () => {
+  await withClient(async (c) => {
+    const spec = {
+      specVersion: "1.0",
+      meta: { project: "guard-regression", target: "vanilla-gsap", createdWith: "mcp-host" },
+      globals: { respectReducedMotion: false, pauseControls: "off" },
+      motions: [
+        { id: "ticker", primitive: "marquee", target: ".ticker", params: { duration: 120 } },
+        { id: "spinner", primitive: "spinLoop", target: ".logo", params: { duration: 60 } },
+      ],
+    };
+    const out = (await c.callTool({ name: "motion_validate", arguments: { spec } })).structuredContent;
+    assert.ok(Array.isArray(out.warnings), "the response must carry a warnings array");
+    const codes = out.warnings.map((w) => w.code);
+    assert.ok(codes.includes("MS-GLOBALS-RRM-OFF"), "reduced-motion off must be reported");
+    assert.ok(codes.includes("MS-GLOBALS-PAUSE-OFF"), "pause path off + persistent motion must be reported");
+  });
+});
+
+test("MCP: a clean spec reports no warnings", async () => {
+  await withClient(async (c) => {
+    const out = (await c.callTool({ name: "motion_validate", arguments: { spec: validSpec } })).structuredContent;
+    assert.equal(out.ok, true);
+    assert.deepEqual(out.warnings, [], "a clean spec must not raise warnings");
   });
 });
 

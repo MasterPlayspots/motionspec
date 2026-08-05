@@ -32,6 +32,8 @@ const AUTHORING_RULES = [
   '4. "id" matches [A-Za-z0-9_-]{1,64}, descriptive, unique per motion.',
   '5. meta.target is "vanilla-gsap". Set globals.respectReducedMotion: true.',
   "6. If no catalog primitive covers the request, do NOT improvise — tell the user which primitive is missing (this is an escalation signal).",
+  '7. WCAG 2.2.2: a primitive with "persistent": true keeps moving on its own and needs a pause/stop control. globals.pauseControls is "auto" (default, emits the control), "api" (you wire your own) or "off". Setting it to "off" with a persistent motion in the spec is a 2.2.2 violation and is reported in warnings[].',
+  '8. warnings[] is advisory, not fatal: ok=true with a non-empty warnings[] means the spec compiles but does NOT meet the accessibility recommendation. Read it before you ship.',
 ].join("\n");
 
 /* Catalog summary from the shared source (TASK-026). */
@@ -83,7 +85,7 @@ function registerMotionspecTools(server, deps) {
     {
       title: "Validate a MotionSpec (trust boundary)",
       description:
-        "Checks a MotionSpec against the schema, the primitive allow-list, parameter bounds and injection rules. Fail-closed: returns ok=false with precise errors. Use to pre-check a spec before compiling.",
+        "Checks a MotionSpec against the schema, the primitive allow-list, parameter bounds and injection rules. Fail-closed: returns ok=false with precise errors. Returns {ok, errors, warnings, deprecations, catalogVersion}. IMPORTANT: warnings[] carries the WCAG 2.2.2 / reduced-motion findings and can be non-empty while ok=true — a spec that compiles is not automatically accessible. Use to pre-check a spec before compiling.",
       inputSchema: { spec: z.record(z.string(), z.any()).describe("The MotionSpec JSON object") },
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
@@ -91,12 +93,16 @@ function registerMotionspecTools(server, deps) {
       const catVer = getCatVer();
       const big = oversizeError(spec);
       if (big) {
-        const out = { ok: false, errors: ["[" + big.code + "] " + big.message], deprecations: [], catalogVersion: catVer };
+        const out = { ok: false, errors: ["[" + big.code + "] " + big.message], warnings: [], deprecations: [], catalogVersion: catVer };
         return { content: [{ type: "text", text: JSON.stringify(out, null, 2) }], structuredContent: out, isError: true };
       }
       const v = validateSpec(spec, getCatalog());
       telemetry.log({ outcome: v.ok ? "mcp-validate-ok" : "mcp-validate-fail", model: "mcp-host", attempts: 1, errors: v.ok ? undefined : v.errors });
-      const out = { ok: v.ok, errors: v.errors || [], deprecations: v.deprecations || [], catalogVersion: catVer };
+      /* warnings[] carries the two WCAG 2.2.2 signals (MS-GLOBALS-RRM-OFF,
+       * MS-GLOBALS-PAUSE-OFF). validate.js computes them; dropping the field
+       * here made the only publicly reachable checker answer ok:true for a spec
+       * with reduced-motion off, pause off and a 120 s marquee. */
+      const out = { ok: v.ok, errors: v.errors || [], warnings: v.warnings || [], deprecations: v.deprecations || [], catalogVersion: catVer };
       return { content: [{ type: "text", text: JSON.stringify(out, null, 2) }], structuredContent: out };
     }
   );
@@ -123,8 +129,8 @@ function registerMotionspecTools(server, deps) {
       const res = compileSpec(spec, getCatalog(), { specName: specName || "mcp-spec" });
       telemetry.log({ outcome: res.ok ? "mcp-compile-ok" : "mcp-compile-fail", model: "mcp-host", attempts: 1, errors: res.ok ? undefined : res.errors });
       const out = res.ok
-        ? { ok: true, js: res.js, css: res.css, report: res.report, catalogVersion: catVer }
-        : { ok: false, errors: res.errors, hint: "Fix the listed errors. Call motion_catalog to re-check allowed primitives and parameter bounds.", catalogVersion: catVer };
+        ? { ok: true, js: res.js, css: res.css, warnings: res.warnings || [], report: res.report, catalogVersion: catVer }
+        : { ok: false, errors: res.errors, warnings: res.warnings || [], hint: "Fix the listed errors. Call motion_catalog to re-check allowed primitives and parameter bounds.", catalogVersion: catVer };
       return { content: [{ type: "text", text: JSON.stringify(out, null, 2) }], structuredContent: out, isError: !res.ok };
     }
   );

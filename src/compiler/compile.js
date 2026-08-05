@@ -80,11 +80,14 @@ function compileSpec(spec, catalog, opts) {
   const o = opts || {};
   const budget = typeof o.budget === "number" ? o.budget : BUDGET; /* audit #16: configurable */
   const v = validateSpec(spec, catalog);
-  if (!v.ok) return { ok: false, errors: v.errors };
+  if (!v.ok) return { ok: false, errors: v.errors, warnings: v.warnings || [] };
 
   /* ADR-0001 D4: deprecation note comes from the validator (single source),
-   * so validate-only callers and the compile report agree. */
+   * so validate-only callers and the compile report agree. The same applies to
+   * warnings[] — the WCAG 2.2.2 signals were computed and then dropped here,
+   * so a caller that only ever compiles never saw them either. */
   const deprecations = v.deprecations || [];
+  const warnings = v.warnings || [];
 
   const respectRM = !(spec.globals && spec.globals.respectReducedMotion === false);
   const js = [], css = [];
@@ -162,6 +165,7 @@ function compileSpec(spec, catalog, opts) {
     ok: true,
     js: jsOut,
     css: cssOut,
+    warnings,
     report: {
       motions: spec.motions.length,
       jsCount: nJs,
