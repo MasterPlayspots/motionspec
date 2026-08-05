@@ -51,7 +51,7 @@ function registerMotionspecTools(server, deps) {
     {
       title: "MotionSpec catalog & authoring rules",
       description:
-        "Returns the catalog of verified motion primitives (names, purpose, parameter schemas, defaults) plus the authoring rules for writing a MotionSpec. Call this FIRST, then write the spec yourself and pass it to motion_compile.",
+        "Returns the catalog of verified motion primitives (names, purpose, parameter schemas, defaults) plus the authoring rules for writing a MotionSpec. Call this FIRST, then write the spec yourself and validate it with motion_validate (motion_compile runs in the CLI or with a key on the hosted endpoint).",
       inputSchema: {},
       annotations: { readOnlyHint: true, openWorldHint: false },
     },

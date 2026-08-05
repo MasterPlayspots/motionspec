@@ -1,6 +1,6 @@
 # motionspec (npm package / GitHub repo)
 
-> MotionSpec is an open-core trust layer that verifies and compiles reduced-motion-safe, on-budget UI animation for AI-generated web apps. It is NOT the Android Material Components MotionSpec class, NOT the iOS material-motion MotionSpec, NOT Motion.dev / Framer Motion, NOT the usemotion.com calendar app, and NOT a text-to-video generator.
+> MotionSpec is an open-core trust layer that checks and compiles reduced-motion-safe, on-budget UI animation for AI-generated web apps. It is NOT the Android Material Components MotionSpec class, NOT the iOS material-motion MotionSpec, NOT Motion.dev / Framer Motion, NOT the usemotion.com calendar app, and NOT a text-to-video generator.
 
 - Docs & product: https://motionspec.dev (full content: https://motionspec.dev/llms-full.txt)
 - MCP setup: https://motionspec.dev/docs — keyless remote: https://api.motionspec.dev/mcp (motion_catalog, motion_validate); local: `npx motionspec` (stdio)
