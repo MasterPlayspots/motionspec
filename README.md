@@ -11,7 +11,7 @@
 ![MCP Registry](https://img.shields.io/badge/MCP%20Registry-io.github.MasterPlayspots%2Fmotionspec-6f42c1)
 [![smithery badge](https://smithery.ai/badge/kevin-froeba/motionspec)](https://smithery.ai/servers/kevin-froeba/motionspec)
 
-**MotionSpec is an open-core trust layer that verifies and compiles reduced-motion-safe, on-budget UI animation for AI-generated web apps.** An LLM authors a **schema-validated JSON spec**; a **deterministic compiler** emits vanilla-GSAP JavaScript + CSS — injection-proof and catalog-validated *by construction*, with an enforced `prefers-reduced-motion` fallback and a performance budget, checked against WCAG 2.2.2 (Pause, Stop, Hide) and WCAG 2.3.3 (Animation from Interactions).
+**MotionSpec is an open-core trust layer that checks and compiles reduced-motion-safe, on-budget UI animation for AI-generated web apps.** An LLM authors a **schema-validated JSON spec**; a **deterministic compiler** emits vanilla-GSAP JavaScript + CSS — injection-proof and catalog-validated *by construction*, with an enforced `prefers-reduced-motion` fallback and a performance budget, with WCAG 2.2.2 (Pause, Stop, Hide) pause-path candidates reported — reduced-motion guards map to WCAG 2.3.3 (Animation from Interactions), Level AAA.
 
 Run it two ways: as a keyless **MCP server** any LLM host can call (`npx motionspec`), or as a **CLI compiler** in your build (`motion compile spec.json`). Either way you keep plain files — a GSAP build or a dependency-free WAAPI/CSS lowering. MIT core. Docs: https://motionspec.dev
 
@@ -32,7 +32,7 @@ request ──> Routing (small model, Stage A) ──> MotionSpec (JSON)
 
 ### Not to be confused with
 
-> **Not to be confused with:** the Android Material Components `MotionSpec` class, the iOS material-motion `MotionSpec`, Motion.dev / Framer Motion, the usemotion.com calendar app, the Motion Specialties mobility brand, or text-to-video generators (Runway/Sora/Kling/Viggle). MotionSpec verifies the *UI animation inside web apps* — it does not generate video.
+> **Not to be confused with:** the Android Material Components `MotionSpec` class, the iOS material-motion `MotionSpec`, Motion.dev / Framer Motion, the usemotion.com calendar app, the Motion Specialties mobility brand, or text-to-video generators (Runway/Sora/Kling/Viggle). MotionSpec checks the *UI animation inside web apps* — it does not generate video.
 
 ## 60-second start
 
@@ -59,7 +59,7 @@ This repo is also a Claude Code plugin: it bundles the MCP server (`npx motionsp
 
 | | |
 |---|---|
-| Version | **v1.2.6** · schema frozen at spec v1 (ADR-0001, signed) |
+| Version | **v1.2.7** · schema frozen at spec v1 (ADR-0001, signed) |
 | Published | **npm `motionspec`** (82 kB packed, 67 files, nothing dev-only ships) · MCP Registry |
 | Tests | **295 green** — injection attacks, 6000-spec fuzz, golden determinism, schema parity, pause-controls, motion-a11y audit · CI on Node 18/20/22 + x86 Playwright e2e |
 | Catalog | **40 primitives**, every one device-verified, reduced-motion-fallback mandatory; the 18 continuous loops also carry a WCAG-2.2.2 pause path |

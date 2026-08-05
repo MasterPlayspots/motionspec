@@ -2,19 +2,19 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.MasterPlayspots/motionspec",
   "title": "MotionSpec — verified web motion (reduced-motion / WCAG)",
-  "description": "Verifies web animation vs WCAG 2.2.2/2.3.3: validated specs, deterministic reduced-motion-safe CSS.",
+  "description": "Deterministic motion compiler + validator: reports WCAG 2.2.2 pause-path candidates, fail-closed.",
   "repository": {
     "url": "https://github.com/MasterPlayspots/motionspec",
     "source": "github"
   },
   "websiteUrl": "https://motionspec.dev",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "motionspec",
-      "version": "1.2.6",
+      "version": "1.2.7",
       "runtimeHint": "npx",
       "transport": {
         "type": "stdio"

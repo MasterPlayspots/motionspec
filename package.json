@@ -1,8 +1,8 @@
 {
   "name": "motionspec",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "mcpName": "io.github.MasterPlayspots/motionspec",
-  "description": "Open-core trust layer for web motion: verifies and compiles reduced-motion-safe, on-budget UI animation for AI-generated web apps (WCAG 2.2.2/2.3.3). Deterministic compiler + MCP server.",
+  "description": "Open-core motion layer for the web: deterministic compiler + MCP server. Validates motion specs fail-closed, reports WCAG 2.2.2 pause-path candidates, and flags missing reduced-motion guards (2.3.3, an AAA best practice).",
   "license": "MIT",
   "author": "Kevin Fröba <security@motionspec.dev>",
   "keywords": [
