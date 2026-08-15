@@ -65,7 +65,7 @@
     "pipeline": "node bin/motion.js pipeline",
     "catalog": "node bin/motion.js catalog",
     "stats": "node bin/motion.js stats",
-    "prepublishOnly": "npm test && npm run catalog-lock:check && npm run sbom && npm run sbom:check && node bin/license-check.js && node -e \"if(!require('fs').existsSync('CHANGELOG.md'))throw new Error('CHANGELOG.md fehlt')\"",
+    "prepublishOnly": "npm test && npm run catalog-lock:check && npm run sbom && npm run sbom:check && node bin/license-check.js && node bin/changelog-gate.js",
     "release": "npm test && npm run catalog-lock:check && npm run sbom && npm run sbom:check && node bin/license-check.js && npm publish",
     "lint": "eslint .",
     "prepare": "husky",

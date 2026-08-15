@@ -8,6 +8,48 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ## [Unreleased]
 
+### Fixed
+- npm audit gate: one high-severity advisory resolved on `main` (`4d6fb59`). **Not on npm yet** — the newest published version is 1.2.7, which predates this fix.
+
+### Changed
+- `deps`: `@playwright/test` 1.62.0 → 1.62.1 (#21).
+
+### Documentation
+- `llms-install.md` — agent-readable install guide for Cline, Claude, and stdio (#20).
+
+## [1.2.7] - 2026-08-03
+
+### Fixed
+- `motion_audit` now surfaces the WCAG 2.2.2 warnings the validator already computed but discarded before returning (#18). The checks existed; the output dropped them.
+
+### Changed
+- Tool descriptions rewritten to say what each tool does, without the marketing register — the release was named "honest short descriptions" for that reason.
+- `npm version` now syncs `plugin.json` and the README status row alongside `package.json` and `server.json` (#16), so a release can no longer leave one surface behind.
+- `deps`: `brace-expansion` and `fast-uri` bumped to clear the audit gate (#17).
+
+### Added
+- CI waits for npm to actually serve a version before publishing the MCP-registry entry (`d5e77ab`) — publishing the manifest first produced a registry entry pointing at a version nobody could install.
+
+## [1.2.6] - 2026-07-27
+
+### Added
+- Claude Code plugin bundling the MCP server plus the `motion` and `audit` skills (`f115ee8`), with the marketplace manifest (#5).
+- Code of Conduct (Contributor Covenant 2.1) and the project logo (`fb8a3d3`).
+
+### Changed
+- README states plainly that compile output is vanilla GSAP JS plus CSS, and that WAAPI lowering is internal (ADR-0001/0002, #6). The earlier wording let readers infer WAAPI output.
+- `deps`: MCP SDK 1.30.0 with a regenerated lockfile to unblock the audit gate (#15); `eslint` 10.6.0 → 10.7.0 (#10); `@commitlint/cli` 21.2.0 → 21.2.1 (#9).
+- `ci`: `actions/checkout` 4 → 7 (#7), `actions/setup-node` 6.4.0 → 7.0.0 (#8).
+
+## [1.2.5] - 2026-07-15
+
+### Changed
+- Package description and keywords rewritten for accessibility discoverability, plus disambiguation from the unrelated Android `MotionSpec` API and from Motion Specialties (`46d915a`, `60b965c`).
+- `server.json` declares the remote endpoint; the MCP-registry workflow publishes it (`60b965c`).
+
+### Documentation
+- CHANGELOG entries for 1.2.3 and 1.2.4, which had been released without one (#4). The same gap then repeated for 1.2.5–1.2.7 — see the `prepublishOnly` gate added under `Unreleased`.
+
 ## [1.2.4] - 2026-07-12
 
 ### Changed
