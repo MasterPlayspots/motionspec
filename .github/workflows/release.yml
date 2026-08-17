@@ -1,0 +1,68 @@
+name: Release (GitHub release from tag)
+
+# Closes a measured gap: five tags exist (v1.2.3 … v1.2.7), one GitHub release
+# does (v1.2.5). Tagging and releasing were two separate manual acts, and the
+# second one kept being forgotten. Now the tag does both.
+#
+# This does NOT publish to npm — publish-mcp.yml owns that. This only creates the
+# GitHub release that should always have accompanied the tag.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to create the release for (backfill)
+        type: string
+        required: true
+
+permissions:
+  contents: write        # needed to create a release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - name: Work out the version
+        id: v
+        run: |
+          TAG="${{ inputs.tag || github.ref_name }}"
+          echo "tag=$TAG"          >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}"  >> "$GITHUB_OUTPUT"
+
+      # The release notes ARE the changelog section. Writing them twice means
+      # writing them differently — and then neither is authoritative.
+      - name: Cut the changelog section for this version
+        id: notes
+        run: |
+          VERSION="${{ steps.v.outputs.version }}"
+          awk -v v="$VERSION" '
+            $0 ~ "^## \\[" v "\\]" { seen = 1; next }
+            seen && /^## / { exit }
+            seen { print }
+          ' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then
+            echo "::error::CHANGELOG.md has no non-empty section for $VERSION."
+            echo "The tag exists, the entry does not. Write it, then re-run this workflow"
+            echo "with workflow_dispatch and tag=${{ steps.v.outputs.tag }}."
+            exit 1
+          fi
+          echo "--- release notes ---"; cat notes.md
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.v.outputs.tag }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists — nothing to do."
+            exit 0
+          fi
+          gh release create "$TAG" --title "$TAG" --notes-file notes.md --verify-tag
