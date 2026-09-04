@@ -108,6 +108,14 @@ Input is size-capped (`MS-INPUT-TOO-LARGE`, 64 KB). The stdio server exposes one
 
 `motion audit <url>` (CLI, `--json` for the machine payload) and the `motion_audit` MCP tool run a **static** scan of a page's HTML and linked stylesheets — no headless browser, no new dependency. It reports four motion problems: CSS animation/transition without a `prefers-reduced-motion` guard (WCAG 2.3.3), animated properties other than transform/opacity, `infinite` animations with no pause path (`animation-play-state`/`data-*`), and `<marquee>`/autoplay motion over 5 s (WCAG 2.2.2). Each finding carries a selector, the WCAG reference, and a copy-paste fix. **It is honest about its limits:** runtime motion (WAAPI/GSAP/JS) is reported as *not audited (V2)* rather than silently passed. A page that clears every check earns the `reduced-motion-safe` badge — the exact output MotionSpec itself produces.
 
+## Use in CI
+
+`motion audit --json` is stable enough to gate a pull request. [`examples/ci/motion-audit.yml`](examples/ci/motion-audit.yml) is a copy-and-adapt GitHub Actions workflow that builds your site, serves the build directory on localhost, audits the paths you list with `npx -y -p motionspec@1.2.7 motion audit <url> --json` (local, MIT, no key, no hosted call), and compares each page with a checked-in baseline `.motionspec/baseline.json`.
+
+The gate fails when a page got **worse** — the same rule MotionSpec's weekly re-scan uses: the score fell, *or* the number of Level-A findings (WCAG 2.2.2 Pause, Stop, Hide) rose. A page without a baseline entry never fails; that run is the baseline. Re-baselining is a deliberate manual run (`workflow_dispatch` with `update_baseline: true`) that uploads the new file as an artifact for you to commit — the workflow never commits on its own. Fixed findings are listed as `- fixed:` lines, new ones as `+ new finding:`.
+
+The machine payload is `{ ok, url, score, badge, findings: [{ selector, rule, wcag, fix }], summary, disclosures }`; `badge` is the literal `"reduced-motion-safe"` only at zero findings. Note that `audit` takes a **URL**, not a directory — hence the local server step. And the scope caveat travels with it: this is a static CSS scan (no inline `style=""`, `@import`, CSS-in-JS, external JS bundles, video/GIF/Canvas, or flashing checks); a green gate means "no regression in the loaded CSS", not "accessible".
+
 ## Specification & conformance
 
 MotionSpec is a governed format, not just a tool. The normative spec is [`SPEC.md`](SPEC.md) (versioned `1.0`, RFC-2119 MUST/SHOULD/MAY over the JSON Schema, with a documented ADR-based change process). [`CONFORMANCE.md`](CONFORMANCE.md) defines the five checks (schema, diagnostics, output, determinism, accessibility) an implementation passes to call itself *MotionSpec 1.0 compatible*, run against the published `test/golden` corpus. Multiple implementations passing the same corpus is what makes it a standard.

@@ -1,0 +1,158 @@
+# Motion-accessibility regression gate — example GitHub Actions workflow.
+#
+# Copy this file to .github/workflows/motion-audit.yml in YOUR repository and adapt the
+# three values under `env:`. It is shipped under examples/ on purpose: it is not an active
+# workflow of the motionspec repo itself.
+#
+# What it does
+#   1. builds your site, serves the build directory on localhost,
+#   2. runs `motion audit <url> --json` (motionspec 1.2.7, MIT, local — no key, no hosted call)
+#      for every path you list,
+#   3. compares each result with the checked-in baseline `.motionspec/baseline.json` and fails
+#      when a page got worse. "Worse" uses the same rule as MotionSpec's weekly re-scan diff:
+#      the score fell, OR the number of Level-A findings (WCAG 2.2.2 Pause, Stop, Hide) rose.
+#      A page with no baseline entry never fails — that run *is* the baseline.
+#
+# Updating the baseline
+#   Run the workflow manually (workflow_dispatch) with `update_baseline: true`. The job writes a
+#   fresh `.motionspec/baseline.json` and uploads it as an artifact; download it and commit it.
+#   The gate never commits on its own.
+#
+# Scope (state this to your team): the audit is a STATIC scan of HTML + <style> + linked
+# stylesheets. It does not evaluate inline style="", @import, CSS-in-JS, external JS bundles
+# (GSAP/WAAPI are only detected and disclosed), <video autoplay>, GIF, Canvas/WebGL, SVG SMIL,
+# Lottie/Rive, View Transitions, scroll-driven animations, or flashing (WCAG 2.3.1).
+# A passing gate means "no regression in the loaded CSS", not "this page is accessible".
+
+name: Motion audit (regression gate)
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      update_baseline:
+        description: "Write a fresh .motionspec/baseline.json and upload it as an artifact"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  # --- adapt these three ---------------------------------------------------------------
+  BUILD_CMD: "npm run build"        # command that produces BUILD_DIR (use "true" for a static repo)
+  BUILD_DIR: "dist"                 # directory to serve
+  AUDIT_PATHS: "/ /pricing"         # space-separated paths to audit
+  # -------------------------------------------------------------------------------------
+  MOTIONSPEC_VERSION: "1.2.7"
+  PORT: "4173"
+
+jobs:
+  motion-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build
+        run: |
+          npm ci
+          ${BUILD_CMD}
+
+      - name: Serve the build directory
+        run: |
+          test -d "${BUILD_DIR}" || { echo "::error::BUILD_DIR '${BUILD_DIR}' does not exist"; exit 1; }
+          (cd "${BUILD_DIR}" && python3 -m http.server "${PORT}" --bind 127.0.0.1 >/tmp/http.log 2>&1 &)
+          for i in $(seq 1 30); do
+            curl -fs "http://127.0.0.1:${PORT}/" >/dev/null && break
+            sleep 1
+          done
+          curl -fsI "http://127.0.0.1:${PORT}/" | head -1
+
+      - name: Audit every path (motion audit --json)
+        run: |
+          mkdir -p .motionspec/current
+          for p in ${AUDIT_PATHS}; do
+            slug=$(printf '%s' "$p" | sed 's#^/##; s#[^A-Za-z0-9._-]#_#g'); [ -n "$slug" ] || slug=index
+            echo "::group::audit ${p}"
+            npx -y -p "motionspec@${MOTIONSPEC_VERSION}" motion audit "http://127.0.0.1:${PORT}${p}" --json \
+              > ".motionspec/current/${slug}.json"
+            node -e 'const r=require(require("path").resolve(process.argv[1]));console.log(`score ${r.score}/100 · findings ${r.findings.length} · badge ${r.badge||"-"}`);for(const d of r.disclosures||[])console.log("  note: "+d)' ".motionspec/current/${slug}.json"
+            echo "::endgroup::"
+          done
+
+      - name: Compare with baseline (fail on regression)
+        if: ${{ !inputs.update_baseline }}
+        run: |
+          node - <<'JS'
+          const fs = require("fs"), path = require("path");
+          const LEVEL_A = "WCAG 2.2.2";                       // Pause, Stop, Hide — Level A
+          const key = (f) => f.selector + " | " + f.rule;     // identity of a finding
+          const shape = (r) => ({
+            score: r.score,
+            mandatory_a_count: r.findings.filter((f) => String(f.wcag).startsWith(LEVEL_A)).length,
+            findings: r.findings.map(key).sort(),
+          });
+          // Same rule as the weekly re-scan diff (istRueckschritt): worse = score fell OR Level-A count rose.
+          const regressed = (now, before) => {
+            if (!before) return { regressed: false, reasons: ["no baseline entry — this run is the baseline"] };
+            const reasons = [];
+            if (now.score < before.score) reasons.push(`score ${before.score} -> ${now.score}`);
+            if (now.mandatory_a_count > before.mandatory_a_count) reasons.push(`Level-A findings ${before.mandatory_a_count} -> ${now.mandatory_a_count}`);
+            return { regressed: reasons.length > 0, reasons };
+          };
+          const baselineFile = ".motionspec/baseline.json";
+          const baseline = fs.existsSync(baselineFile) ? JSON.parse(fs.readFileSync(baselineFile, "utf8")) : { pages: {} };
+          const paths = (process.env.AUDIT_PATHS || "/").split(/\s+/).filter(Boolean);
+          let failed = 0;
+          for (const p of paths) {
+            let slug = p.replace(/^\//, "").replace(/[^A-Za-z0-9._-]/g, "_"); if (!slug) slug = "index";
+            const r = JSON.parse(fs.readFileSync(path.join(".motionspec/current", slug + ".json"), "utf8"));
+            if (!r.ok) { console.log(`::error::${p}: audit failed (${r.error || "unknown"})`); failed++; continue; }
+            const now = shape(r), before = baseline.pages && baseline.pages[p];
+            const v = regressed(now, before);
+            const added = before ? now.findings.filter((k) => !before.findings.includes(k)) : [];
+            const removed = before ? before.findings.filter((k) => !now.findings.includes(k)) : [];
+            const line = `${p}: score ${now.score}/100, Level-A findings ${now.mandatory_a_count}, total ${now.findings.length}`;
+            if (v.regressed) { failed++; console.log(`::error::${line} — REGRESSION: ${v.reasons.join(" · ")}`); }
+            else console.log(`${line} — ok (${v.reasons.join(" · ") || "unchanged or better"})`);
+            for (const k of added) console.log(`  + new finding: ${k}`);
+            for (const k of removed) console.log(`  - fixed: ${k}`);
+          }
+          if (failed) { console.log(`\n${failed} page(s) regressed. Fix the motion, or re-baseline deliberately via workflow_dispatch (update_baseline).`); process.exit(1); }
+          JS
+
+      - name: Write a fresh baseline (manual runs only)
+        if: ${{ inputs.update_baseline }}
+        run: |
+          node - <<'JS'
+          const fs = require("fs"), path = require("path");
+          const LEVEL_A = "WCAG 2.2.2";
+          const paths = (process.env.AUDIT_PATHS || "/").split(/\s+/).filter(Boolean);
+          const out = { motionspec: process.env.MOTIONSPEC_VERSION, note: "motion audit baseline — regenerate via workflow_dispatch (update_baseline), then commit", pages: {} };
+          for (const p of paths) {
+            let slug = p.replace(/^\//, "").replace(/[^A-Za-z0-9._-]/g, "_"); if (!slug) slug = "index";
+            const r = JSON.parse(fs.readFileSync(path.join(".motionspec/current", slug + ".json"), "utf8"));
+            if (!r.ok) { console.log(`::error::${p}: audit failed (${r.error || "unknown"})`); process.exit(1); }
+            out.pages[p] = {
+              score: r.score,
+              mandatory_a_count: r.findings.filter((f) => String(f.wcag).startsWith(LEVEL_A)).length,
+              findings: r.findings.map((f) => f.selector + " | " + f.rule).sort(),
+            };
+          }
+          fs.writeFileSync(".motionspec/baseline.json", JSON.stringify(out, null, 2) + "\n");
+          console.log(fs.readFileSync(".motionspec/baseline.json", "utf8"));
+          JS
+
+      - name: Upload audit JSON (and the new baseline, if written)
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: motion-audit
+          path: .motionspec/
+          retention-days: 14
