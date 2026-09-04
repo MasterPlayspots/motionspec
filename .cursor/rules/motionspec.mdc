@@ -1,0 +1,29 @@
+---
+description: Motion accessibility rules for web UI animation (prefers-reduced-motion, WCAG 2.2.2 pause path, no flashing) and how to run MotionSpec (compile / audit) in this repo.
+globs: ["**/*.css","**/*.tsx","**/*.jsx","**/*.vue","**/*.svelte"]
+alwaysApply: false
+---
+
+# Motion accessibility (MotionSpec)
+
+When you add or change animation or transitions in a web UI, follow these rules. Full context: `AGENTS.md` in the repo root.
+
+1. **Respect `prefers-reduced-motion`.** Disable or reduce every animation/transition under `@media (prefers-reduced-motion: reduce)` (CSS) or `matchMedia('(prefers-reduced-motion: reduce)')` (JS). This is WCAG 2.3.3 (Level AAA) — a best practice, not a Level A fix.
+2. **Provide a pause/stop for auto-starting motion longer than 5 s and for every `infinite` animation** (WCAG 2.2.2, Level A). A reduced-motion guard alone does not satisfy 2.2.2; the user needs a visible control or an equivalent mechanism (e.g. `html[data-ms-paused] .x { animation-play-state: paused }` + a button).
+3. **Never flash more than 3 times per second** (WCAG 2.3.1, Level A). MotionSpec does **not** audit flashing — check it yourself.
+4. **Animate `transform` and `opacity` only**; avoid animating layout properties (`width`, `top`, `background`, …).
+5. Prefer a MotionSpec catalog primitive (40 exist: loops, hover/press, scroll) over hand-written keyframes when one fits; the compiler emits the reduced-motion guard and the pause path by construction.
+
+## Commands (local, free, MIT — no key)
+
+```bash
+npx -p motionspec@1.2.7 motion compile spec.motionspec.json   # validates fail-closed ([MS-XXX] errors, exit 1), then emits ./out/*.motion.js + .css
+npx -p motionspec@1.2.7 motion catalog                        # the 40 primitives + catalog version
+npx -p motionspec@1.2.7 motion audit https://example.com --json   # static motion-a11y scan → { ok, url, score, badge, findings[], summary, disclosures }
+```
+
+There is no separate `validate` CLI subcommand — validation is the first stage of `compile`. Over MCP (`https://api.motionspec.dev/mcp`, keyless: `motion_catalog`, `motion_validate`; keyed: `motion_compile`, `motion_audit`, `motion_stats` — Dev Key $39/mo or Agency $249/mo, motionspec.dev/pricing) validation is its own tool. `npx -y motionspec` runs all five tools locally over stdio without a key.
+
+## Scope you must state in any audit report
+
+The audit is a **static** scan of HTML + `<style>` + linked stylesheets. It does not evaluate inline `style=""`, `@import`, CSS-in-JS, external JS bundles (GSAP/WAAPI are only detected and disclosed as "not audited"), `<video autoplay>`, GIF, Canvas/WebGL, SVG SMIL, Lottie/Rive, View Transitions, scroll-driven animations, or flashing (2.3.1). A clean score means "nothing found in the loaded CSS", not "the page is accessible".
