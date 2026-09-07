@@ -5,15 +5,15 @@
 [![npm](https://img.shields.io/npm/v/motionspec?color=cb3837&label=npm)](https://www.npmjs.com/package/motionspec)
 [![node](https://img.shields.io/node/v/motionspec?color=339933)](https://www.npmjs.com/package/motionspec)
 [![license](https://img.shields.io/npm/l/motionspec)](./LICENSE)
-![tests](https://img.shields.io/badge/tests-295%20passing-brightgreen)
-![coverage](https://img.shields.io/badge/coverage-%E2%89%8899%25%20lines%20·%2098%25%20funcs-brightgreen)
+![tests](https://img.shields.io/badge/tests-302%20passing-brightgreen)
+![coverage](https://img.shields.io/badge/coverage-99%25%20lines%20·%2099%25%20funcs%20·%2079%25%20branches-brightgreen)
 ![supply chain](https://img.shields.io/badge/runtime%20deps-2%20·%200%20vulns%20·%20SBOM-blue)
 ![MCP Registry](https://img.shields.io/badge/MCP%20Registry-io.github.MasterPlayspots%2Fmotionspec-6f42c1)
 [![smithery badge](https://smithery.ai/badge/kevin-froeba/motionspec)](https://smithery.ai/servers/kevin-froeba/motionspec)
 
 **MotionSpec is an open-core trust layer that checks and compiles reduced-motion-safe, on-budget UI animation for AI-generated web apps.** An LLM authors a **schema-validated JSON spec**; a **deterministic compiler** emits vanilla-GSAP JavaScript + CSS — injection-proof and catalog-validated *by construction*, with an enforced `prefers-reduced-motion` fallback and a performance budget, with WCAG 2.2.2 (Pause, Stop, Hide) pause-path candidates reported — reduced-motion guards map to WCAG 2.3.3 (Animation from Interactions), Level AAA.
 
-Run it two ways: as a keyless **MCP server** any LLM host can call (`npx motionspec`), or as a **CLI compiler** in your build (`motion compile spec.json`). Either way you keep plain files — a GSAP build or a dependency-free WAAPI/CSS lowering. MIT core. Docs: https://motionspec.dev
+Run it two ways: as a keyless **MCP server** any LLM host can call (`npx motionspec`), or as a **CLI compiler** in your build (`motion compile spec.json`). Either way you keep plain files: vanilla-GSAP JavaScript plus CSS. (A WAAPI/CSS lowering exists in the codebase, but it has no CLI flag, no MCP tool and no schema target yet — see [below](#one-build-target-one-internal-lowering).) MIT core. Docs: https://motionspec.dev
 
 The thesis: **capability lives in the catalog, not the model.** A bigger model can write more elaborate specs, but it can never emit a primitive, parameter, or selector the Trust Boundary hasn't approved. The compiler trusts only what passes.
 
@@ -25,7 +25,7 @@ request ──> Routing (small model, Stage A) ──> MotionSpec (JSON)
                                                             │
                                               ┌─────────────┴─────────────┐
                                               ▼                           ▼
-                                   Compiler (no model, Stage B)   WAAPI lowering (no GSAP)
+                                   Compiler (no model, Stage B)   WAAPI lowering (internal — no CLI/MCP path yet)
                                               │                           │
                                    out/*.motion.js + .css       Element.animate / IO / @keyframes
 ```
@@ -61,10 +61,10 @@ This repo is also a Claude Code plugin: it bundles the MCP server (`npx motionsp
 |---|---|
 | Version | **v1.2.7** · schema frozen at spec v1 (ADR-0001, signed) |
 | Published | **npm `motionspec`** (82 kB packed, 67 files, nothing dev-only ships) · MCP Registry |
-| Tests | **295 green** — injection attacks, 6000-spec fuzz, golden determinism, schema parity, pause-controls, motion-a11y audit · CI on Node 18/20/22 + x86 Playwright e2e |
+| Tests | **302 green** — injection attacks, 6000-spec fuzz, golden determinism, schema parity, pause-controls, motion-a11y audit · CI on Node 18/20/22 + x86 Playwright e2e |
 | Catalog | **40 primitives**, every one device-verified, reduced-motion-fallback mandatory; the 18 continuous loops also carry a WCAG-2.2.2 pause path |
 | Supply chain | **2 runtime deps** (MCP SDK, zod — both pinned) · 0 vulnerabilities · CycloneDX SBOM committed · all permissive licenses · CI actions SHA-pinned |
-| Coverage | ≈99% lines / ≈98% functions / ≈80% branches of `src/` + `worker/` (CI gate: 90/90/75) |
+| Coverage | 99.06% lines / 99.09% functions / 79.05% branches of `src/` (`npm run coverage`, 2026-09-04; CI gate 90/90/75) |
 | Last audit | 2026-07-03 — 17/17 integration handshakes evidenced, infra 8.1/10, security: **0 critical**, full-git-history secret scan clean |
 | First client | CHS Computer — live on Vercel |
 | Hosted MCP | **live** — keyless `motion_catalog`/`motion_validate` at api.motionspec.dev/mcp · keyed tier: Cloudflare Worker, per-key gated (hashed keys in KV) · two-stage rate limiting (pre-auth per IP + per key, burst-verified) · per-minute cron canary + external heartbeat (synthetic fault → alert in <5 min, proven on real infra) · Analytics Engine telemetry, PII-scrubbed · gated `/dashboard` |
@@ -77,16 +77,19 @@ Schema v1 is frozen: `specVersion "1.0"` is the stable public contract; `"0.1"` 
 2. **Injection-proof** — ids, selectors, string params and triggers are charset-validated; every interpolation is a JS literal (`JSON.stringify`) or a CSS-screened raw value through one shared safety gate (`safety.js`). Malicious model output is rejected fail-closed — tested and fuzzed over 6000 random specs.
 3. **a11y by construction (motion)** — safe defaults, enforced gates, and proof per build. `respectReducedMotion` is **default-on at the compiler level** (fail-safe): omitting it still yields a `prefers-reduced-motion` guard. Opting out is possible but emits `MS-GLOBALS-RRM-OFF`; a prompt-side instruction alone can never disable the guard.
 4. **Pause/Stop for loops (WCAG 2.2.2)** — every continuous loop primitive is tagged `a11y.persistent`, and the compiler emits a pause path **by construction**: an `animation-play-state: paused` rule keyed on `html[data-ms-paused]` (outside the reduced-motion guard, so it is always live) plus, under `pauseControls: "auto"` (the fail-safe default), one accessible pause/stop toggle (`type="button"`, `aria-pressed` in sync, ≥24 px target, visible focus ring, not rendered under reduced motion). `pauseControls: "api"` keeps the CSS contract and leaves the control to the integrator; `"off"` opts out but emits `MS-GLOBALS-PAUSE-OFF` when a persistent motion is present. The promote-gate refuses any `infinite`/`repeat:-1` primitive that is not `a11y.persistent`. A spec with no loops adds **zero** extra bytes.
-5. **Determinism** — same spec ⇒ byte-identical code (golden-file tests on both targets).
+5. **Determinism** — same spec ⇒ byte-identical code (golden-file tests for the GSAP output and for the internal WAAPI lowering).
 6. **Versioned** — schema frozen v1; catalog SemVer enforced by a diff-gate (a tightened bound shipped as a "patch" fails CI); specs may pin `catalogVersion` for reproducibility (`MS-CATALOG-PIN-MISMATCH` fail-closed).
 7. **Observability** — every request logs `model | model-repaired | cache-hit | escalate-*` (local: JSONL sink · hosted: Cloudflare Analytics Engine, PII-scrubbed). Escalation clusters are the growth signal for new primitives.
 
-## Two build targets, one boundary
+## One build target, one internal lowering
 
-Every catalog primitive compiles through the **same** validated spec to:
+What you can get out of the compiler today, through the CLI or the MCP tools, is exactly one target:
 
-- **`vanilla-gsap`** — GSAP + ScrollTrigger, the production default.
-- **WAAPI/CSS lowering** — zero-GSAP output on `Element.animate`, IntersectionObserver, and `@keyframes`/`position: sticky`. Full catalog coverage, byte-identical golden per primitive, same accessibility guard, same CSS safety gate. This is the framework-decoupling hedge: the IR outlives any animation library. **Internal for now** — not yet exposed through the MCP tools or the CLI (`meta.target` is frozen to `vanilla-gsap`, ADR-0001; engine wiring out of scope, ADR-0002).
+- **`vanilla-gsap`** — GSAP + ScrollTrigger. `meta.target` accepts nothing else (schema frozen at v1).
+
+A second lowering exists in the codebase and is kept green by the test suite, but it is **not reachable** through any interface:
+
+- **WAAPI/CSS lowering** (`src/compiler/lower-waapi.js`) — zero-GSAP output on `Element.animate`, IntersectionObserver, and `@keyframes`/`position: sticky`. Full catalog coverage, byte-identical golden per primitive, same accessibility guard, same CSS safety gate. This is the framework-decoupling hedge: the IR outlives any animation library. **Internal** — referenced only by the tests and `bin/promote-gate.js`; there is no CLI flag, no MCP tool and no schema target for it (ADR-0001 freezes `meta.target` to `vanilla-gsap`; engine wiring is out of scope, ADR-0002). Do not plan a build on it until a release note says otherwise.
 
 ## The catalog grows itself — humans keep the taste
 
@@ -108,6 +111,14 @@ Input is size-capped (`MS-INPUT-TOO-LARGE`, 64 KB). The stdio server exposes one
 
 `motion audit <url>` (CLI, `--json` for the machine payload) and the `motion_audit` MCP tool run a **static** scan of a page's HTML and linked stylesheets — no headless browser, no new dependency. It reports four motion problems: CSS animation/transition without a `prefers-reduced-motion` guard (WCAG 2.3.3), animated properties other than transform/opacity, `infinite` animations with no pause path (`animation-play-state`/`data-*`), and `<marquee>`/autoplay motion over 5 s (WCAG 2.2.2). Each finding carries a selector, the WCAG reference, and a copy-paste fix. **It is honest about its limits:** runtime motion (WAAPI/GSAP/JS) is reported as *not audited (V2)* rather than silently passed. A page that clears every check earns the `reduced-motion-safe` badge — the exact output MotionSpec itself produces.
 
+## Use in CI
+
+`motion audit --json` is stable enough to gate a pull request. [`examples/ci/motion-audit.yml`](examples/ci/motion-audit.yml) is a copy-and-adapt GitHub Actions workflow that builds your site, serves the build directory on localhost, audits the paths you list with `npx -y -p motionspec@1.2.7 motion audit <url> --json` (local, MIT, no key, no hosted call), and compares each page with a checked-in baseline `.motionspec/baseline.json`.
+
+The gate fails when a page got **worse** — the same rule MotionSpec's weekly re-scan uses: the score fell, *or* the number of Level-A findings (WCAG 2.2.2 Pause, Stop, Hide) rose. A page without a baseline entry never fails; that run is the baseline. Re-baselining is a deliberate manual run (`workflow_dispatch` with `update_baseline: true`) that uploads the new file as an artifact for you to commit — the workflow never commits on its own. Fixed findings are listed as `- fixed:` lines, new ones as `+ new finding:`.
+
+The machine payload is `{ ok, url, score, badge, findings: [{ selector, rule, wcag, fix }], summary, disclosures }`; `badge` is the literal `"reduced-motion-safe"` only at zero findings. Note that `audit` takes a **URL**, not a directory — hence the local server step. And the scope caveat travels with it: this is a static CSS scan (no inline `style=""`, `@import`, CSS-in-JS, external JS bundles, video/GIF/Canvas, or flashing checks); a green gate means "no regression in the loaded CSS", not "accessible".
+
 ## Specification & conformance
 
 MotionSpec is a governed format, not just a tool. The normative spec is [`SPEC.md`](SPEC.md) (versioned `1.0`, RFC-2119 MUST/SHOULD/MAY over the JSON Schema, with a documented ADR-based change process). [`CONFORMANCE.md`](CONFORMANCE.md) defines the five checks (schema, diagnostics, output, determinism, accessibility) an implementation passes to call itself *MotionSpec 1.0 compatible*, run against the published `test/golden` corpus. Multiple implementations passing the same corpus is what makes it a standard.
@@ -128,7 +139,7 @@ Notes: EN 301 549 is the EU harmonised standard whose clause 9 adopts the WCAG s
 
 ```bash
 npm ci                                      # install (0 runtime deps beyond MCP SDK + zod)
-npm test                                    # 295 tests: validator, goldens, router, fuzz, parity
+npm test                                    # 302 tests: validator, goldens, router, fuzz, parity
 node bin/motion.js catalog                  # primitives + catalog version
 node bin/motion.js compile examples/hero.motionspec.json
 node bin/motion.js pipeline "Hero headline fades in, cards staggered" --mock
@@ -167,12 +178,13 @@ src/forge/         generate.js · prioritize.js — the gauntlet-verified catalo
 src/discover/      gap analysis: request intents ↔ catalog coverage
 src/demo/          device-verification demo pages (`?rm=1` simulates reduced motion)
 bin/               motion.js (CLI) · promote-gate.js — dev/CI gate scripts stay repo-only
-test/              295 tests incl. injection, fuzz, goldens (both targets), parity; test/e2e (Playwright)
+test/              302 tests incl. injection, fuzz, goldens (GSAP + internal WAAPI lowering), parity; test/e2e (Playwright)
 docs/              ADR records (docs/adr/) and per-primitive reference (docs/primitives/)
 ```
 
 ## Docs
 
+- [AGENTS.md](AGENTS.md) — what a coding agent should know: when to use MotionSpec, the commands, the three motion rules (reduced motion · pause path · no flashing), and what the audit does **not** check. The same rules in editor form: [`.cursor/rules/motionspec.mdc`](.cursor/rules/motionspec.mdc) and [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
 - [SECURITY.md](SECURITY.md) — security posture of the npm package and hosted endpoint.
 - `docs/adr/0001-schema-freeze-v1.md` — the frozen v1 contract and why.
 
