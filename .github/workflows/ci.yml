@@ -100,5 +100,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # Fails before `npm ci` can, and says what is actually wrong with the lock
+      # file instead of naming one arbitrary missing package. Needs no install.
+      - name: Lock file gate (complete, resolvable, matches package.json)
+        run: node bin/lockfile-gate.js
       - run: npm ci
       - run: npm run lint

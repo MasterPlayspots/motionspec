@@ -58,6 +58,7 @@
     "sbom:check": "node bin/sbom-check.js",
     "catalog-lock": "node bin/catalog-lock.js",
     "catalog-lock:check": "node bin/catalog-lock.js --check",
+    "lockfile:check": "node bin/lockfile-gate.js",
     "mcp": "node src/mcp/server.mjs",
     "test:golden-update": "UPDATE_GOLDEN=1 node --test test/compile.test.js",
     "compile": "node bin/motion.js compile",

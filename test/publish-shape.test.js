@@ -95,13 +95,26 @@ const EXPECTED_FILES = [
 const DEV_SCRIPT_RE =
   /assert-canonical|worker-smoke|sbom-check|license-check|catalog-lock\.js|bin\/forge\.js/;
 
+/* `npm pack` runs the `prepare` lifecycle, and whatever that prints lands on
+ * stdout in front of the JSON. Outside a git checkout — an exported ZIP, an
+ * unpacked tarball — husky writes ".git can't be found" there, and JSON.parse
+ * threw on it: three tests red, none of them about the publish shape. Cut to the
+ * first bracket instead of trusting the whole stream. */
+function parsePackJson(out) {
+  const start = out.indexOf("[");
+  if (start === -1) {
+    throw new Error(`npm pack --json produced no JSON. Raw output:\n${out}`);
+  }
+  return JSON.parse(out.slice(start));
+}
+
 function packedFileList() {
   const out = execFileSync("npm", ["pack", "--dry-run", "--json"], {
     cwd: ROOT,
     encoding: "utf8",
     maxBuffer: 10 * 1024 * 1024,
   });
-  return JSON.parse(out)[0].files.map((f) => f.path).sort();
+  return parsePackJson(out)[0].files.map((f) => f.path).sort();
 }
 
 test("publish shape: npm pack yields exactly the approved file list", () => {
@@ -122,7 +135,7 @@ test("self-containedness: unpacked tarball loads generate.js without node_module
       ["pack", "--json", "--pack-destination", tmp],
       { cwd: ROOT, encoding: "utf8", maxBuffer: 10 * 1024 * 1024 }
     );
-    const tarball = path.join(tmp, JSON.parse(packOut)[0].filename);
+    const tarball = path.join(tmp, parsePackJson(packOut)[0].filename);
     execFileSync("tar", ["-xzf", tarball, "-C", tmp], { encoding: "utf8" });
 
     const entry = path.join(tmp, "package", "src", "forge", "generate.js");
