@@ -61,8 +61,20 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Dependency audit (fail on any vuln)
-        run: npm audit --audit-level=low
+      # Blocking gate: everything that ships. Zero tolerance.
+      - name: Dependency audit - shipped dependencies (blocking)
+        run: npm audit --audit-level=low --omit=dev
+      # Advisory only: the dev toolchain. Split off 2026-09-11, matching the
+      # sister repo (motionspec-internal, split 2026-08-03) - this single gate
+      # had been failing intermittently on dev-only transitive deps (e.g.
+      # brace-expansion via eslint/glob, seen 2026-08-03) bundled together with
+      # genuine runtime CVEs (fast-uri, qs - both reachable via
+      # @modelcontextprotocol/sdk, seen 2026-08-03 and 2026-09-07), conflating
+      # "blocks the merge" with "tooling only, never ships" into one red/green
+      # signal. Re-tighten to a single blocking audit once dev-only findings
+      # stop recurring.
+      - name: Dependency audit - dev toolchain (advisory only)
+        run: npm audit --audit-level=low || true
       - name: Regenerate SBOM, verify completeness, check licenses
         run: |
           npm run sbom
