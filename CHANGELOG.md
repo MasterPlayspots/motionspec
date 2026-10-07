@@ -13,6 +13,7 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 - `examples/ci/motion-audit.yml` — a copy-and-adapt GitHub Actions gate: `motion audit --json` per path against a checked-in `.motionspec/baseline.json`, failing on the weekly-re-scan rule (score fell or Level-A findings rose). README section "Use in CI".
 
 ### Fixed
+- Refresh shipped transitive dependencies to clear the production security audit: `fast-uri` 3.1.8, `ip-address` 10.7.3, and `proxy-addr` 2.0.8. Regenerate the runtime SBOM; keep the blocking audit gate and the existing MCP SDK 1.32.0 pin.
 - README: test count corrected to the measured 302 (was 295); coverage row now carries the measured numbers (99.06 % lines / 99.09 % functions / 79.05 % branches, `npm run coverage` 2026-09-04) instead of approximations, and no longer claims `worker/` (not in this repo); "Two build targets" renamed and reworded — the WAAPI/CSS lowering has no CLI flag, MCP tool or schema target and is stated as internal in the intro, the diagram and the section.
 - npm audit gate: one high-severity advisory resolved on `main` (`4d6fb59`). **Not on npm yet** — the newest published version is 1.2.7, which predates this fix.
 
