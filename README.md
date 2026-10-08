@@ -65,12 +65,12 @@ This repo is also a Claude Code plugin: it bundles the MCP server (`npx motionsp
 
 | | |
 |---|---|
-| Version | **v1.2.7** · schema frozen at spec v1 (ADR-0001, signed) |
-| Published | **npm `motionspec`** (82 kB packed, 67 files, nothing dev-only ships) · MCP Registry |
+| Version | **v1.2.8** · schema frozen at spec v1 (ADR-0001, signed) |
+| Published | **npm `motionspec`** (104 kB packed, 67 files, nothing dev-only ships) · MCP Registry |
 | Tests | **354 green** — injection attacks, 6000-spec fuzz, golden determinism, schema parity, pause-controls, motion-a11y audit · CI on Node 18/20/22 + x86 Playwright e2e |
 | Catalog | **40 primitives**, every one device-verified, reduced-motion-fallback mandatory; the 18 continuous loops also carry a WCAG-2.2.2 pause path |
 | Supply chain | **2 runtime deps** (MCP SDK, zod — both pinned) · 0 vulnerabilities · CycloneDX SBOM committed · all permissive licenses · CI actions SHA-pinned |
-| Coverage | 97.23% lines / 95.17% functions / 80.87% branches of `src/` (`npm run coverage`, 2026-10-08; CI gate 90/90/75) |
+| Coverage | 97.23% lines / 95.17% functions / 80.82% branches of `src/` (`npm run coverage`, 2026-10-08; CI gate 90/90/75) |
 | Last audit | 2026-07-03 — 17/17 integration handshakes evidenced, infra 8.1/10, security: **0 critical**, full-git-history secret scan clean |
 | First client | CHS Computer — live on Vercel |
 | Hosted MCP | **live** — keyless `motion_catalog`/`motion_validate` at api.motionspec.dev/mcp · keyed tier: Cloudflare Worker, per-key gated (hashed keys in KV) · two-stage rate limiting (pre-auth per IP + per key, burst-verified) · per-minute cron canary + external heartbeat (synthetic fault → alert in <5 min, proven on real infra) · Analytics Engine operations telemetry (request bodies, specs and error text are not stored) · gated `/dashboard` |

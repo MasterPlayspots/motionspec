@@ -8,22 +8,41 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ## [Unreleased]
 
-### Added
-- `AGENTS.md` for coding agents, plus the same rules in editor form: `.cursor/rules/motionspec.mdc` (Cursor) and `.github/copilot-instructions.md` (Copilot). They state the three motion rules (reduced motion · pause path for auto-playing/infinite motion, WCAG 2.2.2 · no flashing, 2.3.1 — not audited), the CLI/MCP commands, and what the audit does not check.
-- `examples/ci/motion-audit.yml` — a copy-and-adapt GitHub Actions gate: `motion audit --json` per path against a checked-in `.motionspec/baseline.json`, failing on the weekly-re-scan rule (score fell or Level-A findings rose). README section "Use in CI".
+## [1.2.8] - 2026-10-08
 
-### Fixed
-- Refresh shipped transitive dependencies to clear the production security audit: `fast-uri` 3.1.8, `ip-address` 10.7.3, and `proxy-addr` 2.0.8. Regenerate the runtime SBOM; keep the blocking audit gate and the existing MCP SDK 1.32.0 pin.
-- README: test count corrected to the measured 302 (was 295); coverage row now carries the measured numbers (99.06 % lines / 99.09 % functions / 79.05 % branches, `npm run coverage` 2026-09-04) instead of approximations, and no longer claims `worker/` (not in this repo); "Two build targets" renamed and reworded — the WAAPI/CSS lowering has no CLI flag, MCP tool or schema target and is stated as internal in the intro, the diagram and the section.
-- npm audit gate: one high-severity advisory resolved on `main` (`4d6fb59`). **Not on npm yet** — the newest published version is 1.2.7, which predates this fix.
+One codebase again: this release brings the npm package to the code the hosted endpoint (`api.motionspec.dev/mcp`) has served since September, so npm, the MCP Registry entry and the hosted `serverInfo.version` carry one number for one engine.
 
 ### Changed
-- `deps`: `@playwright/test` 1.62.0 → 1.62.1 (#21).
+- **`motion_audit` and `motion audit` use the engine of the free site check — one checker, one score.** `src/audit/audit.js` is the same engine as motionspec.dev/motion-check, with the same fetch limits (12 stylesheets, 8 s, 2 MB) and scoring v2: 100 minus a deduction per root-cause group (same kind + same keyframes/selector family), weighted by severity, dampened for repeated occurrences and capped per category; floor 0. Engine changes:
+  - **Cascade-aware `prefers-reduced-motion` guards.** A guard counts only when it wins the cascade (later in source order or `!important`; a universal `*` guard only with `!important`). Rules inside `no-preference` blocks are guarded by construction. A `matchMedia('(prefers-reduced-motion')` check in page JS is a hint at half weight.
+  - **Colour/opacity/shadow-type transitions and opacity-only `@keyframes` are not motion** (WCAG 2.3.3 definition) — no finding, counted in `coverage`. `transition: all` stays a candidate at half weight.
+  - **Loading indicators are review items**, not violations: spinner/loader/skeleton/progress rules become `kind: "preload-candidate"`, `severity: "review"`, no score impact.
+  - **No CSS motion → `status: "not-measurable"`, `score: null`, no badge**, with an explicit disclosure. Runtime motion libraries (GSAP, three.js, PixiJS, Lottie, Framer Motion, …) are detected from `<script src>` and withhold the badge.
+  - **Escaped quotes in selectors** (Tailwind v4 arbitrary variants such as `[&_svg:not([class*='size-'])]`) no longer swallow the rest of a minified stylesheet.
+- **Result shape (`--json` and `structuredContent`):** `{ ok, url, status, score, scoring, scoring_doc, summary, badge, findings, groups, disclosures, coverage }`. **`score` can be `null` — read `status` first.** Scores are not comparable with 1.2.7 (scoring v1); `examples/ci/motion-audit.yml` compares only same-version, measurable runs and asks for a re-baseline otherwise.
+- Tool texts: `motion_catalog` names the free motion check and the key page; price links carry `?src=mcp` (`?src=mcp-<tool>` in the structured `upgrade` block). The Dev Key is described as $39/month (`upgradeInfo()` said `billing: "one-time"`).
+- `registerMotionspecTools` can register keyed tools as **paywall stubs** when a host passes an allow-list (`deps.only`): same name and input schema, no work, `isError: true`, a hint naming the price and the free routes (`motion_validate`, the free site check, local `npx -p motionspec motion compile <spec.json>`). The stdio server passes no allow-list, so all five tools work locally exactly as before; `deps.paywallStub === false` restores silent omission.
+- Package description and keywords describe web animation accessibility; the `waapi` keyword is dropped (compile output is vanilla GSAP + CSS; WAAPI lowering is internal).
+- `deps`: `@modelcontextprotocol/sdk` 1.30.0 → 1.32.0; `@playwright/test` 1.62.0 → 1.62.1 (#21); `eslint`, `globals`, `zod`, commitlint bumps.
+
+### Hosted endpoint (api.motionspec.dev — not part of the npm package)
+- A keyless `tools/list` shows all five tools; `motion_compile`, `motion_audit` and `motion_stats` answer with the paywall stub instead of `Tool … not found`.
+- `GET /` describes the current product and links pricing, docs, `llms.txt` and the Registry entry; `initialize` carries `serverInfo.title`/`websiteUrl` and instructions naming the free and keyed tools.
+
+### Added
+- `AGENTS.md` for coding agents, plus the same rules in editor form: `.cursor/rules/motionspec.mdc` (Cursor) and `.github/copilot-instructions.md` (Copilot). They state the three motion rules (reduced motion · pause path for auto-playing/infinite motion, WCAG 2.2.2 · no flashing, 2.3.1 — not audited), the CLI/MCP commands, and what the audit does not check.
+- `examples/ci/motion-audit.yml` — a copy-and-adapt GitHub Actions gate: `motion audit --json` per path against a checked-in `.motionspec/baseline.json`, failing when a comparable score fell or Level-A findings rose. README section "Use in CI".
+- `llms-install.md` — agent-readable install guide for Cline, Claude, and stdio (#20).
+- Tests from the shared engine: `test/audit-precision.test.mjs`, `test/audit-escaped-quote.test.mjs`, `test/audit-mcp-parity.test.mjs` (tool = site pipeline on five fixtures).
+
+### Fixed
+- Shipped transitive dependencies refreshed to clear the production audit: `fast-uri` 3.1.8, `ip-address` 10.7.3, `proxy-addr` 2.0.8 (#43). The high-severity advisory fixed on `main` in `4d6fb59` now ships.
+- README figures are measured values (354 tests; 97.23 % lines / 95.17 % functions / 80.82 % branches, `npm run coverage` 2026-10-08; 104 kB packed); "Two build targets" reworded — the WAAPI/CSS lowering has no CLI flag, MCP tool or schema target and is internal.
 
 ### Documentation
-- Clarify web animation accessibility in the README, npm metadata, MCP manifest and agent context; add a scoped motion guide, a repeatable discovery search plan and an aggregate analytics proposal. Registry publication is a separate release step; no new tracking is activated.
-- Replace broad legal/standards mappings with the exact WCAG 2.2.2 (A) and 2.3.3 (AAA) scope and clarify the legacy audit badge.
-- `llms-install.md` — agent-readable install guide for Cline, Claude, and stdio (#20).
+- Web animation accessibility stated consistently in the README, npm metadata, MCP manifest (title/description) and agent context; scoped motion guide (`docs/motion-accessibility.md`), repeatable discovery check (`docs/discovery.md`) and an aggregate analytics proposal (`docs/analytics-plan.md`). No new tracking is activated.
+- Broad legal/standards mappings replaced by the exact WCAG 2.2.2 (A) and 2.3.3 (AAA) scope; the legacy audit badge explained.
+- Every place that documents the audit result describes the v2 shape (AGENTS.md, README, editor rules, audit skill, motion guide).
 
 ## [1.2.7] - 2026-08-03
 
