@@ -58,9 +58,11 @@ test("MCP: motion_audit returns a structured result (error path is well-formed)"
       assert.ok(typeof out.error === "string" && out.error.length > 0, "an error message is present");
       assert.equal(r.isError, true);
     } else {
-      /* If some resolver did answer, the success shape must still hold. */
+      /* If some resolver did answer, the success shape must still hold
+       * (W2.2: score is null when the page has no CSS motion — status says so). */
       assert.ok(Array.isArray(out.findings));
-      assert.equal(typeof out.score, "number");
+      assert.ok(out.score === null || typeof out.score === "number");
+      assert.ok(out.status === "measured" || out.status === "not-measurable");
     }
     assert.ok(Array.isArray(r.content) && r.content[0].type === "text", "text content is returned");
   });

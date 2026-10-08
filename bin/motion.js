@@ -88,20 +88,23 @@ async function main() {
 
   if (cmd === "audit") {
     if (!arg) { console.error("Usage: motion audit <url> [--json]"); process.exit(2); }
-    const { audit } = require("../src/audit/audit.js");
-    const res = await audit(arg);
+    /* W2.2 (2026-09-11): same engine, same limits, same v2 scoring as the site's
+     * free check and the hosted motion_audit tool — one URL, one score everywhere. */
+    const engine = require("../src/audit/audit.js");
+    const { AUDIT_OPTS, auditResult } = require("../src/mcp/register-tools.js");
+    const res = await engine.audit(arg, AUDIT_OPTS);
     /* ONE telemetry data point per run (a11y-checker usage signal). No URL/PII. */
     telemetry.log({ outcome: res.ok ? "audit-ok" : "audit-fail", model: "cli-audit", attempts: 1 });
     if (!res.ok) {
       console.error("Audit failed: " + res.error);
       process.exit(1);
     }
+    const out = auditResult(res, engine);
     if (flags.has("--json")) {
       /* keep the JSON payload lean — the Markdown report is a separate view */
-      const json = { ok: res.ok, url: res.url, score: res.score, badge: res.badge, findings: res.findings, summary: res.summary, disclosures: res.disclosures };
-      console.log(JSON.stringify(json, null, 2));
+      console.log(JSON.stringify(out, null, 2));
     } else {
-      console.log(res.markdown);
+      console.log(engine.toMarkdown(Object.assign({}, res, { score: out.score, summary: out.summary }), res.url));
     }
     return;
   }

@@ -20,6 +20,14 @@ module.exports = [
     rules: baseRules,
   },
   {
+    /* src/audit/audit.js is kept byte-identical to the engine behind the free
+     * site check, so one engine produces one score everywhere. That file carries
+     * two unused helpers (skipBlock, createsMotion); removing them would break
+     * the identity. Only these two names are exempt — any NEW dead code still fails. */
+    files: ["src/audit/audit.js"],
+    rules: { "no-unused-vars": ["error", { argsIgnorePattern: "^_", caughtErrors: "none", varsIgnorePattern: "^(skipBlock|createsMotion)$" }] },
+  },
+  {
     files: ["**/*.mjs"],
     languageOptions: { ecmaVersion: "latest", sourceType: "module", globals: { ...globals.node, ...globals.browser } },
     rules: baseRules,

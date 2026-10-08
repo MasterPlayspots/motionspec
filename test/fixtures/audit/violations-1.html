@@ -5,14 +5,18 @@
   <title>Audit fixture 1 — unguarded + infinite</title>
   <style>
     /* Check 1: animation with NO prefers-reduced-motion guard.
-       Check 3: infinite animation with NO pause path. */
-    .spinner {
-      animation: spin 6s linear infinite;
+       Check 3: infinite animation with NO pause path.
+       W2.2 (2026-09-11): the selector/keyframes are deliberately NOT loader-like
+       (`.spinner`/`spin` is a loading indicator = WCAG 2.2.2 preload exception,
+       reported as 'review' with no score impact). A decorative drifting hero
+       background is a real Level-A candidate. */
+    .hero {
+      animation: drift 6s linear infinite;
     }
-    @keyframes spin { from { transform: rotate(0) } to { transform: rotate(360deg) } }
+    @keyframes drift { from { transform: translateX(0) } to { transform: translateX(-50%) } }
   </style>
 </head>
 <body>
-  <div class="spinner">loading</div>
+  <div class="hero">drifting background</div>
 </body>
 </html>
