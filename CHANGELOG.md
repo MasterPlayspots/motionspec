@@ -21,6 +21,8 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 - `deps`: `@playwright/test` 1.62.0 → 1.62.1 (#21).
 
 ### Documentation
+- Clarify web animation accessibility in the README, npm metadata, MCP manifest and agent context; add a scoped motion guide, a repeatable discovery search plan and an aggregate analytics proposal. Registry publication is a separate release step; no new tracking is activated.
+- Replace broad legal/standards mappings with the exact WCAG 2.2.2 (A) and 2.3.3 (AAA) scope and clarify the legacy audit badge.
 - `llms-install.md` — agent-readable install guide for Cline, Claude, and stdio (#20).
 
 ## [1.2.7] - 2026-08-03
