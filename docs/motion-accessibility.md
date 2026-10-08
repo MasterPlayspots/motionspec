@@ -97,6 +97,7 @@ legacy zero-findings label for the loaded CSS, not a certificate.
 
 ## Continue
 
+- [Reproducible examples](../examples/a11y/README.md): a loop with a pause control, interaction motion with reduced-motion behaviour, and a static audit with its limits.
 - [GSAP and prefers-reduced-motion](https://motionspec.dev/blog/gsap-prefers-reduced-motion)
 - [Catalog reference](primitives/README.md)
 - [Agent workflow](../AGENTS.md)

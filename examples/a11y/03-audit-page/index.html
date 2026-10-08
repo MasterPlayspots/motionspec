@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>MotionSpec audit example</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- A runtime motion library: the static audit detects it, does not audit it,
+       and withholds the badge. -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+</head>
+<body>
+  <div class="ticker"><span>Breaking: motion needs a pause button</span></div>
+  <button class="cta" type="button">Start</button>
+  <a class="link" href="#">Read more</a>
+  <div class="spinner" role="status" aria-label="Loading"></div>
+  <div class="card">Card</div>
+</body>
+</html>

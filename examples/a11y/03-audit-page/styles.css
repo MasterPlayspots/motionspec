@@ -1,0 +1,20 @@
+/* (1) Endless ticker, no pause path and no reduced-motion guard:
+       WCAG 2.2.2 candidate (Level A) and 2.3.3 candidate. */
+@keyframes ticker { from { transform: translateX(0) } to { transform: translateX(-100%) } }
+.ticker span { display: inline-block; animation: ticker 20s linear infinite; }
+
+/* (2) Hover motion without a reduced-motion guard: WCAG 2.3.3 candidate. */
+.cta { transition: transform .2s ease; }
+.cta:hover { transform: translateY(-4px); }
+
+/* (3) Colour-only transition: not motion under WCAG 2.3.3 — no finding. */
+.link { transition: color .2s ease; }
+
+/* (4) Loading spinner: listed for manual review (2.2.2 preload exception), no score impact. */
+@keyframes spin { to { transform: rotate(1turn) } }
+.spinner { width: 1rem; height: 1rem; animation: spin 1s linear infinite; }
+
+/* (5) Guarded hover motion: the later reduced-motion rule wins the cascade — no finding. */
+.card { transition: transform .3s ease; }
+.card:hover { transform: scale(1.02); }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } }

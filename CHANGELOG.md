@@ -8,6 +8,9 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ## [Unreleased]
 
+### Documentation
+- `examples/a11y/`: three reproducible motion-accessibility examples — an endless loop with the WCAG 2.2.2 pause control, interaction-triggered motion with reduced-motion behaviour (2.3.3), and a static audit page whose five cases, runtime-library disclosure and withheld badge are explained. `test/examples-a11y.test.js` pins every stated output.
+
 ## [1.2.8] - 2026-10-08
 
 One codebase again: this release brings the npm package to the code the hosted endpoint (`api.motionspec.dev/mcp`) has served since September, so npm, the MCP Registry entry and the hosted `serverInfo.version` carry one number for one engine.
