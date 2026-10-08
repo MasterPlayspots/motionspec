@@ -1,9 +1,15 @@
-# motionspec (npm package / GitHub repo)
+# MotionSpec — web animation accessibility MCP server and CLI
 
-> MotionSpec is an open-core trust layer that checks and compiles reduced-motion-safe, on-budget UI animation for AI-generated web apps. It is NOT the Android Material Components MotionSpec class, NOT the iOS material-motion MotionSpec, NOT Motion.dev / Framer Motion, NOT the usemotion.com calendar app, and NOT a text-to-video generator.
+> MotionSpec (npm: motionspec; GitHub: MasterPlayspots/motionspec) compiles validated animation specs to deterministic GSAP + CSS and statically checks loaded CSS for motion-accessibility candidates. It is not the Android/iOS MotionSpec class, Motion.dev / Framer Motion, a calendar app, or a video generator.
 
-- Docs & product: https://motionspec.dev (full content: https://motionspec.dev/llms-full.txt)
-- MCP setup: https://motionspec.dev/docs — keyless remote: https://api.motionspec.dev/mcp (motion_catalog, motion_validate); local: `npx motionspec` (stdio)
-- Registry: io.github.MasterPlayspots/motionspec · npm: https://www.npmjs.com/package/motionspec
-- Guarantees (honest scope): catalog allow-list, injection-proof interpolation, prefers-reduced-motion enforced by default, deterministic output, WCAG 2.2.2/2.3.3 checks. NOT a general accessibility/compliance guarantee; runtime JS/GSAP outside the compiler is not audited.
-- Contact: hello@motionspec.dev · Fröba Sales Solutions UG (haftungsbeschränkt), Kronach, Germany
+- Start: https://motionspec.dev/docs · repo: https://github.com/MasterPlayspots/motionspec
+- Install: https://github.com/MasterPlayspots/motionspec/blob/main/llms-install.md
+- Motion accessibility and audit limits: https://github.com/MasterPlayspots/motionspec/blob/main/docs/motion-accessibility.md
+- MCP identity: io.github.MasterPlayspots/motionspec · npm: https://www.npmjs.com/package/motionspec
+- Hosted MCP: https://api.motionspec.dev/mcp (Streamable HTTP). Keyless: motion_catalog and motion_validate. Hosted motion_compile, motion_audit and motion_stats require a key.
+- Local MCP: npx -y motionspec (stdio); all five tools, no key. Local CLI executable: motion. There is no standalone CLI validate command; compile validates first.
+- Workflow: motion_catalog → write a spec → motion_validate → review warnings even when ok=true → motion_compile. URL checks use motion_audit, not motion_validate.
+- Compiler: vanilla-gsap is the only public output target. Reduced-motion guards and loop pause controls are defaults; explicit opt-outs produce warnings. Internal WAAPI lowering is not a released CLI/MCP target.
+- Scope: WCAG 2.2.2 (Pause, Stop, Hide, A) and 2.3.3 (Animation from Interactions, AAA) motion candidates; prefers-reduced-motion, CSS animation and pause paths. Static signals do not prove WCAG conformance. Runtime JS/GSAP, flashing, video and Canvas are not audited. The legacy reduced-motion-safe badge means zero findings in loaded CSS only.
+- Agent rules: https://github.com/MasterPlayspots/motionspec/blob/main/AGENTS.md
+- Contact: hello@motionspec.dev

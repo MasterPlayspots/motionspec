@@ -1,4 +1,4 @@
-# MotionSpec
+# MotionSpec — web animation accessibility MCP server
 
 <img src="https://motionspec.dev/logo-512.png" alt="MotionSpec logo" width="96" align="right">
 
@@ -11,9 +11,15 @@
 ![MCP Registry](https://img.shields.io/badge/MCP%20Registry-io.github.MasterPlayspots%2Fmotionspec-6f42c1)
 [![smithery badge](https://smithery.ai/badge/kevin-froeba/motionspec)](https://smithery.ai/servers/kevin-froeba/motionspec)
 
-**MotionSpec is an open-core trust layer that checks and compiles reduced-motion-safe, on-budget UI animation for AI-generated web apps.** An LLM authors a **schema-validated JSON spec**; a **deterministic compiler** emits vanilla-GSAP JavaScript + CSS — injection-proof and catalog-validated *by construction*, with an enforced `prefers-reduced-motion` fallback and a performance budget, with WCAG 2.2.2 (Pause, Stop, Hide) pause-path candidates reported — reduced-motion guards map to WCAG 2.3.3 (Animation from Interactions), Level AAA.
+**MotionSpec is an MCP server and CLI for web animation accessibility.** It helps AI coding agents and frontend developers compile validated animation specs to deterministic **GSAP + CSS** and find motion-accessibility candidates in a page's loaded CSS: missing `prefers-reduced-motion` guards and missing pause paths for continuous animation.
 
-Run it two ways: as a keyless **MCP server** any LLM host can call (`npx motionspec`), or as a **CLI compiler** in your build (`motion compile spec.json`). Either way you keep plain files: vanilla-GSAP JavaScript plus CSS. (A WAAPI/CSS lowering exists in the codebase, but it has no CLI flag, no MCP tool and no schema target yet — see [below](#one-build-target-one-internal-lowering).) MIT core. Docs: https://motionspec.dev
+The MIT compiler includes reduced-motion handling and loop pause controls by default. Its static audit supports review of **WCAG 2.2.2 (Pause, Stop, Hide — Level A)** and **WCAG 2.3.3 (Animation from Interactions — Level AAA)**. Findings need contextual review; a clean scan is not a full accessibility or WCAG-conformance assessment. Runtime JavaScript animation, flashing, video and Canvas are outside the audit's scope.
+
+- **Create web animation:** choose a catalog primitive, validate a JSON spec, then compile vanilla-GSAP JavaScript and CSS. The internal WAAPI lowering is not a public build target.
+- **Check CSS motion:** audit a URL for reduced-motion and pause-path candidates, then review the reported selectors and suggested fixes.
+- **Prevent regressions:** use the [CI example](examples/ci/motion-audit.yml) to compare findings against an explicitly accepted baseline.
+
+Local stdio MCP exposes all five tools without an API key (`npx -y motionspec`). The hosted endpoint at `https://api.motionspec.dev/mcp` provides keyless `motion_catalog` and `motion_validate`; hosted compile, audit and stats require a key. See the [installation guide](llms-install.md) and [motion accessibility guide](docs/motion-accessibility.md). Docs and product: https://motionspec.dev/docs.
 
 The thesis: **capability lives in the catalog, not the model.** A bigger model can write more elaborate specs, but it can never emit a primitive, parameter, or selector the Trust Boundary hasn't approved. The compiler trusts only what passes.
 
@@ -109,7 +115,7 @@ Input is size-capped (`MS-INPUT-TOO-LARGE`, 64 KB). The stdio server exposes one
 
 ## Motion-a11y checker
 
-`motion audit <url>` (CLI, `--json` for the machine payload) and the `motion_audit` MCP tool run a **static** scan of a page's HTML and linked stylesheets — no headless browser, no new dependency. It reports four motion problems: CSS animation/transition without a `prefers-reduced-motion` guard (WCAG 2.3.3), animated properties other than transform/opacity, `infinite` animations with no pause path (`animation-play-state`/`data-*`), and `<marquee>`/autoplay motion over 5 s (WCAG 2.2.2). Each finding carries a selector, the WCAG reference, and a copy-paste fix. **It is honest about its limits:** runtime motion (WAAPI/GSAP/JS) is reported as *not audited (V2)* rather than silently passed. A page that clears every check earns the `reduced-motion-safe` badge — the exact output MotionSpec itself produces.
+`motion audit <url>` (CLI, `--json` for the machine payload) and the `motion_audit` MCP tool run a **static** scan of a page's HTML and linked stylesheets — no headless browser, no new dependency. It reports four motion problems: CSS animation/transition without a `prefers-reduced-motion` guard (WCAG 2.3.3), animated properties other than transform/opacity, `infinite` animations with no pause path (`animation-play-state`/`data-*`), and `<marquee>`/autoplay motion over 5 s (WCAG 2.2.2). Each finding carries a selector, the WCAG reference, and a copy-paste fix. **It is honest about its limits:** runtime motion (WAAPI/GSAP/JS) is reported as *not audited (V2)* rather than silently passed. At zero findings the API returns the legacy `reduced-motion-safe` badge string. It means only that these checks found no candidates in the loaded CSS; it does not certify the page or its runtime motion.
 
 ## Use in CI
 
@@ -125,15 +131,18 @@ MotionSpec is a governed format, not just a tool. The normative spec is [`SPEC.m
 
 ## Standards mapping
 
-MotionSpec turns specific legal and normative accessibility requirements into compiler-enforced defaults. Each check maps to the frameworks that mandate it:
+MotionSpec checks a limited set of motion signals. These are candidates for review, not a
+conformance verdict or a substitute for testing the delivered interface.
 
-| MotionSpec mechanism | WCAG 2.2 | EN 301 549 | U.S. Section 508 | EAA / BFSG |
-|---|---|---|---|---|
-| Pause/stop path for every continuous loop (`animation-play-state` + accessible toggle) | **SC 2.2.2** Pause, Stop, Hide (Level A) | clause 9.2.2.2 (mirrors the WCAG SC) | incorporated (WCAG 2.0 A/AA baseline; 2.2.2 is Level A, in scope) | conformance presumed via EN 301 549 |
-| Reduced-motion guard on every motion (`prefers-reduced-motion`) | **SC 2.3.3** Animation from Interactions (Level AAA) | clause 9.2.3.3 | beyond the AA baseline; provided anyway | supports the EAA "perceivable/operable" duties |
-| `motion audit` static checks (loops without a pause path, motion missing a reduced-motion guard, autoplay > 5 s) | 2.2.2 / 2.3.3 | clause 9 (web) | WCAG-incorporated success criteria | pre-market self-check for covered products |
+| Criterion | Level | What to review with MotionSpec |
+|---|---|---|
+| [WCAG 2.2.2 — Pause, Stop, Hide](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html) | A | For non-essential moving, blinking or scrolling content that starts automatically, lasts more than five seconds and appears alongside other content, check for a usable pause, stop or hide mechanism. The compiler supplies loop pause paths by default; the static audit looks for missing-path candidates. Auto-updating content has separate requirements without the five-second threshold. |
+| [WCAG 2.3.3 — Animation from Interactions](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html) | AAA | Non-essential motion triggered by interaction must be disableable. Reduced-motion handling is one implementation approach. A missing media query alone does not establish failure, and finding one does not establish success. |
 
-Notes: EN 301 549 is the EU harmonised standard whose clause 9 adopts the WCAG success criteria by number. U.S. Section 508 (Revised) incorporates WCAG 2.0 Level A and AA — SC 2.2.2 is Level A and therefore in scope; SC 2.3.3 is Level AAA and is provided as a stronger guarantee than the baseline requires. The European Accessibility Act (EAA) and its German transposition (BFSG, applicable from 28 June 2025) require covered digital products and services to be accessible, with conformance commonly demonstrated against EN 301 549. MotionSpec enforces the *motion* subset of these obligations by construction; it does not by itself make an entire product conformant.
+Animating only `transform` and `opacity` is a performance recommendation, not by itself a
+WCAG success criterion. The audit does not measure flashing (2.3.1), runtime GSAP/WAAPI,
+video, Canvas, or the usability of a pause control. It does not establish compliance with
+EN 301 549, Section 508, EAA, BFSG, or any other legal framework.
 
 ## Quickstart (from a clone)
 
@@ -184,6 +193,9 @@ docs/              ADR records (docs/adr/) and per-primitive reference (docs/pri
 
 ## Docs
 
+- [Web animation accessibility](docs/motion-accessibility.md) — reduced motion, pause controls, GSAP output, review workflow and audit limits.
+- [Discovery and search measurement](docs/discovery.md) — separate registry, GitHub, npm and web search surfaces, with a repeatable query log.
+- [Usage measurement plan](docs/analytics-plan.md) — current local telemetry, proposed aggregate hosted counters, and limits of npm download statistics.
 - [AGENTS.md](AGENTS.md) — what a coding agent should know: when to use MotionSpec, the commands, the three motion rules (reduced motion · pause path · no flashing), and what the audit does **not** check. The same rules in editor form: [`.cursor/rules/motionspec.mdc`](.cursor/rules/motionspec.mdc) and [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
 - [SECURITY.md](SECURITY.md) — security posture of the npm package and hosted endpoint.
 - `docs/adr/0001-schema-freeze-v1.md` — the frozen v1 contract and why.
