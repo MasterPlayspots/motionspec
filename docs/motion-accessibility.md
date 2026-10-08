@@ -48,8 +48,9 @@ node bin/motion.js audit https://example.com --json
 Replace the example URL with a page you are authorized to inspect. For an agent:
 
 > Run motion_audit on this URL. Separate static findings from untested runtime animation.
-> Explain the selector, candidate issue and suggested fix, then list manual checks. Do not
-> interpret a score of 100 or the reduced-motion-safe badge as full WCAG conformance.
+> Explain the selector, candidate issue and suggested fix, then list manual checks. Read
+> `status` first: `not-measurable` (score `null`) means no CSS motion was found, not "safe".
+> Do not interpret a score of 100 or the reduced-motion-safe badge as full WCAG conformance.
 
 For a team maintaining many websites, start with representative page templates, review
 findings and false positives, implement fixes, and use the
@@ -86,7 +87,9 @@ See [AGENTS.md](../AGENTS.md#what-the-audit-does-not-check-say-so-in-every-repor
 
 In the delivered page, test reduced-motion on and off, pause/resume behavior, keyboard
 operation, visible focus, and animations created after load. Check flashing separately.
-Read the audit's disclosures and failed-fetch information before drawing conclusions.
+Read the audit's disclosures and failed-fetch information before drawing conclusions, and
+verify `review` items (loading indicators) by hand: the preload exception of 2.2.2 applies
+only while the indicator actually blocks interaction.
 
 MotionSpec complements broader accessibility testing. It does not certify a website or
 establish compliance with accessibility laws. The API's `reduced-motion-safe` badge is a

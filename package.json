@@ -1,6 +1,6 @@
 {
   "name": "motionspec",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "mcpName": "io.github.MasterPlayspots/motionspec",
   "description": "MCP server and CLI for web animation accessibility: compile validated specs to GSAP + CSS with reduced-motion defaults; statically check CSS for WCAG 2.2.2 pause-path and WCAG 2.3.3 motion candidates. MIT core.",
   "license": "MIT",

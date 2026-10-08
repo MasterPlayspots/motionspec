@@ -8,6 +8,12 @@
  * is tested through audit() with an INJECTED fetchImpl so the suite never
  * touches the real network. A CLI test drives bin/motion.js against a local
  * server (skips gracefully if the sandbox blocks loopback).
+ * W2.2 (2026-09-11): the engine is the site's audit.cjs (cascade-aware guards,
+ * colour transitions are not motion, loaders are 'review', no CSS motion is
+ * 'not-measurable'); the precision rules live in test/audit-precision.test.mjs,
+ * the tool/site parity in test/audit-mcp-parity.test.mjs. Fixtures 1 and 2 were
+ * sharpened accordingly (`.spinner` is a loader; a guarded transition is no
+ * risky-props finding).
  */
 const { test } = require("node:test");
 const assert = require("node:assert");
@@ -30,6 +36,8 @@ test("fixture violations-1: unguarded animation (2.3.3) + infinite no-pause (2.2
   assert.ok(r.findings.some((f) => f.wcag.includes("2.2.2")), "a 2.2.2 finding present");
   assert.ok(r.findings.some((f) => f.wcag.includes("2.3.3")), "a 2.3.3 finding present");
   assert.equal(r.badge, null, "a page with violations must NOT earn the badge");
+  assert.equal(r.status, "measured");
+  assert.deepEqual(r.findings.map((f) => f.kind).sort(), ["infinite-no-pause", "unguarded"]);
 });
 
 /* ---- fixture 2: non-transform/opacity property + autoplay > 5s ------------ */
@@ -38,6 +46,9 @@ test("fixture violations-2: animated non-transform prop (2.3.3) + autoplay >5s (
   assert.ok(/non-transform\/opacity/.test(rules(r)), "check 2 (risky property) must fire");
   assert.ok(/> 5s/.test(rules(r)), "check 4 (autoplay >5s) must fire");
   assert.equal(r.badge, null);
+  /* the guarded 20 s ken-burns stays a 2.2.2 candidate at half weight (no pause control without the OS setting) */
+  const long = r.findings.find((f) => f.kind === "autoplay-long");
+  assert.equal(long.weight, 0.5);
 });
 
 /* ---- fixture 3: <marquee> element + runtime-motion disclosure ------------- */
@@ -65,6 +76,7 @@ test("clean fixture earns the badge 'reduced-motion-safe' with zero findings", (
   assert.equal(r.badge, BADGE_SAFE);
   assert.equal(r.badge, "reduced-motion-safe");
   assert.equal(r.score, 100);
+  assert.equal(r.status, "measured", "a clean verdict needs measurable motion — the loader/transitions ARE evidence");
   const md = toMarkdown(r, "https://fixture/clean.html");
   assert.ok(md.includes("`reduced-motion-safe`"), "the badge string appears in the Markdown report");
 });
@@ -132,6 +144,12 @@ test("CLI: motion audit <url> prints a Markdown report (skips if loopback blocke
     assert.equal(j.ok, true);
     assert.ok(Array.isArray(j.findings) && j.findings.length > 0);
     assert.ok(!("markdown" in j), "the --json payload omits the Markdown view");
+    /* W2.2: the CLI prints the same v2 verdict as the site check and the MCP tool */
+    assert.equal(j.status, "measured");
+    assert.equal(j.scoring, "v2");
+    assert.equal(j.score, 72, "v2 score of fixture 1 (20 infinite + 8 unguarded)");
+    assert.ok(Array.isArray(j.groups) && j.groups.length === 2);
+    assert.ok(/\*\*Score:\*\* 72\/100/.test(out), "the Markdown view carries the v2 score too");
   } finally {
     srv.close();
   }

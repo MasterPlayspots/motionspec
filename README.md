@@ -5,8 +5,8 @@
 [![npm](https://img.shields.io/npm/v/motionspec?color=cb3837&label=npm)](https://www.npmjs.com/package/motionspec)
 [![node](https://img.shields.io/node/v/motionspec?color=339933)](https://www.npmjs.com/package/motionspec)
 [![license](https://img.shields.io/npm/l/motionspec)](./LICENSE)
-![tests](https://img.shields.io/badge/tests-302%20passing-brightgreen)
-![coverage](https://img.shields.io/badge/coverage-99%25%20lines%20·%2099%25%20funcs%20·%2079%25%20branches-brightgreen)
+![tests](https://img.shields.io/badge/tests-354%20passing-brightgreen)
+![coverage](https://img.shields.io/badge/coverage-97%25%20lines%20·%2095%25%20funcs%20·%2081%25%20branches-brightgreen)
 ![supply chain](https://img.shields.io/badge/runtime%20deps-2%20·%200%20vulns%20·%20SBOM-blue)
 ![MCP Registry](https://img.shields.io/badge/MCP%20Registry-io.github.MasterPlayspots%2Fmotionspec-6f42c1)
 [![smithery badge](https://smithery.ai/badge/kevin-froeba/motionspec)](https://smithery.ai/servers/kevin-froeba/motionspec)
@@ -65,15 +65,15 @@ This repo is also a Claude Code plugin: it bundles the MCP server (`npx motionsp
 
 | | |
 |---|---|
-| Version | **v1.2.7** · schema frozen at spec v1 (ADR-0001, signed) |
-| Published | **npm `motionspec`** (82 kB packed, 67 files, nothing dev-only ships) · MCP Registry |
-| Tests | **302 green** — injection attacks, 6000-spec fuzz, golden determinism, schema parity, pause-controls, motion-a11y audit · CI on Node 18/20/22 + x86 Playwright e2e |
+| Version | **v1.2.8** · schema frozen at spec v1 (ADR-0001, signed) |
+| Published | **npm `motionspec`** (104 kB packed, 67 files, nothing dev-only ships) · MCP Registry |
+| Tests | **354 green** — injection attacks, 6000-spec fuzz, golden determinism, schema parity, pause-controls, motion-a11y audit · CI on Node 18/20/22 + x86 Playwright e2e |
 | Catalog | **40 primitives**, every one device-verified, reduced-motion-fallback mandatory; the 18 continuous loops also carry a WCAG-2.2.2 pause path |
 | Supply chain | **2 runtime deps** (MCP SDK, zod — both pinned) · 0 vulnerabilities · CycloneDX SBOM committed · all permissive licenses · CI actions SHA-pinned |
-| Coverage | 99.06% lines / 99.09% functions / 79.05% branches of `src/` (`npm run coverage`, 2026-09-04; CI gate 90/90/75) |
+| Coverage | 97.23% lines / 95.17% functions / 80.82% branches of `src/` (`npm run coverage`, 2026-10-08; CI gate 90/90/75) |
 | Last audit | 2026-07-03 — 17/17 integration handshakes evidenced, infra 8.1/10, security: **0 critical**, full-git-history secret scan clean |
 | First client | CHS Computer — live on Vercel |
-| Hosted MCP | **live** — keyless `motion_catalog`/`motion_validate` at api.motionspec.dev/mcp · keyed tier: Cloudflare Worker, per-key gated (hashed keys in KV) · two-stage rate limiting (pre-auth per IP + per key, burst-verified) · per-minute cron canary + external heartbeat (synthetic fault → alert in <5 min, proven on real infra) · Analytics Engine telemetry, PII-scrubbed · gated `/dashboard` |
+| Hosted MCP | **live** — keyless `motion_catalog`/`motion_validate` at api.motionspec.dev/mcp · keyed tier: Cloudflare Worker, per-key gated (hashed keys in KV) · two-stage rate limiting (pre-auth per IP + per key, burst-verified) · per-minute cron canary + external heartbeat (synthetic fault → alert in <5 min, proven on real infra) · Analytics Engine operations telemetry (request bodies, specs and error text are not stored) · gated `/dashboard` |
 
 Schema v1 is frozen: `specVersion "1.0"` is the stable public contract; `"0.1"` is deprecated and accepted until v1.2 (a tripwire test enforces the revisit). The `[MS-XXX]` error-code registry is public API — codes are never reused or redefined.
 
@@ -115,15 +115,15 @@ Input is size-capped (`MS-INPUT-TOO-LARGE`, 64 KB). The stdio server exposes one
 
 ## Motion-a11y checker
 
-`motion audit <url>` (CLI, `--json` for the machine payload) and the `motion_audit` MCP tool run a **static** scan of a page's HTML and linked stylesheets — no headless browser, no new dependency. It reports four motion problems: CSS animation/transition without a `prefers-reduced-motion` guard (WCAG 2.3.3), animated properties other than transform/opacity, `infinite` animations with no pause path (`animation-play-state`/`data-*`), and `<marquee>`/autoplay motion over 5 s (WCAG 2.2.2). Each finding carries a selector, the WCAG reference, and a copy-paste fix. **It is honest about its limits:** runtime motion (WAAPI/GSAP/JS) is reported as *not audited (V2)* rather than silently passed. At zero findings the API returns the legacy `reduced-motion-safe` badge string. It means only that these checks found no candidates in the loaded CSS; it does not certify the page or its runtime motion.
+`motion audit <url>` (CLI, `--json` for the machine payload) and the `motion_audit` MCP tool run a **static** scan of a page's HTML and linked stylesheets — no headless browser, no new dependency. It reports four motion problems: CSS animation/transition without an effective `prefers-reduced-motion` guard (WCAG 2.3.3 — the guard must win the cascade), animated properties other than transform/opacity, `infinite` animations with no pause path (`animation-play-state`/`data-*`), and `<marquee>`/autoplay motion over 5 s (WCAG 2.2.2). Colour/opacity-only transitions are not motion under 2.3.3 and are not reported; loading indicators (spinners, skeletons) are listed as `review` items with no score impact. Each finding carries a selector, the WCAG reference, and a copy-paste fix. The CLI, the `motion_audit` tool and the free check at motionspec.dev/motion-check run the same engine with the same limits (12 stylesheets, 2 MB, 8 s) and the same score. **It is honest about its limits:** runtime motion (WAAPI/GSAP/JS, WebGL libraries) is reported as *not audited (V2)* rather than silently passed, and a page with no CSS motion is `status: "not-measurable"` with `score: null` instead of a perfect score. The legacy `reduced-motion-safe` badge string is returned only for a measurable page with zero findings and no runtime motion library; it means only that these checks found no candidates in the loaded CSS, not that the page or its runtime motion is certified.
 
 ## Use in CI
 
-`motion audit --json` is stable enough to gate a pull request. [`examples/ci/motion-audit.yml`](examples/ci/motion-audit.yml) is a copy-and-adapt GitHub Actions workflow that builds your site, serves the build directory on localhost, audits the paths you list with `npx -y -p motionspec@1.2.7 motion audit <url> --json` (local, MIT, no key, no hosted call), and compares each page with a checked-in baseline `.motionspec/baseline.json`.
+`motion audit --json` is stable enough to gate a pull request. [`examples/ci/motion-audit.yml`](examples/ci/motion-audit.yml) is a copy-and-adapt GitHub Actions workflow that builds your site, serves the build directory on localhost, audits the paths you list with `npx -y -p motionspec@1.2.8 motion audit <url> --json` (local, MIT, no key, no hosted call), and compares each page with a checked-in baseline `.motionspec/baseline.json`.
 
-The gate fails when a page got **worse** — the same rule MotionSpec's weekly re-scan uses: the score fell, *or* the number of Level-A findings (WCAG 2.2.2 Pause, Stop, Hide) rose. A page without a baseline entry never fails; that run is the baseline. Re-baselining is a deliberate manual run (`workflow_dispatch` with `update_baseline: true`) that uploads the new file as an artifact for you to commit — the workflow never commits on its own. Fixed findings are listed as `- fixed:` lines, new ones as `+ new finding:`.
+The gate fails when a page got **worse** — the same rule MotionSpec's weekly re-scan uses: the score fell, *or* the number of Level-A findings (WCAG 2.2.2 Pause, Stop, Hide) rose. Scores are compared only when both runs are measurable and use the same scoring version; a baseline written by 1.2.7 or earlier (scoring v1) needs one re-baseline. A page without a baseline entry never fails; that run is the baseline. Re-baselining is a deliberate manual run (`workflow_dispatch` with `update_baseline: true`) that uploads the new file as an artifact for you to commit — the workflow never commits on its own. Fixed findings are listed as `- fixed:` lines, new ones as `+ new finding:`.
 
-The machine payload is `{ ok, url, score, badge, findings: [{ selector, rule, wcag, fix }], summary, disclosures }`; `badge` is the literal `"reduced-motion-safe"` only at zero findings. Note that `audit` takes a **URL**, not a directory — hence the local server step. And the scope caveat travels with it: this is a static CSS scan (no inline `style=""`, `@import`, CSS-in-JS, external JS bundles, video/GIF/Canvas, or flashing checks); a green gate means "no regression in the loaded CSS", not "accessible".
+The machine payload is `{ ok, url, status, score, scoring, scoring_doc, summary, badge, findings, groups, disclosures, coverage }`; read `status` before using `score` (it is `null` when the page is not measurable). Note that `audit` takes a **URL**, not a directory — hence the local server step. And the scope caveat travels with it: this is a static CSS scan (no inline `style=""`, `@import`, CSS-in-JS, external JS bundles, video/GIF/Canvas, or flashing checks); a green gate means "no regression in the loaded CSS", not "accessible".
 
 ## Specification & conformance
 
@@ -148,7 +148,7 @@ EN 301 549, Section 508, EAA, BFSG, or any other legal framework.
 
 ```bash
 npm ci                                      # install (0 runtime deps beyond MCP SDK + zod)
-npm test                                    # 302 tests: validator, goldens, router, fuzz, parity
+npm test                                    # 354 tests: validator, goldens, router, fuzz, parity
 node bin/motion.js catalog                  # primitives + catalog version
 node bin/motion.js compile examples/hero.motionspec.json
 node bin/motion.js pipeline "Hero headline fades in, cards staggered" --mock
@@ -187,7 +187,7 @@ src/forge/         generate.js · prioritize.js — the gauntlet-verified catalo
 src/discover/      gap analysis: request intents ↔ catalog coverage
 src/demo/          device-verification demo pages (`?rm=1` simulates reduced motion)
 bin/               motion.js (CLI) · promote-gate.js — dev/CI gate scripts stay repo-only
-test/              302 tests incl. injection, fuzz, goldens (GSAP + internal WAAPI lowering), parity; test/e2e (Playwright)
+test/              354 tests incl. injection, fuzz, goldens (GSAP + internal WAAPI lowering), parity; test/e2e (Playwright)
 docs/              ADR records (docs/adr/) and per-primitive reference (docs/primitives/)
 ```
 

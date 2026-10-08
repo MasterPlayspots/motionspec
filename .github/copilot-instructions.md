@@ -24,15 +24,18 @@ These instructions apply whenever you write or change animation or transitions i
 ## Commands (local, free, MIT — no key needed)
 
 ```bash
-npx -p motionspec@1.2.7 motion compile spec.motionspec.json     # validate (fail-closed, [MS-XXX] errors, exit 1) + emit ./out/*.motion.js and .css
-npx -p motionspec@1.2.7 motion catalog                          # list the 40 primitives and the catalog version
-npx -p motionspec@1.2.7 motion audit https://example.com --json # static motion-a11y scan of a live URL
+npx -p motionspec@1.2.8 motion compile spec.motionspec.json     # validate (fail-closed, [MS-XXX] errors, exit 1) + emit ./out/*.motion.js and .css
+npx -p motionspec@1.2.8 motion catalog                          # list the 40 primitives and the catalog version
+npx -p motionspec@1.2.8 motion audit https://example.com --json # static motion-a11y scan of a live URL
 ```
 
 There is no separate `validate` subcommand in the CLI; validation is the first stage of `compile`.
 
-`audit --json` returns `{ ok, url, score, badge, findings: [{ selector, rule, wcag, fix }], summary, disclosures }`.
-`badge` is the literal string `"reduced-motion-safe"` only when there are zero findings.
+`audit --json` returns `{ ok, url, status, score, scoring, summary, badge, findings, groups, disclosures, coverage }`.
+Read `status` first: `"not-measurable"` means no CSS motion was found and `score` is `null` (not 0, not 100).
+Findings of kind `preload-candidate` (loading indicators) are `review` items with no score impact.
+`badge` is the literal string `"reduced-motion-safe"` only for a measurable page with zero findings and
+no runtime motion library detected.
 
 ## MCP endpoint
 
@@ -47,4 +50,5 @@ The audit is a static scan of the page HTML, `<style>` blocks and linked stylesh
 evaluate inline `style=""`, `@import`, CSS-in-JS, external JavaScript bundles (GSAP/WAAPI are only
 detected and disclosed as "not audited"), `<video autoplay>`, GIF, Canvas/WebGL, SVG SMIL,
 Lottie/Rive, View Transitions, scroll-driven animations, or flashing (2.3.1). A clean score means
-"nothing found in the loaded CSS", not "this page is accessible".
+"nothing found in the loaded CSS", not "this page is accessible"; a `not-measurable` page means
+"no CSS motion to check", not "safe".
