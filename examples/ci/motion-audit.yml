@@ -6,11 +6,14 @@
 #
 # What it does
 #   1. builds your site, serves the build directory on localhost,
-#   2. runs `motion audit <url> --json` (motionspec 1.2.7, MIT, local — no key, no hosted call)
+#   2. runs `motion audit <url> --json` (motionspec 1.2.8, MIT, local — no key, no hosted call)
 #      for every path you list,
 #   3. compares each result with the checked-in baseline `.motionspec/baseline.json` and fails
 #      when a page got worse. "Worse" uses the same rule as MotionSpec's weekly re-scan diff:
 #      the score fell, OR the number of Level-A findings (WCAG 2.2.2 Pause, Stop, Hide) rose.
+#      Scores are compared only when both runs are measurable and use the same scoring
+#      version: `score` is null when a page has no CSS motion (`status: "not-measurable"`),
+#      and a baseline written by motionspec <= 1.2.7 (scoring v1) is not comparable — re-baseline.
 #      A page with no baseline entry never fails — that run *is* the baseline.
 #
 # Updating the baseline
@@ -46,7 +49,7 @@ env:
   BUILD_DIR: "dist"                 # directory to serve
   AUDIT_PATHS: "/ /pricing"         # space-separated paths to audit
   # -------------------------------------------------------------------------------------
-  MOTIONSPEC_VERSION: "1.2.7"
+  MOTIONSPEC_VERSION: "1.2.8"
   PORT: "4173"
 
 jobs:
@@ -82,7 +85,7 @@ jobs:
             echo "::group::audit ${p}"
             npx -y -p "motionspec@${MOTIONSPEC_VERSION}" motion audit "http://127.0.0.1:${PORT}${p}" --json \
               > ".motionspec/current/${slug}.json"
-            node -e 'const r=require(require("path").resolve(process.argv[1]));console.log(`score ${r.score}/100 · findings ${r.findings.length} · badge ${r.badge||"-"}`);for(const d of r.disclosures||[])console.log("  note: "+d)' ".motionspec/current/${slug}.json"
+            node -e 'const r=require(require("path").resolve(process.argv[1]));console.log(`${r.status||"-"} · score ${r.score==null?"n/a":r.score+"/100"} · findings ${(r.findings||[]).length} · badge ${r.badge||"-"}`);for(const d of r.disclosures||[])console.log("  note: "+d)' ".motionspec/current/${slug}.json"
             echo "::endgroup::"
           done
 
@@ -94,17 +97,24 @@ jobs:
           const LEVEL_A = "WCAG 2.2.2";                       // Pause, Stop, Hide — Level A
           const key = (f) => f.selector + " | " + f.rule;     // identity of a finding
           const shape = (r) => ({
+            status: r.status || null,
+            scoring: r.scoring || null,
             score: r.score,
             mandatory_a_count: r.findings.filter((f) => String(f.wcag).startsWith(LEVEL_A)).length,
             findings: r.findings.map(key).sort(),
           });
           // Same rule as the weekly re-scan diff (istRueckschritt): worse = score fell OR Level-A count rose.
+          // Scores compare only when both are numbers from the same scoring version
+          // (score is null for a not-measurable page; a v1 baseline has no `scoring`).
           const regressed = (now, before) => {
-            if (!before) return { regressed: false, reasons: ["no baseline entry — this run is the baseline"] };
-            const reasons = [];
-            if (now.score < before.score) reasons.push(`score ${before.score} -> ${now.score}`);
+            if (!before) return { regressed: false, reasons: [], notes: ["no baseline entry — this run is the baseline"] };
+            const reasons = [], notes = [];
+            const comparable = typeof now.score === "number" && typeof before.score === "number" && now.scoring === before.scoring;
+            if (comparable && now.score < before.score) reasons.push(`score ${before.score} -> ${now.score}`);
+            if (!comparable) notes.push(`score not compared (baseline ${before.scoring || "v1"}/${before.status || "measured"}, now ${now.scoring || "v1"}/${now.status || "measured"})` +
+              (now.scoring !== before.scoring ? " — scoring changed, re-baseline" : ""));
             if (now.mandatory_a_count > before.mandatory_a_count) reasons.push(`Level-A findings ${before.mandatory_a_count} -> ${now.mandatory_a_count}`);
-            return { regressed: reasons.length > 0, reasons };
+            return { regressed: reasons.length > 0, reasons, notes };
           };
           const baselineFile = ".motionspec/baseline.json";
           const baseline = fs.existsSync(baselineFile) ? JSON.parse(fs.readFileSync(baselineFile, "utf8")) : { pages: {} };
@@ -118,9 +128,10 @@ jobs:
             const v = regressed(now, before);
             const added = before ? now.findings.filter((k) => !before.findings.includes(k)) : [];
             const removed = before ? before.findings.filter((k) => !now.findings.includes(k)) : [];
-            const line = `${p}: score ${now.score}/100, Level-A findings ${now.mandatory_a_count}, total ${now.findings.length}`;
+            const line = `${p}: score ${now.score == null ? "n/a (" + now.status + ")" : now.score + "/100"}, Level-A findings ${now.mandatory_a_count}, total ${now.findings.length}`;
             if (v.regressed) { failed++; console.log(`::error::${line} — REGRESSION: ${v.reasons.join(" · ")}`); }
-            else console.log(`${line} — ok (${v.reasons.join(" · ") || "unchanged or better"})`);
+            else console.log(`${line} — ok (${v.notes.join(" · ") || "unchanged or better"})`);
+            if (v.regressed && v.notes.length) console.log(`  note: ${v.notes.join(" · ")}`);
             for (const k of added) console.log(`  + new finding: ${k}`);
             for (const k of removed) console.log(`  - fixed: ${k}`);
           }
@@ -140,6 +151,8 @@ jobs:
             const r = JSON.parse(fs.readFileSync(path.join(".motionspec/current", slug + ".json"), "utf8"));
             if (!r.ok) { console.log(`::error::${p}: audit failed (${r.error || "unknown"})`); process.exit(1); }
             out.pages[p] = {
+              status: r.status || null,
+              scoring: r.scoring || null,
               score: r.score,
               mandatory_a_count: r.findings.filter((f) => String(f.wcag).startsWith(LEVEL_A)).length,
               findings: r.findings.map((f) => f.selector + " | " + f.rule).sort(),

@@ -52,22 +52,32 @@ The npm package installs two executables: `motion` (the CLI) and `motionspec` (t
 ```bash
 # Compile — this is also the validator: an invalid spec is rejected fail-closed with
 # [MS-XXX] errors and exit code 1, and nothing is written.
-npx -p motionspec@1.2.7 motion compile spec.motionspec.json      # → ./out/*.motion.js + .css
+npx -p motionspec@1.2.8 motion compile spec.motionspec.json      # → ./out/*.motion.js + .css
 
 # List the 40 primitives and the catalog version
-npx -p motionspec@1.2.7 motion catalog
+npx -p motionspec@1.2.8 motion catalog
 
 # Audit a live URL (static scan). --json gives a stable machine payload.
-npx -p motionspec@1.2.7 motion audit https://example.com --json
+npx -p motionspec@1.2.8 motion audit https://example.com --json
 ```
 
 There is no separate `validate` subcommand in the CLI; validation is the first stage of
 `compile`. Over MCP, validation is its own tool (`motion_validate`, see below).
 
 `audit --json` returns
-`{ ok, url, score, badge, findings: [{ selector, rule, wcag, fix }], summary, disclosures }`.
-`score` is 0–100 (−25 per 2.2.2 finding, −10 per 2.3.3 finding); `badge` is the literal string
-`"reduced-motion-safe"` when there are zero findings, otherwise `null`.
+`{ ok, url, status, score, scoring, scoring_doc, summary, badge, findings, groups, disclosures, coverage }`
+(the same shape as the `motion_audit` MCP tool and the free check at motionspec.dev/motion-check).
+
+- **Read `status` first.** `"measured"` → `score` is 0–100. `"not-measurable"` → the loaded CSS
+  contains no motion, `score` is `null` and there is no badge — do not report that as 0 or 100.
+- `score` (scoring `"v2"`): 100 minus a deduction per root-cause group (same kind + same
+  keyframes/selector family), weighted by severity and dampened for repeated occurrences, with
+  per-category caps; floor 0. `scoring_doc` states the exact rule.
+- `findings[]`: `{ selector, rule, wcag, fix, kind, root, weight?, severity?, note? }`. `kind` is
+  `unguarded`, `risky-props`, `infinite-no-pause`, `autoplay-long`, `marquee` or
+  `preload-candidate` (loading indicator, `severity: "review"`, no score impact — verify by hand).
+- `badge` is the literal string `"reduced-motion-safe"` only for a measurable page with zero
+  findings and no runtime motion library detected; otherwise `null`.
 
 A minimal spec:
 
@@ -110,10 +120,12 @@ Suggested loop for an agent: `motion_catalog` → write the spec → `motion_val
 ## What the audit does NOT check (say so in every report)
 
 The audit is a static scan of the page HTML, `<style>` blocks and `<link rel="stylesheet">`
-sheets (max 20 sheets, 2 MB each, 8 s timeout). It reports four things: CSS animation/transition
-without a reduced-motion guard (2.3.3); animated non-transform/opacity properties (2.3.3);
-`infinite` animation without a pause path (2.2.2); `<marquee>` or autoplay animation > 5 s
-without a pause path (2.2.2).
+sheets (max 12 sheets, 2 MB each, 8 s timeout). It reports four things: CSS animation/transition
+without an effective reduced-motion guard (2.3.3; the guard must win the cascade); animated
+non-transform/opacity properties (2.3.3); `infinite` animation without a pause path (2.2.2);
+`<marquee>` or autoplay animation > 5 s without a pause path (2.2.2). Colour/opacity-only
+transitions are not motion under 2.3.3 and are not reported; loading indicators are listed for
+manual review. A `matchMedia('(prefers-reduced-motion')` check in page JS counts only as a hint.
 
 It does **not** evaluate: inline `style=""` attributes, `@import`ed sheets, CSS-in-JS, external
 JavaScript bundles (GSAP/WAAPI/`requestAnimationFrame` are only *detected* as text signals in the
