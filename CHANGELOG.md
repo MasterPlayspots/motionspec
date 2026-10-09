@@ -13,6 +13,7 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ### Documentation
 - `examples/a11y/`: three reproducible motion-accessibility examples — an endless loop with the WCAG 2.2.2 pause control, interaction-triggered motion with reduced-motion behaviour (2.3.3), and a static audit page whose five cases, runtime-library disclosure and withheld badge are explained. `test/examples-a11y.test.js` pins every stated output.
+- README test count 354 → 358 (badge, status table, command and layout comments), the four tests added with `examples/a11y/`.
 
 ## [1.2.8] - 2026-10-08
 
