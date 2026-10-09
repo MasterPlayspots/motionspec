@@ -1,0 +1,9 @@
+{
+  "specVersion": "1.0",
+  "meta": { "project": "example-interaction", "target": "vanilla-gsap", "createdWith": "example" },
+  "globals": { "respectReducedMotion": true },
+  "motions": [
+    { "id": "card-lift", "primitive": "hoverLift", "target": ".card" },
+    { "id": "cta-press", "primitive": "pressShrink", "target": ".cta" }
+  ]
+}

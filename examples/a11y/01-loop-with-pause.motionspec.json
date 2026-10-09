@@ -1,0 +1,8 @@
+{
+  "specVersion": "1.0",
+  "meta": { "project": "example-loop-with-pause", "target": "vanilla-gsap", "createdWith": "example" },
+  "globals": { "respectReducedMotion": true, "pauseControls": "auto" },
+  "motions": [
+    { "id": "news-ticker", "primitive": "marquee", "target": ".ticker-track", "params": { "duration": 30 } }
+  ]
+}
