@@ -1,0 +1,11 @@
+interface:
+  display_name: "Check CSS motion"
+  short_description: "Check CSS motion on a public website"
+  default_prompt: "Use $audit-motion to check the CSS motion on my public website."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "motionspec"
+      description: "Check public CSS motion and validate motion specifications"
+      transport: "streamable_http"
+      url: "https://api.motionspec.dev/chatgpt/mcp"

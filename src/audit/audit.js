@@ -106,7 +106,9 @@ async function fetchText(url, opts) {
     const reader = res.body && res.body.getReader ? res.body.getReader() : null;
     if (!reader) {
       const text = await res.text();
-      return { ok: true, status: res.status, text: text.slice(0, o.maxBytes) };
+      if (Buffer.byteLength(text, "utf8") > o.maxBytes)
+        return { ok: false, status: res.status, error: "response too large" };
+      return { ok: true, status: res.status, text, finalUrl: res.url || url };
     }
     const chunks = [];
     let total = 0;
@@ -114,11 +116,14 @@ async function fetchText(url, opts) {
       const { done, value } = await reader.read();
       if (done) break;
       total += value.length;
+      if (total > o.maxBytes) {
+        try { await reader.cancel(); } catch (e) { /* ignore */ }
+        return { ok: false, status: res.status, error: "response too large" };
+      }
       chunks.push(value);
-      if (total > o.maxBytes) { try { await reader.cancel(); } catch (e) { /* ignore */ } break; }
     }
     const buf = Buffer.concat(chunks.map((c) => Buffer.from(c)));
-    return { ok: true, status: res.status, text: buf.toString("utf8").slice(0, o.maxBytes) };
+    return { ok: true, status: res.status, text: buf.toString("utf8"), finalUrl: res.url || url };
   } catch (e) {
     /* Do NOT leak the URL into the message; keep it generic + PII-free. */
     return { ok: false, error: e && e.name === "AbortError" ? "timeout" : "fetch failed" };
@@ -155,6 +160,7 @@ function attrValue(tag, name) {
 /* Extract linked stylesheet URLs (<link rel="stylesheet" href=...>). */
 function linkedStylesheets(html, base) {
   const out = [];
+  const seen = new Set();
   const linkRe = /<link\b[^>]*>/gi;
   let m;
   while ((m = linkRe.exec(html)) !== null) {
@@ -163,7 +169,7 @@ function linkedStylesheets(html, base) {
     const val = attrValue(tag, "href");
     if (!val) continue;
     const resolved = resolveHref(val, base);
-    if (resolved && out.indexOf(resolved) === -1) out.push(resolved);
+    if (resolved && !seen.has(resolved)) { seen.add(resolved); out.push(resolved); }
   }
   return out;
 }
@@ -774,7 +780,7 @@ function preloadFix(selector) {
 /**
  * Analyze already-fetched HTML + CSS texts. Pure + deterministic.
  * @param {{url:string, html:string, styles:Array<{href:string,text:string}>,
- *          fetchErrors?:string[]}} input
+ *          fetchErrors?:string[], omittedStylesheets?:number}} input
  * @returns {{status:string, score:number|null, findings:Array, summary:string,
  *            badge:string|null, disclosures:string[], coverage:object}}
  */
@@ -969,8 +975,14 @@ function analyze(input) {
   if (libs.length) disclosures.push("Runtime motion library detected (" + libs.join(", ") + ") — not audited (V2).");
   if (jsGuard) disclosures.push("A JavaScript prefers-reduced-motion check (matchMedia) is present — runtime motion may be guarded; not verified. CSS candidates without a CSS guard are weighted as hints.");
   for (const h of hints) disclosures.push(h + " are in use — treated as a guard hint, not verified per element.");
-  if (input.fetchErrors && input.fetchErrors.length)
-    disclosures.push(input.fetchErrors.length + " resource(s) could not be loaded — partially unaudited.");
+  const failedStylesheets = Array.isArray(input.fetchErrors) ? input.fetchErrors.length : 0;
+  const omittedStylesheets = Number.isSafeInteger(input.omittedStylesheets) && input.omittedStylesheets > 0
+    ? input.omittedStylesheets : 0;
+  const fetchComplete = failedStylesheets === 0 && omittedStylesheets === 0;
+  if (failedStylesheets)
+    disclosures.push(failedStylesheets + " resource(s) could not be loaded — partially unaudited.");
+  if (omittedStylesheets)
+    disclosures.push(omittedStylesheets + " linked stylesheet(s) exceeded the stylesheet limit — partially unaudited.");
   if (guardedRules)
     disclosures.push(guardedRules + " motion rule(s) are covered by a prefers-reduced-motion guard elsewhere in the CSS (cascade-aware match" +
       (universal.anim || universal.trans ? ", universal guard present" : "") + ", " + guards.size + " guarded selector(s)).");
@@ -999,6 +1011,8 @@ function analyze(input) {
   const runtimeSignals = libs.length > 0 || sigs.some((s) => s !== "requestAnimationFrame-Loop");
   if (measurable && findings.length === 0 && runtimeSignals)
     disclosures.push("Badge withheld: runtime motion signals are present and not audited.");
+  if (measurable && findings.length === 0 && !fetchComplete)
+    disclosures.push("Badge withheld: linked CSS coverage is incomplete; the score describes only the loaded CSS.");
 
   /* Score (v1, per finding): start at 100, subtract per finding weighted by
    * kind and by the finding's weight factor (capped at 0). Deterministic.
@@ -1016,7 +1030,7 @@ function analyze(input) {
     if (score < 0) score = 0;
   }
 
-  const badge = (measurable && findings.length === 0 && !runtimeSignals) ? BADGE_SAFE : null;
+  const badge = (measurable && findings.length === 0 && !runtimeSignals && fetchComplete) ? BADGE_SAFE : null;
   const summary = !measurable
     ? "Not measurable: no CSS motion found in the loaded CSS (static scan)."
     : (findings.length === 0
@@ -1025,6 +1039,9 @@ function analyze(input) {
 
   const coverage = {
     stylesheets: sources.length,
+    failed_stylesheets: failedStylesheets,
+    omitted_stylesheets: omittedStylesheets,
+    fetch_complete: fetchComplete,
     rules_scanned: rulesScanned,
     motion_rules: motionRules,
     motion_evidence_rules: motionEvidence,
@@ -1180,7 +1197,14 @@ async function audit(url, opts) {
     return { ok: false, url, error: page.error || "fetch failed" };
   }
   const html = page.text;
-  const hrefs = linkedStylesheets(html, url).slice(0, o.maxStylesheets);
+  /* Redirect metadata comes only from the injected fetch adapter (or the
+   * default fetch Response), never from the downloaded HTML. Resolve linked
+   * sheets and their cascade ordering against the final page location. Every
+   * sheet still goes through the same fetch adapter and its security policy. */
+  const finalUrl = typeof page.finalUrl === "string" ? page.finalUrl : url;
+  const allHrefs = linkedStylesheets(html, finalUrl);
+  const hrefs = allHrefs.slice(0, o.maxStylesheets);
+  const omittedStylesheets = allHrefs.length - hrefs.length;
   const styles = [];
   const fetchErrors = [];
   for (const href of hrefs) {
@@ -1188,7 +1212,7 @@ async function audit(url, opts) {
     if (r.ok) styles.push({ href, text: r.text });
     else fetchErrors.push(href);
   }
-  const result = analyze({ url, html, styles, fetchErrors });
+  const result = analyze({ url: finalUrl, html, styles, fetchErrors, omittedStylesheets });
   return Object.assign({ ok: true, url }, result, { markdown: toMarkdown(result, url) });
 }
 

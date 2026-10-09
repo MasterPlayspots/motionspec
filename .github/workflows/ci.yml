@@ -116,5 +116,9 @@ jobs:
       # file instead of naming one arbitrary missing package. Needs no install.
       - name: Lock file gate (complete, resolvable, matches package.json)
         run: node bin/lockfile-gate.js
+      - name: Portable ChatGPT package contract and archive boundary
+        run: |
+          python3 scripts/build-chatgpt-plugin.py --check
+          python3 -m unittest discover -s test -p 'test_chatgpt_plugin.py'
       - run: npm ci
       - run: npm run lint
