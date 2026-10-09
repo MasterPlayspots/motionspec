@@ -5,7 +5,7 @@
 [![npm](https://img.shields.io/npm/v/motionspec?color=cb3837&label=npm)](https://www.npmjs.com/package/motionspec)
 [![node](https://img.shields.io/node/v/motionspec?color=339933)](https://www.npmjs.com/package/motionspec)
 [![license](https://img.shields.io/npm/l/motionspec)](./LICENSE)
-![tests](https://img.shields.io/badge/tests-358%20passing-brightgreen)
+![tests](https://img.shields.io/badge/tests-360%20passing-brightgreen)
 ![coverage](https://img.shields.io/badge/coverage-97%25%20lines%20·%2095%25%20funcs%20·%2081%25%20branches-brightgreen)
 ![supply chain](https://img.shields.io/badge/runtime%20deps-2%20·%200%20vulns%20·%20SBOM-blue)
 ![MCP Registry](https://img.shields.io/badge/MCP%20Registry-io.github.MasterPlayspots%2Fmotionspec-6f42c1)
@@ -65,11 +65,11 @@ This repo is also a Claude Code plugin: it bundles the MCP server (`npx motionsp
 
 | | |
 |---|---|
-| Version | **v1.2.8** · schema frozen at spec v1 (ADR-0001, signed) |
-| Published | **npm `motionspec`** (104 kB packed, 67 files, nothing dev-only ships) · MCP Registry |
-| Tests | **358 green** — injection attacks, 6000-spec fuzz, golden determinism, schema parity, pause-controls, motion-a11y audit · CI on Node 18/20/22 + x86 Playwright e2e |
+| Version | **v1.2.9** · schema frozen at spec v1 (ADR-0001, signed) |
+| Published | **npm `motionspec`** (105 kB packed, 67 files, nothing dev-only ships) · MCP Registry |
+| Tests | **360 green** — injection attacks, 6000-spec fuzz, golden determinism, schema parity, pause-controls, motion-a11y audit · CI on Node 18/20/22 + x86 Playwright e2e |
 | Catalog | **40 primitives**, every one device-verified, reduced-motion-fallback mandatory; the 18 continuous loops also carry a WCAG-2.2.2 pause path |
-| Supply chain | **2 runtime deps** (MCP SDK, zod — both pinned) · 0 vulnerabilities · CycloneDX SBOM committed · all permissive licenses · CI actions SHA-pinned |
+| Supply chain | **2 runtime deps** (MCP SDK, zod — both pinned) · 0 vulnerabilities · CycloneDX SBOM regenerated and checked in CI · all permissive licenses · CI actions SHA-pinned |
 | Coverage | 97.23% lines / 95.17% functions / 80.82% branches of `src/` (`npm run coverage`, 2026-10-08; CI gate 90/90/75) |
 | Last audit | 2026-07-03 — 17/17 integration handshakes evidenced, infra 8.1/10, security: **0 critical**, full-git-history secret scan clean |
 | First client | CHS Computer — live on Vercel |
@@ -148,7 +148,7 @@ EN 301 549, Section 508, EAA, BFSG, or any other legal framework.
 
 ```bash
 npm ci                                      # install (0 runtime deps beyond MCP SDK + zod)
-npm test                                    # 358 tests: validator, goldens, router, fuzz, parity
+npm test                                    # 360 tests: validator, goldens, router, fuzz, parity
 node bin/motion.js catalog                  # primitives + catalog version
 node bin/motion.js compile examples/hero.motionspec.json
 node bin/motion.js pipeline "Hero headline fades in, cards staggered" --mock
@@ -187,7 +187,7 @@ src/forge/         generate.js · prioritize.js — the gauntlet-verified catalo
 src/discover/      gap analysis: request intents ↔ catalog coverage
 src/demo/          device-verification demo pages (`?rm=1` simulates reduced motion)
 bin/               motion.js (CLI) · promote-gate.js — dev/CI gate scripts stay repo-only
-test/              358 tests incl. injection, fuzz, goldens (GSAP + internal WAAPI lowering), parity; test/e2e (Playwright)
+test/              360 tests incl. injection, fuzz, goldens (GSAP + internal WAAPI lowering), parity; test/e2e (Playwright)
 docs/              ADR records (docs/adr/) and per-primitive reference (docs/primitives/)
 ```
 
