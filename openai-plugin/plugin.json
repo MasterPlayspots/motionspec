@@ -1,0 +1,100 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "motionspec",
+  "version": "0.1.0",
+  "description": "Check public website CSS motion, browse MotionSpec primitives, and validate motion specifications. Static analysis only; no login required.",
+  "author": {
+    "name": "Froeba Sales Solutions UG",
+    "email": "hello@motionspec.dev",
+    "url": "https://motionspec.dev"
+  },
+  "homepage": "https://motionspec.dev",
+  "repository": "https://github.com/MasterPlayspots/motionspec",
+  "license": "MIT",
+  "keywords": [
+    "css",
+    "motion-accessibility",
+    "reduced-motion",
+    "validation",
+    "web-development"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "MotionSpec",
+        "shortDescription": "Check CSS motion",
+        "longDescription": "MotionSpec helps web developers and designers check public website CSS motion, explore available animation primitives, and validate MotionSpec JSON specifications. The website check reads HTML, style blocks and linked stylesheets for reduced-motion and pause-control candidates. It reports its loaded-CSS coverage and returns no numeric score when CSS motion is not measurable. It does not render pages, execute JavaScript, evaluate runtime animation, test flashing, or certify full accessibility or legal compliance. These three tools are free and require no login. Compilation, deployment and account functions are outside this plugin version.",
+        "developerName": "Froeba Sales Solutions UG",
+        "category": "Developer Tools",
+        "capabilities": [
+          "Check public CSS motion",
+          "Browse motion primitives",
+          "Validate motion specifications"
+        ],
+        "websiteURL": "https://motionspec.dev",
+        "supportURL": "https://github.com/MasterPlayspots/motionspec/issues",
+        "privacyPolicyURL": "https://motionspec.dev/privacy",
+        "termsOfServiceURL": "https://motionspec.dev/agb",
+        "defaultPrompt": [
+          "Check CSS motion on my public website.",
+          "Show me the available motion primitives.",
+          "Validate my MotionSpec JSON specification."
+        ],
+        "composerIcon": "./assets/logo.png",
+        "logo": "./assets/logo.png"
+      },
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "P1: Find static motion candidates on an unguarded page",
+              "prompt": "Check the CSS motion at https://motionspec.dev/review/chatgpt-v1/a-unguarded.html and explain the fixes.",
+              "tools_triggered": "motion_audit",
+              "expected_behavior": "Return a measured CSS result with numeric score, reduced-motion and infinite-animation pause candidates. Explain that runtime motion and flashing were not tested and this is not certification."
+            },
+            {
+              "description": "P2: Report guarded finite CSS motion with its limits",
+              "prompt": "Check https://motionspec.dev/review/chatgpt-v1/b-reduced-motion.html for CSS motion and explain what the result does and does not prove.",
+              "tools_triggered": "motion_audit",
+              "expected_behavior": "Return a measured result for finite transform animation with an effective reduced-motion guard; report the actual score and badge only if present. Describe loaded-CSS coverage without claiming website certification."
+            },
+            {
+              "description": "P3: Preserve the no-CSS-motion result",
+              "prompt": "Check https://motionspec.dev/review/chatgpt-v1/c-no-css-motion.html and explain its motion score.",
+              "tools_triggered": "motion_audit",
+              "expected_behavior": "Report status not-measurable and score null because no CSS motion is loaded. Do not substitute 0, 100 or a passing result. Mention runtime-motion coverage limits."
+            },
+            {
+              "description": "P4: Browse the scrollReveal catalog primitive",
+              "prompt": "Use MotionSpec to show the scrollReveal primitive and explain its parameters and reduced-motion fallback.",
+              "tools_triggered": "motion_catalog",
+              "expected_behavior": "Return scrollReveal from the actual catalog, including its required from parameter, supported bounds and reduced-motion fallback. Do not invent a primitive, compile code or claim website certification."
+            },
+            {
+              "description": "P5: Explain a rejected MotionSpec primitive",
+              "prompt": "Validate this exact MotionSpec JSON without changing it first: {\"specVersion\":\"1.0\",\"meta\":{\"target\":\"vanilla-gsap\"},\"motions\":[{\"id\":\"hero\",\"primitive\":\"notInCatalog\",\"target\":\".hero\"}]}",
+              "tools_triggered": "motion_validate",
+              "expected_behavior": "Return ok false with the actual validation error for notInCatalog. Explain the invalid primitive, do not silently replace it or say the spec passed."
+            }
+          ],
+          "negative": [
+            {
+              "description": "N1: Unsupported video generation",
+              "prompt": "Use MotionSpec to generate a 30-second promotional video."
+            },
+            {
+              "description": "N2: Unrelated calendar action",
+              "prompt": "Use MotionSpec to create a calendar appointment for tomorrow."
+            },
+            {
+              "description": "N3: No certification without testing",
+              "prompt": "Issue a full WCAG accessibility certificate for my website without testing it."
+            }
+          ]
+        },
+        "commerce": false,
+        "commerce_description": "The three included tools are free and do not sell products or process payments."
+      }
+    }
+  }
+}

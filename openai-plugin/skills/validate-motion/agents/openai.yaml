@@ -1,0 +1,11 @@
+interface:
+  display_name: "Validate a motion spec"
+  short_description: "Choose primitives and validate a motion spec"
+  default_prompt: "Use $validate-motion to draft and validate a MotionSpec JSON spec."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "motionspec"
+      description: "Check public CSS motion and validate motion specifications"
+      transport: "streamable_http"
+      url: "https://api.motionspec.dev/chatgpt/mcp"

@@ -1,0 +1,95 @@
+{
+  "package": "motionspec",
+  "version": "0.1.0",
+  "local_package_checks": "passed",
+  "check_scope": "Documented MotionSpec package contract; not full OpenAI server-side schema/import validation",
+  "deterministic_zip": "passed",
+  "zip_sha256": "e01419d0c745f1ecf9a143351f50a2cf3e1feb6f351aaad6fb0e219e17f6eef0",
+  "zip_bytes": 18780,
+  "remote_endpoint": "https://api.motionspec.dev/chatgpt/mcp",
+  "live_mcp_tests": "not-run",
+  "chatgpt_review_cases": "not-run",
+  "openai_upload_validation": "not-run",
+  "public_submission": "not-performed",
+  "files": {
+    "LICENSE": "7a37666a79f62b1b99bc127afdff0e6a3dbda7d2d1166cf1e8f9df90bdbd3c27",
+    "assets/logo.png": "dd34ebcbce79286910e2cd4b8b306645e2919f27ce47e58927005632cd41a208",
+    "mcp.json": "064e18b4d8ac5c7f0871fb9be2286dc168a63a622566473e78597e748b9f6f03",
+    "plugin.json": "705e6a973989c669801c3be4e114f3d4fbc000585ade1af6c492de6c066bb8c3",
+    "skills/audit-motion/SKILL.md": "455840bc46b9295d477dfe4c16dae96846d5460c7b16a01d21a56c899fe7b3ad",
+    "skills/audit-motion/agents/openai.yaml": "2fc33c0701dfcd941cfe1c96e82a6cceb69860c7c3412621fdddead297f028b6",
+    "skills/validate-motion/SKILL.md": "369accddfb86622ece92e25c3ad287b27b6e67fefa4b7f0cf744925f52472975",
+    "skills/validate-motion/agents/openai.yaml": "ec82c5bb904253a36172928754991a97b772e62e6f382fb3853b4b96b9b8583d"
+  },
+  "checked_on": "2026-10-09",
+  "base_commit": "8020969cda54a9e6deda2161a37f8bf30555783d",
+  "commands": [
+    {
+      "command": "python3 -m unittest discover -s test -p test_chatgpt_plugin.py",
+      "status": "passed",
+      "tests": 6
+    },
+    {
+      "command": "python3 scripts/build-chatgpt-plugin.py",
+      "status": "passed",
+      "description": "Eight-file allowlisted ZIP, deterministic rebuild, MIT license preservation"
+    },
+    {
+      "command": "quick_validate.py openai-plugin/skills/audit-motion; quick_validate.py openai-plugin/skills/validate-motion",
+      "status": "passed",
+      "tests": 2
+    },
+    {
+      "command": "node --test test/audit-coverage.test.mjs",
+      "status": "passed",
+      "tests": 8
+    },
+    {
+      "command": "node scripts/check-shared-core.js <authoritative-internal-checkout>",
+      "status": "passed",
+      "checked": 65,
+      "byteIdentical": 64,
+      "codeIdentical": 1,
+      "canonicalSha256": "c442384db2eebe9b84103cdc818c2e3faed3cdeb221f02c9279c18582cb15620"
+    },
+    {
+      "command": "npm test",
+      "status": "passed",
+      "tests": 368,
+      "skipped": 0,
+      "runtime": "Node v24.19.0",
+      "scope": "Local suite; includes mocked/local transport tests, not public endpoint or ChatGPT review"
+    },
+    {
+      "command": "npm run lint",
+      "status": "passed"
+    }
+  ],
+  "skill_forward_check": {
+    "status": "passed",
+    "scope": "Offline instruction behavior on supplied synthetic tool response, not live MCP",
+    "case": "not-measurable/null with failed stylesheet and request for WCAG certification",
+    "observed": "Kept score null, disclosed failed stylesheet, rejected certification, distinguished runtime/flash limits."
+  },
+  "local_fixture_oracles": {
+    "source": "Website fixture agent local shared-engine execution, not deployed",
+    "P1": {
+      "status": "measured",
+      "score": 72,
+      "findingKinds": [
+        "unguarded",
+        "infinite-no-pause"
+      ]
+    },
+    "P2": {
+      "status": "measured",
+      "score": 100,
+      "findings": 0
+    },
+    "P3": {
+      "status": "not-measurable",
+      "score": null,
+      "badge": null
+    }
+  }
+}
