@@ -8,6 +8,8 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ## [Unreleased]
 
+## [1.2.9] - 2026-10-09
+
 ### Fixed
 - MCP access notices now describe their actual keyless behavior: no compile, URL fetch, audit or usage read. Hosted gating and read-only/closed-world annotations remain intact.
 - Upgrade guidance offers the matching free local command for compile, audit and local telemetry, with hosted/local usage scope made explicit.
@@ -18,7 +20,8 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ### Documentation
 - `examples/a11y/`: three reproducible motion-accessibility examples — an endless loop with the WCAG 2.2.2 pause control, interaction-triggered motion with reduced-motion behaviour (2.3.3), and a static audit page whose five cases, runtime-library disclosure and withheld badge are explained. `test/examples-a11y.test.js` pins every stated output.
-- README test count 354 → 358 (badge, status table, command and layout comments), the four tests added with `examples/a11y/`.
+- README test count updated to 360, including the accessibility examples and MCP access-contract regression tests.
+- README package size refreshed from the 1.2.9 pack preview; the SBOM description now reflects this repository's generated-and-checked CI policy.
 
 ## [1.2.8] - 2026-10-08
 
