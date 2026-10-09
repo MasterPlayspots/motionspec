@@ -1,7 +1,7 @@
 "use strict";
 /*
  * register-tools — runtime-agnostic registration of the MotionSpec MCP tools
- * (phase C / C2).  Registers the four motion_ tools on a provided
+ * (phase C / C2).  Registers the five motion_ tools on a provided
  * McpServer.  NO stdio/process/createRequire assumptions: the caller
  * injects the catalog state (getCatalog/getCatVer); transport, catalog
  * reload and logging belong to the respective entrypoint (stdio: server.mjs,
@@ -60,6 +60,11 @@ const CHECK_URL = "motionspec.dev/motion-check";
 const KEYS_URL = "motionspec.dev/pricing?src=mcp";
 function keysUrlFor(tool) { return "https://" + KEYS_URL + "-" + tool; }
 const LOCAL_COMPILE_CMD = "npx -p motionspec motion compile <spec.json>";
+const LOCAL_ALTERNATIVES = {
+  motion_compile: "motion_compile runs locally for free with '" + LOCAL_COMPILE_CMD + "' (MIT).",
+  motion_audit: "Run the static URL audit locally for free with 'npx -p motionspec motion audit <url> --json' (MIT).",
+  motion_stats: "Read local telemetry for free with 'npx -p motionspec motion stats' (MIT). This reads this machine's local activity, not hosted usage.",
+};
 /* Dev Key is a SUBSCRIPTION ($39 per month, cancel anytime — /pricing, llms.txt),
  * never a one-off. The earlier "($39)" read as a one-time price next to
  * "($249/mo)"; `billing:"one-time"` in upgradeInfo() said so outright. */
@@ -75,24 +80,23 @@ function upgradeInfo(tool) {
     ],
     url,
     header: "x-motionspec-key",
-    freeLocalAlternative: "motion_compile runs locally for free: '" + LOCAL_COMPILE_CMD + "' (MIT).",
+    freeLocalAlternative: LOCAL_ALTERNATIVES[tool],
     selfServeCheckoutNotAutomatable: true,
     forAgents: "Unlocking " + tool + " needs a human with a payment method at " + url + ". Do not fetch that URL yourself or attempt checkout \u2014 surface this to your user/operator and stop.",
   };
 }
 function paywallHint(tool) {
-  const free = tool === "motion_stats"
-    ? "Free alternatives: motion_validate here and the free site check at " + CHECK_URL + "."
-    : "Free alternatives: motion_validate here, the free site check at " + CHECK_URL +
-      ", and motion_compile runs locally for free with '" + LOCAL_COMPILE_CMD + "' (MIT).";
-  return tool + " requires " + PAYWALL_PLANS + ": " + KEYS_URL + ". " + free;
+  return tool + " requires " + PAYWALL_PLANS + " on the hosted endpoint: " + KEYS_URL + ". " +
+    LOCAL_ALTERNATIVES[tool] + " Also free: motion_validate here and the site check at " + CHECK_URL + ".";
 }
 
-/* tools/list description of a stub: same facts, in front of the real description. */
-function paywallDescription(tool, description) {
-  return "Requires " + PAYWALL_PLANS + " on the hosted endpoint (" + KEYS_URL + ")" +
-    (tool === "motion_compile" ? "; runs locally for free with '" + LOCAL_COMPILE_CMD + "' (MIT)" : "") +
-    ". " + description;
+/* Describe the registered handler, not the gated operation. In particular the
+ * audit stub never fetches a URL, matching its openWorldHint:false annotation. */
+function paywallDescription(tool) {
+  return "Requires " + PAYWALL_PLANS + " on the hosted endpoint (" + KEYS_URL + "). " +
+    "This unauthenticated call returns access information only; it does not compile code, fetch URLs, run an audit or read usage data. " +
+    "Arguments are optional and unused. Returns isError:true with structuredContent {ok:false, error:'PAYWALL', tool, upgrade} and text guidance. " +
+    "To use " + tool + " on the hosted endpoint, connect with an x-motionspec-key header. " + LOCAL_ALTERNATIVES[tool];
 }
 
 /* U04 — WHO pressed the door handle. The hosted worker is stateless: a
@@ -169,7 +173,7 @@ function auditResult(res, engine) {
   };
 }
 
-/* Registers the four tools.  deps.getCatalog()/getCatVer() always return the
+/* Registers the five tools.  deps.getCatalog()/getCatVer() always return the
  * CURRENT catalog (stdio can reload via SIGHUP; the worker serves the
  * bundled catalog statically). deps.auditFetchImpl (optional) replaces the
  * network layer of motion_audit — tests inject fixtures, a worker may inject a
@@ -191,7 +195,7 @@ function registerMotionspecTools(server, deps) {
    *
    * Now the denied tool IS registered — as a STUB that performs NO work and
    * returns nothing but the pointer to the free check and the key page. It never
-   * calls the real handler, never sets structuredContent, and keeps isError:true
+   * calls the real handler, returns structured upgrade information, and keeps isError:true
    * so no agent can mistake the hint for a result. Callers that want the old
    * silent behaviour pass deps.paywallStub === false. */
   const only = deps.only;
@@ -204,7 +208,7 @@ function registerMotionspecTools(server, deps) {
       name,
       {
         title: spec.title,
-        description: paywallDescription(name, spec.description),
+        description: paywallDescription(name),
         inputSchema: optionalShape(spec.inputSchema),
         /* The stub itself does nothing at all: read-only and no network, no matter
          * what the real tool would do (motion_audit does I/O — the stub does not). */
@@ -291,7 +295,7 @@ function registerMotionspecTools(server, deps) {
     {
       title: "Compile a MotionSpec to GSAP/CSS",
       description:
-        "Validates (fail-closed) and deterministically compiles a MotionSpec into production-ready vanilla-GSAP JavaScript and CSS, with enforced prefers-reduced-motion fallbacks and a performance-budget report. Same spec always yields identical code. Returns {ok, js, css, report} or {ok:false, errors}.",
+        "Validates (fail-closed) and deterministically compiles a MotionSpec into vanilla-GSAP JavaScript and CSS, with prefers-reduced-motion enabled by default and a performance-budget report. Same spec always yields identical code. Returns {ok:true, js, css, warnings, report, catalogVersion} or {ok:false, errors, catalogVersion}; css may be null when no CSS is emitted. Read warnings before shipping: explicitly disabling reduced-motion or loop pause controls can compile with accessibility warnings. Does not write files or execute the emitted code.",
       inputSchema: {
         spec: z.record(z.string(), z.any()).describe("The MotionSpec JSON object"),
         specName: z.string().regex(/^[A-Za-z0-9_-]{1,64}$/).optional().describe("Optional name used in the artifact header"),
@@ -319,7 +323,7 @@ function registerMotionspecTools(server, deps) {
     {
       title: "Audit a live URL for motion accessibility (WCAG 2.2.2 / 2.3.3)",
       description:
-        "Static motion-a11y checker: fetches a URL's HTML + linked stylesheets and scans the CSS for (1) animation/transition that moves without an effective (cascade-aware) prefers-reduced-motion guard, (2) animated non-transform/opacity properties, (3) infinite animations with no pause path, (4) <marquee>/autoplay >5s. Colour/opacity-only transitions are not motion (WCAG 2.3.3). Same engine and scoring as the free site check at " + CHECK_URL + ". Returns {ok, score|null, status, findings, groups, summary, badge, disclosures, coverage, markdown}; pages without CSS motion return status 'not-measurable' with score null (runtime motion such as WAAPI/GSAP/WebGL is not audited); loading indicators (spinners, skeletons) are reported as 'review', not as violations. A clean, measurable page earns the badge 'reduced-motion-safe'. Does network I/O (openWorldHint).",
+        "Static motion-a11y checker: fetches a URL's HTML + linked stylesheets (up to 12 sheets, 2 MB per response, 8 s timeout) and scans the CSS for (1) animation/transition that moves without an effective (cascade-aware) prefers-reduced-motion guard, (2) animated non-transform/opacity properties, (3) infinite animations with no pause path, (4) <marquee>/autoplay >5s. Colour/opacity-only transitions are not motion (WCAG 2.3.3). Uses scoring v2. Same engine and scoring as the free site check at " + CHECK_URL + ". Returns structuredContent {ok, url, status, score, scoring, scoring_doc, findings, groups, summary, badge, disclosures, coverage} plus a Markdown report in text content, or {ok:false, error} with isError:true on failure. Read status first: pages without CSS motion return status 'not-measurable' with score null; runtime motion such as WAAPI/GSAP/WebGL is not audited. Loading indicators are reported as 'review', not as violations; verify them manually. The 'reduced-motion-safe' badge requires a measurable page with zero findings and no detected runtime motion library. Does network I/O (openWorldHint).",
       inputSchema: { url: z.string().describe("The page URL to audit (http/https).") },
       annotations: { readOnlyHint: true, openWorldHint: true },
     },

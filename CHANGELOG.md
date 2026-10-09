@@ -8,6 +8,11 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ## [Unreleased]
 
+### Fixed
+- MCP access notices now describe their actual keyless behavior: no compile, URL fetch, audit or usage read. Hosted gating and read-only/closed-world annotations remain intact.
+- Upgrade guidance offers the matching free local command for compile, audit and local telemetry, with hosted/local usage scope made explicit.
+- Enabled compile/audit descriptions document reduced-motion defaults and warnings, nullable CSS, scoring v2 and Markdown text output accurately.
+
 ### Security
 - Dev toolchain only: `brace-expansion` 5.0.9 → 5.0.12 (pulled in by `eslint` → `minimatch`) fixes three denial-of-service advisories on crafted brace patterns ([GHSA-qhr7-859c-m2p7](https://github.com/advisories/GHSA-qhr7-859c-m2p7), [GHSA-6j4f-fj2g-mc7p](https://github.com/advisories/GHSA-6j4f-fj2g-mc7p), [GHSA-q2hr-2g5m-vwhr](https://github.com/advisories/GHSA-q2hr-2g5m-vwhr)). Not part of the published package; `npm audit --omit=dev` was already clean.
 
