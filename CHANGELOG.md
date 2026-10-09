@@ -8,6 +8,9 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ## [Unreleased]
 
+### Security
+- Dev toolchain only: `brace-expansion` 5.0.9 → 5.0.12 (pulled in by `eslint` → `minimatch`) fixes three denial-of-service advisories on crafted brace patterns ([GHSA-qhr7-859c-m2p7](https://github.com/advisories/GHSA-qhr7-859c-m2p7), [GHSA-6j4f-fj2g-mc7p](https://github.com/advisories/GHSA-6j4f-fj2g-mc7p), [GHSA-q2hr-2g5m-vwhr](https://github.com/advisories/GHSA-q2hr-2g5m-vwhr)). Not part of the published package; `npm audit --omit=dev` was already clean.
+
 ### Documentation
 - `examples/a11y/`: three reproducible motion-accessibility examples — an endless loop with the WCAG 2.2.2 pause control, interaction-triggered motion with reduced-motion behaviour (2.3.3), and a static audit page whose five cases, runtime-library disclosure and withheld badge are explained. `test/examples-a11y.test.js` pins every stated output.
 
