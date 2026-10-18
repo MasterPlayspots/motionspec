@@ -235,6 +235,74 @@ test('`prefers-reduced-motion: no-preference` is guarded by construction; `not (
   assert.equal(engine.rmContextOf('@media (min-width: 600px)'), null);
 });
 
+/* Fix 2026-10-18: a `reduce` block was counted as coverage by its mere existence —
+ * even when it switches motion ON for exactly the users who asked for less. */
+const REDUCE_RULE = /^Motion enabled inside prefers-reduced-motion: reduce/;
+test('reduce block that ENABLES a transition is not coverage → finding, score < 100, no badge', () => {
+  const r = run('@media (prefers-reduced-motion: reduce){.x:hover{transition:transform 1s}}');
+  assert.equal(r.status, 'measured');
+  assert.equal(r.badge, null);
+  assert.equal(r.findings.length, 1);
+  const f = r.findings[0];
+  assert.equal(f.kind, 'unguarded');
+  assert.match(f.rule, REDUCE_RULE);
+  assert.equal(f.selector, '.x:hover');
+  assert.equal(f.fix, 'Inside @media (prefers-reduced-motion: reduce) switch motion off instead: .x:hover { transition: none; }');
+  assert.equal(r.coverage.guarded_rules, 0);
+  const v2 = engine.groupAndScoreV2(r);
+  assert.ok(v2.score < 100, 'score ' + v2.score);
+  assert.equal(v2.groups.length, 1);
+  assert.match(v2.groups[0].rule, REDUCE_RULE, 'own group, not merged into "Transitions without guard"');
+});
+
+test('reduce block that ENABLES a keyframes animation is not coverage', () => {
+  const r = run('@keyframes slide{to{transform:translateX(40px)}}@media (prefers-reduced-motion: reduce){.x{animation:slide 1s}}');
+  assert.equal(r.badge, null);
+  assert.deepEqual(r.findings.map((f) => f.rule).filter((x) => REDUCE_RULE.test(x)).length, 1);
+  assert.match(r.findings[0].fix, /\.x \{ animation: none; \}/);
+});
+
+test('reduce-block motion ignores JS-guard hint weighting (full weight)', () => {
+  const r = run('@media (prefers-reduced-motion: reduce){.x{transition:transform 1s}}', '<div></div>',
+    "<script>matchMedia('(prefers-reduced-motion: reduce)')</script>");
+  assert.equal(r.findings.length, 1);
+  assert.equal(r.findings[0].weight, undefined);
+});
+
+test('reduce block that DISABLES motion is a guard → score 100 + badge (transition: none, 0.01ms)', () => {
+  for (const css of [
+    '.x:hover{transition:transform 1s}@media (prefers-reduced-motion: reduce){.x:hover{transition:none}}',
+    '.x:hover{transition:transform 1s}@media (prefers-reduced-motion: reduce){.x:hover{transition-duration:0.01ms}}',
+    '@keyframes spin{to{transform:rotate(360deg)}}.x{animation:spin 1s}@media (prefers-reduced-motion: reduce){.x{animation-duration:0.01ms}}',
+    '@keyframes spin{to{transform:rotate(360deg)}}.x{animation:spin 1s}@media (prefers-reduced-motion: reduce){.x{animation:none}}',
+  ]) {
+    const r = run(css);
+    assert.equal(r.status, 'measured', css);
+    assert.equal(r.findings.length, 0, css);
+    assert.equal(r.badge, 'reduced-motion-safe', css);
+    assert.equal(engine.groupAndScoreV2(r).score, 100, css);
+  }
+});
+
+test('reduce-block motion switched off again by a LATER reduce guard is covered (cascade)', () => {
+  const r = run('@media (prefers-reduced-motion: reduce){.x{transition:transform 1s}}@media (prefers-reduced-motion: reduce){.x{transition:none}}');
+  assert.equal(r.findings.length, 0);
+  /* …but an EARLIER guard loses the cascade. */
+  const r2 = run('@media (prefers-reduced-motion: reduce){.x{transition:none}}@media (prefers-reduced-motion: reduce){.x{transition:transform 1s}}');
+  assert.equal(r2.findings.length, 1);
+  assert.match(r2.findings[0].rule, REDUCE_RULE);
+  /* A universal !important reset wins over it too. */
+  const r3 = run('@media (prefers-reduced-motion: reduce){.x{transition:transform 1s}*{transition:none!important}}');
+  assert.equal(r3.findings.length, 0);
+});
+
+test('no-preference block with motion stays coverage (unchanged)', () => {
+  const r = run('@media (prefers-reduced-motion: no-preference){.x:hover{transition:transform 1s}}');
+  assert.equal(r.findings.length, 0);
+  assert.equal(r.badge, 'reduced-motion-safe');
+  assert.equal(engine.groupAndScoreV2(r).score, 100);
+});
+
 test('JS guard hint: matchMedia(prefers-reduced-motion) halves unguarded weight and is disclosed', () => {
   const r = run('.card{transition:transform .3s}', '<div></div>', "<script>if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('rm')}</script>");
   assert.equal(r.coverage.js_guard, true);

@@ -885,15 +885,29 @@ function analyze(input) {
       const inNoPref = r.rmContext === "no-preference";
       const selList = splitSelectorList(r.selector);
       const imp = declImportance(r.body);
+      /* Only `no-preference` is guarded by construction. Motion declared INSIDE a
+       * `reduce` block is served exactly to reduced-motion users — it counts as
+       * covered only if a later (or !important) reduce guard switches it off. */
       const mediaCov = { covered: true, how: "media" };
-      const animCov = animMotion ? ((inReduce || inNoPref) ? mediaCov : coveredBy(guards, universal, selList, "anim", { order: r.order, important: imp.anim })) : null;
-      const transCov = tMotion.length ? ((inReduce || inNoPref) ? mediaCov : coveredBy(guards, universal, selList, "trans", { order: r.order, important: imp.trans })) : null;
+      const animCov = animMotion ? (inNoPref ? mediaCov : coveredBy(guards, universal, selList, "anim", { order: r.order, important: imp.anim })) : null;
+      const transCov = tMotion.length ? (inNoPref ? mediaCov : coveredBy(guards, universal, selList, "trans", { order: r.order, important: imp.trans })) : null;
       const unguardedAnim = !!(animCov && !animCov.covered) && !animNonMotion && !preload;
       const unguardedTrans = !!(transCov && !transCov.covered);
       const hasMotion = (animMotion && !animNonMotion) || tMotion.length > 0;
       if (hasMotion && !unguardedAnim && !unguardedTrans && !preload) guardedRules++;
       if (animMotion || tMotion.length > 0) motionEvidence++;
 
+      /* Check 1a: motion switched ON inside `prefers-reduced-motion: reduce` —
+       * the opposite of a guard. Own root so it is not merged into (and fixed
+       * like) the "wrap it in a reduce block" transition group. JS/Tailwind
+       * hints do not soften it: the CSS itself targets reduced-motion users. */
+      if (inReduce && (unguardedAnim || unguardedTrans)) {
+        const off = unguardedAnim && unguardedTrans ? "animation: none; transition: none;" : (unguardedAnim ? "animation: none;" : "transition: none;");
+        add(r.selector, "Motion enabled inside prefers-reduced-motion: reduce (contradicts the guard)", WCAG_2_3_3,
+          "Inside @media (prefers-reduced-motion: reduce) switch motion off instead: " + r.selector + " { " + off + " }",
+          "unguarded", "reduce-enables:" + (unguardedAnim ? kfRoot : tMotion.join(",")),
+          { severity: "medium", note: "This rule applies only to visitors who asked for reduced motion — and gives them motion." });
+      } else
       /* Check 1: motion not covered by a prefers-reduced-motion guard (cascade-aware). */
       if (unguardedAnim || unguardedTrans) {
         const allOnly = !unguardedAnim && tMotion.length > 0 && tMotion.every((p) => p === "all");
