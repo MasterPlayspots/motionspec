@@ -8,6 +8,8 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ## [Unreleased]
 
+## [1.2.10] - 2026-10-18
+
 ### Fixed
 - Audit: motion declared inside `@media (prefers-reduced-motion: reduce)` no longer counts as reduced-motion coverage by the block's mere existence. Such a rule (e.g. `.x:hover { transition: transform 1s }`) now yields an `unguarded` finding "Motion enabled inside prefers-reduced-motion: reduce" and withholds the badge, unless a later or `!important` reduce guard switches it off again. `no-preference` blocks stay guarded by construction. Pages using this pattern can lose a previously awarded `reduced-motion-safe` badge.
 
