@@ -99,14 +99,16 @@ A minimal spec:
 ## MCP endpoint
 
 - **Hosted, keyless:** `https://api.motionspec.dev/mcp` (streamable HTTP, stateless).
-  Free tools: `motion_catalog`, `motion_validate` — both read-only. Rate limit: 60 requests per
-  10 s per IP.
-- **Hosted, keyed:** `motion_compile`, `motion_audit`, `motion_stats` require a key on the hosted
-  endpoint. Keys: **Dev Key $39/month (1 domain)** or **Agency $249/month (up to 10 domains)** —
-  https://motionspec.dev/pricing. Without a key these tools answer with a short notice instead of
-  a result.
+  Free tools: `motion_catalog`, `motion_validate`, `motion_compile`, `motion_audit`. Rate limit:
+  60 requests per 10 s per IP. `motion_audit` fetches public http(s) pages only (ports 80/443;
+  private and loopback addresses are refused).
+- **Hosted, operator key:** `motion_stats` reports the operator's telemetry of the hosted service,
+  not your usage. Without the key it answers with a short notice instead of a result; for your own
+  local activity use `npx -p motionspec motion stats`.
 - **Local, all five tools, no key:** `npx -y motionspec` runs the same server over stdio on your
-  machine. Compilation is MIT and runs locally — the key only gates the hosted endpoint.
+  machine. Compilation and the audit are MIT and run locally.
+- Free site check: https://motionspec.dev/motion-check. Optional paid Motion Report (9 USD,
+  one-time): https://motionspec.dev/pricing?src=mcp#p-report.
 
 ```bash
 claude mcp add --transport http motionspec https://api.motionspec.dev/mcp   # hosted

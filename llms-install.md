@@ -1,10 +1,10 @@
 # Installing MotionSpec (MCP server)
 
-MotionSpec's MCP server is **hosted** — nothing to build, nothing to install, and **no API key** for the read tools.
+MotionSpec's MCP server is **hosted** — nothing to build, nothing to install, and **no API key**.
 
 - Endpoint: `https://api.motionspec.dev/mcp` (streamable HTTP, stateless)
-- Keyless tools: `motion_catalog`, `motion_validate` — both read-only (`readOnlyHint: true`)
-- Keyed tools on the hosted endpoint (Dev Key): `motion_compile`, `motion_audit`, `motion_stats`
+- Keyless tools: `motion_catalog`, `motion_validate`, `motion_compile` (all read-only, no network access) and `motion_audit` (fetches the public http(s) page you name: `openWorldHint: true`)
+- `motion_stats` reports the operator's telemetry of the hosted service and needs the operator key; for your own local activity use `npx -p motionspec motion stats`
 
 ## Cline
 
@@ -23,7 +23,7 @@ Add to your MCP settings (Settings → MCP Servers → Configure, or `~/.cline/m
 }
 ```
 
-`"type": "streamableHttp"` matters — omitting it falls back to legacy SSE. Both keyless tools are read-only, so `autoApprove` is safe.
+`"type": "streamableHttp"` matters — omitting it falls back to legacy SSE. `motion_catalog` and `motion_validate` are read-only and do no network access, so `autoApprove` is safe for them; `motion_audit` fetches a URL, so approve it per call.
 
 ## Claude Code
 
@@ -41,7 +41,7 @@ Settings → Connectors → Add custom connector → `https://api.motionspec.dev
 npx -y motionspec
 ```
 
-This runs the same server over stdio. Locally the **full** toolset is registered, including `motion_compile` — compilation is MIT-licensed and runs on your machine; the Dev Key only gates the hosted endpoint.
+This runs the same server over stdio. Locally the **full** toolset is registered — compilation and the audit are MIT-licensed and run on your machine, and `motion_stats` reads this machine's local activity.
 
 ```json
 {
@@ -63,7 +63,7 @@ curl -s -X POST https://api.motionspec.dev/mcp \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 ```
 
-Expected: two tools (`motion_catalog`, `motion_validate`), both with `"readOnlyHint": true`. The keyless path is rate-limited (60 requests / 10 s per IP).
+Expected: five tools. `motion_catalog`, `motion_validate` and `motion_compile` carry `"readOnlyHint": true` and `"openWorldHint": false`; `motion_audit` carries `"openWorldHint": true`; `motion_stats` answers without the operator key with a short notice instead of a result. The keyless path is rate-limited (60 requests / 10 s per IP).
 
 ## What the tools do
 

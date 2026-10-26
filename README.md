@@ -19,7 +19,7 @@ The MIT compiler includes reduced-motion handling and loop pause controls by def
 - **Check CSS motion:** audit a URL for reduced-motion and pause-path candidates, then review the reported selectors and suggested fixes.
 - **Prevent regressions:** use the [CI example](examples/ci/motion-audit.yml) to compare findings against an explicitly accepted baseline.
 
-Local stdio MCP exposes all five tools without an API key (`npx -y motionspec`). The hosted endpoint at `https://api.motionspec.dev/mcp` provides keyless `motion_catalog` and `motion_validate`; hosted compile, audit and stats require a key. See the [installation guide](llms-install.md) and [motion accessibility guide](docs/motion-accessibility.md). Docs and product: https://motionspec.dev/docs.
+Local stdio MCP exposes all five tools without an API key (`npx -y motionspec`). The hosted endpoint at `https://api.motionspec.dev/mcp` provides keyless `motion_catalog`, `motion_validate`, `motion_compile` and `motion_audit`; only `motion_stats` (the operator's telemetry of the hosted service) requires the operator key. See the [installation guide](llms-install.md) and [motion accessibility guide](docs/motion-accessibility.md). Docs and product: https://motionspec.dev/docs.
 
 The thesis: **capability lives in the catalog, not the model.** A bigger model can write more elaborate specs, but it can never emit a primitive, parameter, or selector the Trust Boundary hasn't approved. The compiler trusts only what passes.
 
@@ -50,7 +50,7 @@ npm install -g motionspec                    # or take the CLI:
 motion compile spec.json                     # deterministic build → ./out in your cwd
 ```
 
-The host LLM authors the spec; the Trust Boundary stays enforced either way. Listed on the MCP Registry as `io.github.MasterPlayspots/motionspec`. A hosted MCP endpoint is live: keyless `motion_catalog` + `motion_validate` at `https://api.motionspec.dev/mcp` (streamable-http; keyed tiers cover compile/audit/stats) — setup: https://motionspec.dev/docs.
+The host LLM authors the spec; the Trust Boundary stays enforced either way. Listed on the MCP Registry as `io.github.MasterPlayspots/motionspec`. A hosted MCP endpoint is live: keyless `motion_catalog`, `motion_validate`, `motion_compile` and `motion_audit` at `https://api.motionspec.dev/mcp` (streamable-http; `motion_stats` is operator-only) — setup: https://motionspec.dev/docs.
 
 ### Claude Code plugin
 
@@ -73,7 +73,7 @@ This repo is also a Claude Code plugin: it bundles the MCP server (`npx motionsp
 | Coverage | 97.23% lines / 95.17% functions / 80.82% branches of `src/` (`npm run coverage`, 2026-10-08; CI gate 90/90/75) |
 | Last audit | 2026-07-03 — 17/17 integration handshakes evidenced, infra 8.1/10, security: **0 critical**, full-git-history secret scan clean |
 | First client | CHS Computer — live on Vercel |
-| Hosted MCP | **live** — keyless `motion_catalog`/`motion_validate` at api.motionspec.dev/mcp · keyed tier: Cloudflare Worker, per-key gated (hashed keys in KV) · two-stage rate limiting (pre-auth per IP + per key, burst-verified) · per-minute cron canary + external heartbeat (synthetic fault → alert in <5 min, proven on real infra) · Analytics Engine operations telemetry (request bodies, specs and error text are not stored) · gated `/dashboard` |
+| Hosted MCP | **live** — keyless `motion_catalog`/`motion_validate`/`motion_compile`/`motion_audit` at api.motionspec.dev/mcp (audit fetches through a public-URL policy: no private/loopback targets, DoH-checked hosts, manual redirects) · operator-only `motion_stats` · Cloudflare Worker, per-key gated (hashed keys in KV) · two-stage rate limiting (pre-auth per IP + per key, burst-verified) · per-minute cron canary + external heartbeat (synthetic fault → alert in <5 min, proven on real infra) · Analytics Engine operations telemetry (request bodies, specs and error text are not stored) · gated `/dashboard` |
 
 Schema v1 is frozen: `specVersion "1.0"` is the stable public contract; `"0.1"` is deprecated and accepted until v1.2 (a tripwire test enforces the revisit). The `[MS-XXX]` error-code registry is public API — codes are never reused or redefined.
 
@@ -111,7 +111,7 @@ The **Catalog Forge** (CI workflow, manual dispatch) picks the top telemetry-ran
 | `motion_audit` | static motion-a11y check of a live URL (read-only, open-world) |
 | `motion_stats` | telemetry summary (escalations = catalog growth signal) |
 
-Input is size-capped (`MS-INPUT-TOO-LARGE`, 64 KB). The stdio server exposes one tool factory as the single source of truth, contract-tested in `test/mcp.test.mjs`. A hosted MCP endpoint is live: keyless `motion_catalog` + `motion_validate` at `https://api.motionspec.dev/mcp`; keyed tiers cover compile/audit/stats.
+Input is size-capped (`MS-INPUT-TOO-LARGE`, 64 KB). The stdio server exposes one tool factory as the single source of truth, contract-tested in `test/mcp.test.mjs`. A hosted MCP endpoint is live: keyless `motion_catalog`, `motion_validate`, `motion_compile` and `motion_audit` at `https://api.motionspec.dev/mcp`; `motion_stats` (operator telemetry) needs the operator key.
 
 ## Motion-a11y checker
 
@@ -148,7 +148,7 @@ EN 301 549, Section 508, EAA, BFSG, or any other legal framework.
 
 ```bash
 npm ci                                      # install (0 runtime deps beyond MCP SDK + zod)
-npm test                                    # 374 tests: validator, goldens, router, fuzz, parity
+npm test                                    # 376 tests: validator, goldens, router, fuzz, parity
 node bin/motion.js catalog                  # primitives + catalog version
 node bin/motion.js compile examples/hero.motionspec.json
 node bin/motion.js pipeline "Hero headline fades in, cards staggered" --mock
@@ -187,7 +187,7 @@ src/forge/         generate.js · prioritize.js — the gauntlet-verified catalo
 src/discover/      gap analysis: request intents ↔ catalog coverage
 src/demo/          device-verification demo pages (`?rm=1` simulates reduced motion)
 bin/               motion.js (CLI) · promote-gate.js — dev/CI gate scripts stay repo-only
-test/              374 tests incl. injection, fuzz, goldens (GSAP + internal WAAPI lowering), parity; test/e2e (Playwright)
+test/              376 tests incl. injection, fuzz, goldens (GSAP + internal WAAPI lowering), parity; test/e2e (Playwright)
 docs/              ADR records (docs/adr/) and per-primitive reference (docs/primitives/)
 ```
 
