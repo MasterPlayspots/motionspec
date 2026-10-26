@@ -39,64 +39,69 @@ const AUTHORING_RULES = [
 /* Catalog summary from the shared source (TASK-026). */
 const { catalogSummary } = require("../compiler/catalog.js");
 
-/* W1 → U04 (2026-09-04) — the keyless answer for a keyed tool. It now says what
- * the key costs and, above all, which routes are FREE: motion_validate on this
- * very server, the site check, and — for motion_compile — the local CLI. The W1
- * wording ("requires a key. Free check … Keys …") named two URLs and hid that
- * the compiler is MIT and runs locally for nothing; an agent that needed compile
- * hit a wall.
+/* 2026-10-26 — no subscriptions any more. The Dev Key and Agency plans are off
+ * sale (decision of 26.10.2026); motion_compile and motion_audit are free on the
+ * hosted endpoint too. No agent-facing text names a subscription or a key price:
+ * where the price page used to be offered for keys, the texts now name the free
+ * site check and the one paid item that is left, the Motion Report (9 USD,
+ * one-time, anchor #p-report on the price page).
  *
  * The npm bin `motionspec` starts the stdio MCP server; the CLI bin is `motion`.
  * `npx motionspec compile x.json` therefore compiles NOTHING (measured
  * 2026-09-04 against motionspec@1.2.7: prints "[motionspec-mcp] ready", no out/).
  * Hence `npx -p motionspec motion compile <spec.json>` — verified the same day. */
-const CHECK_URL = "motionspec.dev/motion-check";
-/* Attribution (11.09.2026). The price page is attributed BY CONSTRUCTION — there
- * is no bare price-page literal (without ?src=) left in agent-facing code. The
- * site reads `?src=` from the landing URL, so a key bought after an agent relayed
- * the link can be attributed to the MCP channel. Texts say `mcp`, the structured
- * upgrade block says `mcp-<tool>` (keysUrlFor); both survive the site's cleaning
- * ([^A-Za-z0-9_-] stripped, max. 60) unchanged. */
-const KEYS_URL = "motionspec.dev/pricing?src=mcp";
-function keysUrlFor(tool) { return "https://" + KEYS_URL + "-" + tool; }
+const CHECK_URL = "https://motionspec.dev/motion-check";
+/* Attribution. The price page is attributed BY CONSTRUCTION — there is no bare
+ * price-page literal (without ?src=) left in agent-facing code. The site reads
+ * `?src=` from the landing URL, so a report bought after an agent relayed the
+ * link can be attributed to the MCP channel. Every report link in this file says
+ * `mcp-<tool>` (reportUrlFor); the longest, `mcp-motion_validate` (19
+ * characters), survives the site's strictest cleaning ([^A-Za-z0-9_-] stripped,
+ * max. 20) unchanged. The #p-report fragment is not part of `src`. */
+const PRICING_SRC_URL = "https://motionspec.dev/pricing?src=mcp";
+function reportUrlFor(tool) { return PRICING_SRC_URL + "-" + tool + "#p-report"; }
+const REPORT_OFFER = Object.freeze({ id: "motion-report", label: "Motion Report", price_usd: 9, billing: "one-time" });
 const LOCAL_COMPILE_CMD = "npx -p motionspec motion compile <spec.json>";
 const LOCAL_ALTERNATIVES = {
   motion_compile: "motion_compile runs locally for free with '" + LOCAL_COMPILE_CMD + "' (MIT).",
   motion_audit: "Run the static URL audit locally for free with 'npx -p motionspec motion audit <url> --json' (MIT).",
-  motion_stats: "Read local telemetry for free with 'npx -p motionspec motion stats' (MIT). This reads this machine's local activity, not hosted usage.",
+  motion_stats: "For your own local activity use 'npx -p motionspec motion stats' (MIT). It reads this machine's local activity, not hosted usage.",
 };
-/* Dev Key is a SUBSCRIPTION ($39 per month, cancel anytime — /pricing, llms.txt),
- * never a one-off. The earlier "($39)" read as a one-time price next to
- * "($249/mo)"; `billing:"one-time"` in upgradeInfo() said so outright. */
-const PAYWALL_PLANS = "a Dev Key ($39/mo) or Agency plan ($249/mo)";
+/* Why a stubbed tool does no work. motion_stats is the only tool the hosted
+ * endpoint still keeps behind its key: it reports the OPERATOR's telemetry of the
+ * hosted service, not the caller's own usage, and it is not a product. Its
+ * answer therefore names no price and no plan, only the local command. */
+const STUB_REASONS = {
+  motion_stats: "motion_stats is not available without the operator key — operator telemetry; for your own local activity use 'npx -p motionspec motion stats'.",
+};
 
+/* The `upgrade` block of motion_catalog/motion_validate: optional, never needed
+ * by any tool. One one-time item, one attributed URL, and the free check. */
 function upgradeInfo(tool) {
-  const url = keysUrlFor(tool);
+  const url = reportUrlFor(tool);
   return {
-    requiredFor: ["motion_compile", "motion_audit", "motion_stats"],
-    plans: [
-      { id: "dev-key", label: "Dev Key", price_usd: 39, billing: "monthly" },
-      { id: "agency", label: "Agency plan", price_usd: 249, billing: "monthly" },
-    ],
+    freeCheck: CHECK_URL,
+    plans: [Object.assign({}, REPORT_OFFER)],
     url,
-    header: "x-motionspec-key",
-    freeLocalAlternative: LOCAL_ALTERNATIVES[tool],
     selfServeCheckoutNotAutomatable: true,
-    forAgents: "Unlocking " + tool + " needs a human with a payment method at " + url + ". Do not fetch that URL yourself or attempt checkout \u2014 surface this to your user/operator and stop.",
+    forAgents: "Optional, not required by any tool: a human with a payment method can buy the Motion Report (9 USD, one-time) at " + url +
+      ". Do not fetch that URL yourself or attempt checkout. The free site check is at " + CHECK_URL + ".",
   };
 }
-function paywallHint(tool) {
-  return tool + " requires " + PAYWALL_PLANS + " on the hosted endpoint: " + KEYS_URL + ". " +
-    LOCAL_ALTERNATIVES[tool] + " Also free: motion_validate here and the site check at " + CHECK_URL + ".";
+function stubHint(tool) {
+  return STUB_REASONS[tool] || (tool + " is not enabled without a key on this endpoint. " + LOCAL_ALTERNATIVES[tool]);
 }
 
 /* Describe the registered handler, not the gated operation. In particular the
  * audit stub never fetches a URL, matching its openWorldHint:false annotation. */
-function paywallDescription(tool) {
-  return "Requires " + PAYWALL_PLANS + " on the hosted endpoint (" + KEYS_URL + "). " +
+function stubDescription(tool) {
+  const why = tool === "motion_stats"
+    ? "Operator telemetry of the hosted service (not your own usage); needs the operator key (header x-motionspec-key). "
+    : "Not enabled without a key (header x-motionspec-key) on this endpoint. ";
+  return why +
     "This unauthenticated call returns access information only; it does not compile code, fetch URLs, run an audit or read usage data. " +
-    "Arguments are optional and unused. Returns isError:true with structuredContent {ok:false, error:'PAYWALL', tool, upgrade} and text guidance. " +
-    "To use " + tool + " on the hosted endpoint, connect with an x-motionspec-key header. " + LOCAL_ALTERNATIVES[tool];
+    "Arguments are optional and unused. Returns isError:true with structuredContent {ok:false, error:'KEY_REQUIRED', tool, freeLocalAlternative} and text guidance. " +
+    LOCAL_ALTERNATIVES[tool];
 }
 
 /* U04 — WHO pressed the door handle. The hosted worker is stateless: a
@@ -131,7 +136,7 @@ function describeCaller(server, caller) {
  * arguments against inputSchema BEFORE the handler runs, so with the original
  * (required) schema a probing keyless caller got
  * "Invalid arguments for tool motion_audit: expected string ... at url" instead
- * of the pointer to the price page — the very dead end this change removes.
+ * of the stub's hint — the very dead end this change removed.
  * The advertised field names stay visible in tools/list; they are merely not
  * required on the stub, which reads none of them. */
 function optionalShape(shape) {
@@ -184,20 +189,16 @@ function registerMotionspecTools(server, deps) {
 
   /* Optional allow-list of tool names. Omitted/undefined => register ALL tools
    * (default: the stdio server and every existing caller stay byte-for-byte
-   * unchanged). The hosted worker passes only ["motion_catalog","motion_validate"]
-   * for its keyless free tier.
+   * unchanged). The hosted worker passes its keyless free tier — since 2026-10-26
+   * every tool except motion_stats (worker/index.mjs FREE_TOOLS).
    *
-   * W1 — a denied tool is no longer SILENTLY DROPPED. Until now `def` just did not
-   * register it: it was absent from tools/list and a tools/call answered
-   * "MCP error -32602: Tool motion_compile not found" (measured 2026-09-02 against
-   * https://api.motionspec.dev/mcp — no price, no URL, not even the word "key").
-   * A keyless agent therefore never learned that a paid product exists at all.
-   *
-   * Now the denied tool IS registered — as a STUB that performs NO work and
-   * returns nothing but the pointer to the free check and the key page. It never
-   * calls the real handler, returns structured upgrade information, and keeps isError:true
-   * so no agent can mistake the hint for a result. Callers that want the old
-   * silent behaviour pass deps.paywallStub === false. */
+   * W1 — a denied tool is not SILENTLY DROPPED (that answered "MCP error -32602:
+   * Tool … not found", measured 2026-09-02 against https://api.motionspec.dev/mcp).
+   * It is registered as a STUB that performs NO work and returns only why it is
+   * unavailable plus the free local alternative — no price, no plan. It never
+   * calls the real handler and keeps isError:true so no agent can mistake the
+   * hint for a result. Callers that want the old silent behaviour pass
+   * deps.paywallStub === false. */
   const only = deps.only;
   const stubDenied = deps.paywallStub !== false;
 
@@ -208,22 +209,24 @@ function registerMotionspecTools(server, deps) {
       name,
       {
         title: spec.title,
-        description: paywallDescription(name),
+        description: stubDescription(name),
         inputSchema: optionalShape(spec.inputSchema),
         /* The stub itself does nothing at all: read-only and no network, no matter
          * what the real tool would do (motion_audit does I/O — the stub does not). */
         annotations: { readOnlyHint: true, openWorldHint: false },
       },
       async () => {
-        /* Countable: WHICH keyed tool was requested, how often — and by which
+        /* Countable: WHICH stubbed tool was requested, how often — and by which
          * client (client/ua/probe/reason; ua and probe come only from a caller
-         * that passes them, i.e. the hosted endpoint — stdio passes none). */
+         * that passes them, i.e. the hosted endpoint — stdio passes none). The
+         * outcome keeps its name `paywall-hit` so existing telemetry series stay
+         * continuous; since 2026-10-26 it counts key-required stubs. */
         const who = describeCaller(server, deps.caller);
         try {
           telemetry.log({ outcome: "paywall-hit", tool: name, model: "mcp-host", key: "free",
             reason: who.reason, client: who.client, ua: who.ua, probe: who.probe, attempts: 0 });
         } catch { /* telemetry never breaks a call */ }
-        return { content: [{ type: "text", text: paywallHint(name) }], structuredContent: { ok: false, error: "PAYWALL", tool: name, upgrade: upgradeInfo(name) }, isError: true };
+        return { content: [{ type: "text", text: stubHint(name) }], structuredContent: { ok: false, error: "KEY_REQUIRED", tool: name, freeLocalAlternative: LOCAL_ALTERNATIVES[name] }, isError: true };
       },
     );
   };
@@ -233,14 +236,14 @@ function registerMotionspecTools(server, deps) {
     {
       title: "MotionSpec catalog & authoring rules",
       description:
-        "Returns the catalog of verified motion primitives (names, purpose, parameter schemas, defaults) plus the authoring rules for writing a MotionSpec. Call this FIRST, then write the spec yourself and validate it with motion_validate (motion_compile runs in the CLI or with a key on the hosted endpoint). Free motion check: " + CHECK_URL + " · keys for the hosted endpoint: " + KEYS_URL + ".",
+        "Returns the catalog of verified motion primitives (names, purpose, parameter schemas, defaults) plus the authoring rules for writing a MotionSpec. Call this FIRST, then write the spec yourself, check it with motion_validate and compile it with motion_compile. Free motion check: " + CHECK_URL + " · paid Motion Report (9 USD, one-time): " + reportUrlFor("motion_catalog") + ".",
       inputSchema: {},
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     async () => {
       const out = {
         catalogVersion: getCatVer(),
-        upgrade: upgradeInfo("motion_compile"),
+        upgrade: upgradeInfo("motion_catalog"),
         specVersion: "1.0",
         authoringRules: AUTHORING_RULES,
         primitives: catalogSummary(getCatalog()),
@@ -285,7 +288,7 @@ function registerMotionspecTools(server, deps) {
        * MS-GLOBALS-PAUSE-OFF). validate.js computes them; dropping the field
        * here made the only publicly reachable checker answer ok:true for a spec
        * with reduced-motion off, pause off and a 120 s marquee. */
-      const out = { ok: v.ok, errors: v.errors || [], warnings: v.warnings || [], deprecations: v.deprecations || [], catalogVersion: catVer, upgrade: upgradeInfo("motion_compile") };
+      const out = { ok: v.ok, errors: v.errors || [], warnings: v.warnings || [], deprecations: v.deprecations || [], catalogVersion: catVer, upgrade: upgradeInfo("motion_validate") };
       return { content: [{ type: "text", text: JSON.stringify(out, null, 2) }], structuredContent: out };
     }
   );
@@ -360,4 +363,4 @@ function registerMotionspecTools(server, deps) {
   );
 }
 
-module.exports = { registerMotionspecTools, AUTHORING_RULES, MAX_SPEC_BYTES, paywallHint, paywallDescription, describeCaller, upgradeInfo, keysUrlFor, auditResult, AUDIT_OPTS, CHECK_URL, KEYS_URL, LOCAL_COMPILE_CMD, PAYWALL_PLANS };
+module.exports = { registerMotionspecTools, AUTHORING_RULES, MAX_SPEC_BYTES, stubHint, stubDescription, describeCaller, upgradeInfo, reportUrlFor, auditResult, AUDIT_OPTS, CHECK_URL, PRICING_SRC_URL, REPORT_OFFER, LOCAL_COMPILE_CMD, LOCAL_ALTERNATIVES };
