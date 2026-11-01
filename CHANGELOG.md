@@ -19,8 +19,8 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ### Dependencies
 - `zod` 4.6.6 → 4.6.7 (#62, runtime dependency).
-- Dev toolchain, not part of the published package: `@playwright/test` 1.64.0 → 1.64.1 (#60), `@commitlint/cli` and `@commitlint/config-conventional` 21.2.3 → 21.2.4 (#61, #63), `eslint` 10.12.0 → 10.13.0 (#64).
-- Lockfile refresh of shipped transitive dependencies to clear `npm audit --omit=dev` (#66), within the existing semver ranges: `@hono/node-server` 2.1.1 → 2.1.5 ([GHSA-rmxm-3fg6-px4f](https://github.com/advisories/GHSA-rmxm-3fg6-px4f)), `hono` 4.13.7 → 4.13.16 ([GHSA-5r4p-p66f-jhc7](https://github.com/advisories/GHSA-5r4p-p66f-jhc7)), `body-parser` 2.3.0 → 2.4.0 ([GHSA-27r3-jxmh-p828](https://github.com/advisories/GHSA-27r3-jxmh-p828), high), `fast-uri` 3.1.8 → 3.1.9, `ip-address` 10.7.3 → 10.7.5, `qs` 6.16.0 → 6.17.1.
+- Dev toolchain, not part of the published package: `@playwright/test` 1.64.0 → 1.64.1 (#60), `@commitlint/cli` and `@commitlint/config-conventional` 21.2.3 → 21.2.4 (#63; #61 landed empty), `eslint` 10.12.0 → 10.13.0 (#64).
+- Lockfile refresh of transitive runtime dependencies to clear `npm audit --omit=dev` (#66), within the existing semver ranges (the lockfile does not ship; a clean install of the package resolves the same versions): `@hono/node-server` 2.1.1 → 2.1.5 ([GHSA-rmxm-3fg6-px4f](https://github.com/advisories/GHSA-rmxm-3fg6-px4f)), `hono` 4.13.7 → 4.13.16 ([GHSA-5r4p-p66f-jhc7](https://github.com/advisories/GHSA-5r4p-p66f-jhc7)), `body-parser` 2.3.0 → 2.4.0 ([GHSA-27r3-jxmh-p828](https://github.com/advisories/GHSA-27r3-jxmh-p828), high), `fast-uri` 3.1.8 → 3.1.9, `ip-address` 10.7.3 → 10.7.5, `qs` 6.16.0 → 6.17.1.
 
 ## [1.2.10] - 2026-10-18
 
