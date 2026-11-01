@@ -6,7 +6,7 @@
 - Install: https://github.com/MasterPlayspots/motionspec/blob/main/llms-install.md
 - Motion accessibility and audit limits: https://github.com/MasterPlayspots/motionspec/blob/main/docs/motion-accessibility.md
 - MCP identity: io.github.MasterPlayspots/motionspec · npm: https://www.npmjs.com/package/motionspec
-- Hosted MCP: https://api.motionspec.dev/mcp (Streamable HTTP). Keyless: motion_catalog and motion_validate. Hosted motion_compile, motion_audit and motion_stats require a key.
+- Hosted MCP: https://api.motionspec.dev/mcp (Streamable HTTP). Keyless: motion_catalog, motion_validate, motion_compile and motion_audit. motion_stats is operator telemetry of the hosted service and needs the operator key.
 - Local MCP: npx -y motionspec (stdio); all five tools, no key. Local CLI executable: motion. There is no standalone CLI validate command; compile validates first.
 - Workflow: motion_catalog → write a spec → motion_validate → review warnings even when ok=true → motion_compile. URL checks use motion_audit, not motion_validate.
 - Compiler: vanilla-gsap is the only public output target. Reduced-motion guards and loop pause controls are defaults; explicit opt-outs produce warnings. Internal WAAPI lowering is not a released CLI/MCP target.

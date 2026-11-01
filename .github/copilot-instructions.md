@@ -39,10 +39,11 @@ no runtime motion library detected.
 
 ## MCP endpoint
 
-`https://api.motionspec.dev/mcp` (streamable HTTP). Keyless tools: `motion_catalog`, `motion_validate`.
-Keyed tools on the hosted endpoint: `motion_compile`, `motion_audit`, `motion_stats` — Dev Key $39/month
-(1 domain) or Agency $249/month (up to 10 domains), see https://motionspec.dev/pricing.
-`npx -y motionspec` runs all five tools locally over stdio without a key.
+`https://api.motionspec.dev/mcp` (streamable HTTP). Keyless tools: `motion_catalog`, `motion_validate`,
+`motion_compile`, `motion_audit`. `motion_stats` reports the operator's telemetry of the hosted service and
+needs the operator key. `npx -y motionspec` runs all five tools locally over stdio without a key.
+Free site check: https://motionspec.dev/motion-check; optional paid Motion Report (9 USD, one-time):
+https://motionspec.dev/pricing?src=mcp#p-report.
 
 ## Scope statement for every audit report
 

@@ -8,6 +8,13 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ## [Unreleased]
 
+### Changed
+- **MCP tool texts name no subscription any more.** The Dev Key and Agency plans are off sale; on the hosted endpoint `motion_compile` and `motion_audit` are now free without a key, like `motion_catalog` and `motion_validate`. `motion_catalog`'s description and the structured `upgrade` block of `motion_catalog`/`motion_validate` name the free site check (`https://motionspec.dev/motion-check`) and the one paid item left, the Motion Report (9 USD, one-time) at `https://motionspec.dev/pricing?src=mcp-<tool>#p-report`. `upgrade` is now `{freeCheck, plans:[{id:"motion-report", label:"Motion Report", price_usd:9, billing:"one-time"}], url, selfServeCheckoutNotAutomatable, forAgents}`. The local stdio server still registers all five tools without a key.
+- **Stub contract** (only when a host passes an allow-list via `deps.only`): a stubbed tool answers `structuredContent {ok:false, error:"KEY_REQUIRED", tool, freeLocalAlternative}` and names no price, plan or price page (was `error:"PAYWALL"` plus `upgrade`). For `motion_stats` the text reads "… operator telemetry; for your own local activity use 'npx -p motionspec motion stats'." In `src/mcp/register-tools.js` `paywallHint`/`paywallDescription`/`keysUrlFor`/`KEYS_URL`/`PAYWALL_PLANS` became `stubHint`/`stubDescription`/`reportUrlFor`/`PRICING_SRC_URL`/`REPORT_OFFER`; `CHECK_URL` now carries `https://`.
+
+### Documentation
+- README, `AGENTS.md`, `llms.txt`, `llms-install.md`, `docs/motion-accessibility.md`, the Copilot and Cursor rules: the hosted endpoint serves `motion_catalog`, `motion_validate`, `motion_compile` and `motion_audit` without a key; `motion_stats` (the operator's telemetry of the hosted service) needs the operator key. No subscription price is named.
+
 ## [1.2.10] - 2026-10-18
 
 ### Fixed

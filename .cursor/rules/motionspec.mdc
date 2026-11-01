@@ -22,7 +22,7 @@ npx -p motionspec@1.2.8 motion catalog                        # the 40 primitive
 npx -p motionspec@1.2.8 motion audit https://example.com --json   # static motion-a11y scan → { ok, url, status, score|null, badge, findings[], groups[], summary, disclosures, coverage }
 ```
 
-There is no separate `validate` CLI subcommand — validation is the first stage of `compile`. Over MCP (`https://api.motionspec.dev/mcp`, keyless: `motion_catalog`, `motion_validate`; keyed: `motion_compile`, `motion_audit`, `motion_stats` — Dev Key $39/mo or Agency $249/mo, motionspec.dev/pricing) validation is its own tool. `npx -y motionspec` runs all five tools locally over stdio without a key.
+There is no separate `validate` CLI subcommand — validation is the first stage of `compile`. Over MCP (`https://api.motionspec.dev/mcp`, keyless: `motion_catalog`, `motion_validate`, `motion_compile`, `motion_audit`; `motion_stats` is operator telemetry and needs the operator key) validation is its own tool. `npx -y motionspec` runs all five tools locally over stdio without a key.
 
 ## Scope you must state in any audit report
 

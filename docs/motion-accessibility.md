@@ -14,8 +14,10 @@ interfaces, continuous hero loops, marquees, hover effects and scroll reveals.
 | Check an existing page | `motion_audit` | Static loaded-CSS findings with selectors and suggestions; runtime motion is outside scope. |
 | Inspect local usage | `motion_stats` | Summary from the configured telemetry sink; not registry installs or global users. |
 
-All five tools run locally without a key. On the hosted endpoint only `motion_catalog`
-and `motion_validate` are keyless. See [installation](../llms-install.md).
+All five tools run locally without a key. On the hosted endpoint `motion_catalog`,
+`motion_validate`, `motion_compile` and `motion_audit` are keyless; `motion_stats` reports the
+operator's telemetry of the hosted service and needs the operator key. See
+[installation](../llms-install.md).
 
 ## Create animation with reduced-motion and pause defaults
 
