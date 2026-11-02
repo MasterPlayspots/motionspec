@@ -8,6 +8,8 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ## [Unreleased]
 
+## [1.2.12] - 2026-11-02
+
 ### Fixed
 - **Audit: no false `<marquee>` finding from text.** `hasMarqueeElement` matched the raw HTML, so the literal text "<marquee>" inside a JSON-LD string, a script, a comment, `<style>`, `<template>`, `<textarea>` or `<noscript>` was reported as a deprecated `<marquee>` element (WCAG 2.2.2, high, −20). The check now ignores those non-rendered parts. Found on motionspec.dev/motion-check itself, which scored 80 for its own FAQ text and now reads "not measurable" (no CSS motion). Regression tests in `test/audit-marquee-text.test.mjs`.
 - **Claude Code plugin: the npx launcher is pinned.** `.mcp.json` ran `npx -y motionspec` without a version, which the Claude plugin directory blocks as an unpinned npx launcher (every version since 1.2.7). It now runs `npx -y motionspec@1.2.11`, and the `npm version` hook (`scripts/sync-server-version.js`) rewrites the pin on every release, so the launcher and npm stay in step. Release order: `npm publish` before pushing a commit whose `.mcp.json` pins the new version.
