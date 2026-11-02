@@ -35,6 +35,10 @@ claude mcp add --transport http motionspec https://api.motionspec.dev/mcp
 
 Settings → Connectors → Add custom connector → `https://api.motionspec.dev/mcp`
 
+## ChatGPT
+
+MotionSpec is listed in the ChatGPT plugin directory: https://chatgpt.com/plugins/plugin_asdk_app_6ad7946fedac819183fb38ac85520e4b. Add it there; no login is needed. It offers `motion_catalog` and `motion_validate` only. It does not compile, check websites or certify accessibility; for `motion_compile` and `motion_audit` use the hosted endpoint above or the local server below.
+
 ## Local (stdio) alternative — full toolset, no key
 
 ```bash
