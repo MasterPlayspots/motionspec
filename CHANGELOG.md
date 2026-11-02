@@ -8,6 +8,10 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ## [Unreleased]
 
+### Fixed
+- **Claude Code plugin: the npx launcher is pinned.** `.mcp.json` ran `npx -y motionspec` without a version, which the Claude plugin directory blocks as an unpinned npx launcher (every version since 1.2.7). It now runs `npx -y motionspec@1.2.11`, and the `npm version` hook (`scripts/sync-server-version.js`) rewrites the pin on every release, so the launcher and npm stay in step. Release order: `npm publish` before pushing a commit whose `.mcp.json` pins the new version.
+- **Claude Code plugin: icon added** at `.claude-plugin/icon.png` (512×512 PNG, the same artwork as `docs/assets/logo-512.png`).
+
 ### Documentation
 - README, `AGENTS.md`, `llms.txt` and `llms-install.md`: MotionSpec is listed in the ChatGPT plugin directory. There it offers `motion_catalog` and `motion_validate` without a login; it does not compile or check websites, and no MotionSpec tool certifies accessibility. Listing: <https://chatgpt.com/plugins/plugin_asdk_app_6ad7946fedac819183fb38ac85520e4b>
 
