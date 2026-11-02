@@ -220,9 +220,18 @@ function orderedStyleSources(html, styles, base) {
   return out;
 }
 
-/* Does the HTML use a <marquee> element (deprecated autoplaying motion)? */
+/* Does the HTML use a <marquee> element (deprecated autoplaying motion)?
+ * Only rendered markup counts: the literal text "<marquee>" inside a <script>
+ * (e.g. a JSON-LD string), <style>, <template>, <textarea>, <noscript> or an
+ * HTML comment is not an element. Regression 2026-11-02: motionspec.dev/motion-check
+ * scored 80 because its own JSON-LD FAQ mentions "the deprecated <marquee> element". */
+function stripNonRenderedText(html) {
+  return String(html || "")
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<(script|style|template|textarea|noscript|xmp)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, " ");
+}
 function hasMarqueeElement(html) {
-  return /<marquee\b/i.test(html);
+  return /<marquee\b/i.test(stripNonRenderedText(html));
 }
 
 /* Runtime motion signals in the HTML/inline JS we honestly do NOT statically
