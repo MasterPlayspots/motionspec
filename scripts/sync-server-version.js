@@ -1,7 +1,8 @@
 "use strict";
 // npm version lifecycle hook: keep every published version surface in lockstep with
 // package.json — server.json (MCP registry), .claude-plugin/plugin.json (plugin
-// directory), and the Version row of the README status table.
+// directory), the pinned npx launcher in .mcp.json, and the Version row of the
+// README status table.
 //
 // Each surface is announced separately, because a listing that quietly keeps an old
 // version is exactly the drift this hook exists to prevent: a reviewer comparing the
@@ -26,6 +27,26 @@ if (fs.existsSync(PLUGIN)) {
   console.log("[version hook] " + PLUGIN + " synced to " + v);
 } else {
   console.warn("[version hook] " + PLUGIN + " not found — skipped");
+}
+
+// --- .mcp.json (plugin MCP launcher) ---------------------------------------------
+// The plugin directory refuses an unpinned npx launcher ("npx -y motionspec"): the
+// package must carry an exact version in the command itself, never @latest or a
+// range. Pin it to the version being released so the launcher and npm stay in step.
+// Publish to npm BEFORE pushing this commit, or the pinned version does not exist yet.
+const MCP = ".mcp.json";
+if (fs.existsSync(MCP)) {
+  const m = JSON.parse(fs.readFileSync(MCP, "utf8"));
+  let pinned = 0;
+  for (const srv of Object.values(m.mcpServers || {})) {
+    if (!srv || srv.command !== "npx" || !Array.isArray(srv.args)) continue;
+    srv.args = srv.args.map((a) => (/^motionspec(@.*)?$/.test(a) ? (pinned++, "motionspec@" + v) : a));
+  }
+  if (pinned === 0) console.warn("[version hook] " + MCP + ": no npx motionspec launcher found — check by hand");
+  fs.writeFileSync(MCP, JSON.stringify(m, null, 2) + "\n");
+  console.log("[version hook] " + MCP + " launcher pinned to motionspec@" + v);
+} else {
+  console.warn("[version hook] " + MCP + " not found — skipped");
 }
 
 // --- README status table -------------------------------------------------------

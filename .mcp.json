@@ -2,7 +2,10 @@
   "mcpServers": {
     "motionspec": {
       "command": "npx",
-      "args": ["-y", "motionspec"]
+      "args": [
+        "-y",
+        "motionspec@1.2.11"
+      ]
     }
   }
 }
