@@ -37,7 +37,7 @@ Settings → Connectors → Add custom connector → `https://api.motionspec.dev
 
 ## ChatGPT
 
-MotionSpec is listed in the ChatGPT plugin directory: https://chatgpt.com/plugins/plugin_asdk_app_6ad7946fedac819183fb38ac85520e4b. Add it there; no login is needed. It offers `motion_catalog` and `motion_validate` only. It does not compile, check websites or certify accessibility; for `motion_compile` and `motion_audit` use the hosted endpoint above or the local server below.
+MotionSpec is listed in the ChatGPT plugin directory; add it there, no login is needed. It offers `motion_catalog` and `motion_validate` only. It does not compile or check websites; for `motion_compile` and `motion_audit`, use the hosted endpoint above or the local server below. No MotionSpec tool certifies accessibility. Listing: <https://chatgpt.com/plugins/plugin_asdk_app_6ad7946fedac819183fb38ac85520e4b>
 
 ## Local (stdio) alternative — full toolset, no key
 

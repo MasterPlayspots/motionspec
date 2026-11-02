@@ -9,7 +9,7 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 ## [Unreleased]
 
 ### Documentation
-- README, `AGENTS.md`, `llms.txt` and `llms-install.md`: MotionSpec is listed in the ChatGPT plugin directory (https://chatgpt.com/plugins/plugin_asdk_app_6ad7946fedac819183fb38ac85520e4b). There it offers `motion_catalog` and `motion_validate` without a login; it does not compile, check websites or certify accessibility.
+- README, `AGENTS.md`, `llms.txt` and `llms-install.md`: MotionSpec is listed in the ChatGPT plugin directory. There it offers `motion_catalog` and `motion_validate` without a login; it does not compile or check websites, and no MotionSpec tool certifies accessibility. Listing: <https://chatgpt.com/plugins/plugin_asdk_app_6ad7946fedac819183fb38ac85520e4b>
 
 ## [1.2.11] - 2026-11-01
 

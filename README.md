@@ -53,7 +53,7 @@ motion compile spec.json                     # deterministic build → ./out in 
 
 The host LLM authors the spec; the Trust Boundary stays enforced either way. Listed on the MCP Registry as `io.github.MasterPlayspots/motionspec`. A hosted MCP endpoint is live: keyless `motion_catalog`, `motion_validate`, `motion_compile` and `motion_audit` at `https://api.motionspec.dev/mcp` (streamable-http; `motion_stats` is operator-only) — setup: https://motionspec.dev/docs.
 
-**In ChatGPT:** MotionSpec is listed in the ChatGPT plugin directory — https://chatgpt.com/plugins/plugin_asdk_app_6ad7946fedac819183fb38ac85520e4b. It offers `motion_catalog` and `motion_validate`, no login. It does not compile, check websites or certify accessibility; use the hosted endpoint above or the local server for that.
+**In ChatGPT:** MotionSpec is listed in the ChatGPT plugin directory. It offers `motion_catalog` and `motion_validate`, no login. It does not compile or check websites; for that, use the hosted endpoint above or the local server. No MotionSpec tool certifies accessibility. Listing: <https://chatgpt.com/plugins/plugin_asdk_app_6ad7946fedac819183fb38ac85520e4b>
 
 ### Claude Code plugin
 

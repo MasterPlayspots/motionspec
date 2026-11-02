@@ -105,10 +105,10 @@ A minimal spec:
 - **Hosted, operator key:** `motion_stats` reports the operator's telemetry of the hosted service,
   not your usage. Without the key it answers with a short notice instead of a result; for your own
   local activity use `npx -p motionspec motion stats`.
-- **ChatGPT, no login:** listed in the ChatGPT plugin directory,
-  https://chatgpt.com/plugins/plugin_asdk_app_6ad7946fedac819183fb38ac85520e4b. Offers
-  `motion_catalog` and `motion_validate` only. It does not compile, check websites or certify
-  accessibility.
+- **ChatGPT, no login:** listed in the ChatGPT plugin directory. Offers `motion_catalog` and
+  `motion_validate` only. It does not compile or check websites; for that, use the hosted
+  endpoint or the local server. No MotionSpec tool certifies accessibility. Listing:
+  <https://chatgpt.com/plugins/plugin_asdk_app_6ad7946fedac819183fb38ac85520e4b>
 - **Local, all five tools, no key:** `npx -y motionspec` runs the same server over stdio on your
   machine. Compilation and the audit are MIT and run locally.
 - Free site check: https://motionspec.dev/motion-check. Optional paid Motion Report (9 USD,
