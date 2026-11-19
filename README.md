@@ -9,7 +9,6 @@
 ![coverage](https://img.shields.io/badge/coverage-97%25%20lines%20·%2095%25%20funcs%20·%2081%25%20branches-brightgreen)
 ![supply chain](https://img.shields.io/badge/runtime%20deps-2%20·%200%20vulns%20·%20SBOM-blue)
 ![MCP Registry](https://img.shields.io/badge/MCP%20Registry-io.github.MasterPlayspots%2Fmotionspec-6f42c1)
-[![smithery badge](https://smithery.ai/badge/kevin-froeba/motionspec)](https://smithery.ai/servers/kevin-froeba/motionspec)
 [![mcptry](https://mcptry.com/badge/io.github.MasterPlayspots/motionspec)](https://mcptry.com/servers/io.github.MasterPlayspots/motionspec)
 
 **MotionSpec is an MCP server and CLI for web animation accessibility.** It helps AI coding agents and frontend developers compile validated animation specs to deterministic **GSAP + CSS** and find motion-accessibility candidates in a page's loaded CSS: missing `prefers-reduced-motion` guards and missing pause paths for continuous animation.
