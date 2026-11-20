@@ -215,6 +215,7 @@ async function api(io, e, methode, pfad, body) {
 }
 
 const API_TEXT = {
+  ungueltige_anfrage: "The scan API rejected the request", /* Vertrag scan 1.2.0 */
   ungueltige_url: "The scan API rejected the URL",
   url_nicht_erlaubt: "The scan API does not allow this URL (private or local address)",
   nicht_angemeldet: "The API key was not accepted (invalid or revoked)",

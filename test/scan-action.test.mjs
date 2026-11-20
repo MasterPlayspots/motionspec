@@ -182,6 +182,7 @@ test("run: API errors fail with a clear message (status, code, Retry-After) and 
     [{ status: 429, body: { fehler: "limit_erreicht", nachricht: "x" }, headers: { "retry-after": "3600" } }, /scan limit is reached .*Retry-After: 3600\./],
     [{ status: 503, body: { fehler: "kostenbremse", nachricht: "x" } }, /No scans are available today/],
     [{ status: 400, body: { fehler: "url_nicht_erlaubt", nachricht: "Die Domain zeigt auf eine private Adresse." } }, /private Adresse/],
+    [{ status: 400, body: { fehler: "ungueltige_anfrage", nachricht: "x" } }, /rejected the request \(HTTP 400, ungueltige_anfrage\)/],
     [{ status: 418, body: "teapot" }, /unexpected answer \(HTTP 418\)/],
     [{ status: 202, body: { id: "falsch" } }, /unexpected answer \(HTTP 202\)/],
     [new Error("offline"), /not reachable/],
