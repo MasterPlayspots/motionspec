@@ -36,7 +36,19 @@ jobs:
 ```
 
 Pin the action to a full commit SHA. You need a MotionSpec API key (stored as a secret) and
-the base URL of the MotionSpec scan API.
+the base URL of the MotionSpec scan API (without `/v1`; a trailing `/v1` is removed).
+
+**Pull requests from forks** get no repository secrets, so `api-key` would be empty and the
+step would fail. Skip the scan for them:
+
+```yaml
+      - uses: MasterPlayspots/motionspec/actions/scan-action@<commit-sha>
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+```
+
+The action masks the API key in the log right away (also when it comes from `vars`), keeps
+texts from the API on one line so they cannot start workflow commands, and neutralises
+`@mentions` and `#references` from the API in the pull request comment.
 
 ## Inputs
 
@@ -44,7 +56,7 @@ the base URL of the MotionSpec scan API.
 |---|---|---|
 | `url` | — (required) | Public http(s) URL of the page to scan. |
 | `api-key` | — (required) | MotionSpec API key, sent as `Authorization: Bearer`. Never printed. |
-| `api-url` | — (required) | Base URL of the scan API, without `/v1`. https only (http only for localhost). |
+| `api-url` | — (required) | Base URL of the scan API, without `/v1` (a trailing `/v1` is removed). https only (http only for localhost). |
 | `language` | `en` | Language of rule titles and the coverage notice: `en` or `de`. |
 | `fail-on` | `serious` | Lowest severity that counts: `critical`, `serious`, `moderate`, `minor`, or `none` (never fail on violations). |
 | `max-violations` | `0` | Violations at or above `fail-on` that are still accepted. |
