@@ -116,7 +116,8 @@ test("run: violations above the threshold → exit 1, outputs, summary with the 
   assert.match(s, /1\. \[critical\] Images must have alternative text \(`image-alt`, WCAG 1\.1\.1\) — 1×/);
   assert.match(s, /\[49-€ Check\]\(https:\/\/motionspec\.dev\/pricing\?scan=scn_\w+&src=scan-action\) \(EUR 49 \/ USD 49 excl\. VAT, B2B\)/);
   assert.ok(f.logs.some((l) => l.startsWith("::error::3 violations at or above serious")));
-  const alles = JSON.stringify(f.dateien) + f.logs.join("\n");
+  assert.equal(f.logs[0], "::add-mask::" + KEY, "the key is masked before any other output");
+  const alles = JSON.stringify(f.dateien) + f.logs.filter((l) => !l.startsWith("::add-mask::")).join("\n");
   assert.equal(alles.includes(KEY), false, "the API key never appears in outputs, summary or logs");
   for (const w of VERBOTEN) assert.equal(alles.toLowerCase().includes(w), false, w);
 });
@@ -190,7 +191,7 @@ test("run: API errors fail with a clear message (status, code, Retry-After) and 
     assert.equal(await lib.run(env(), f.io), 1);
     assert.ok(f.logs.some((l) => l.startsWith("::error::") && re.test(l)), JSON.stringify(f.logs));
     assert.equal(outputs(f).result, "error");
-    assert.equal(f.logs.join("").includes(KEY), false);
+    assert.equal(f.logs.filter((l) => !l.startsWith("::add-mask::")).join("").includes(KEY), false);
   }
   const fehler = fakeIo(okRoutes(antwort("fehler", null, { fehlerCode: "browser" })));
   assert.equal(await lib.run(env(), fehler.io), 1);
@@ -299,11 +300,82 @@ test("index.mjs end to end: real fetch against a local scan API mock, exit code 
     assert.match(readFileSync(out, "utf8"), /^result=passed$/m);
     assert.match(readFileSync(out, "utf8"), /^moderate=1$/m);
     assert.ok(readFileSync(sum, "utf8").includes(HINWEIS_EN));
-    assert.equal(res.stdout.includes(KEY), false);
+    assert.equal(res.stdout.split("\n")[0], "::add-mask::" + KEY, "masked first");
+    assert.equal(res.stdout.split("\n").filter((l) => !l.startsWith("::add-mask::")).join("\n").includes(KEY), false);
     assert.deepEqual(seen.map((s) => s.method + " " + s.url), ["POST /v1/scans", "GET /v1/scans/" + ID]);
     assert.equal(seen[0].auth, "Bearer " + KEY);
     assert.equal(JSON.parse(seen[0].body).quelle, "action");
   } finally {
     server.close();
   }
+});
+
+/* Nacharbeit nach Abnahme T7b (motionspec#83). */
+
+/* Jede stdout-Zeile, die der Runner als Workflow-Kommando lesen würde. */
+function kommandoZeilen(logs) {
+  return logs.join("\n").split(/\r\n|\r|\n/).filter((z) => /^\s*::/.test(z));
+}
+const EIGENE = /^::(error|warning|add-mask)::/;
+
+test("log injection: API texts cannot start workflow commands (probe from the review)", async () => {
+  const probe = "x\n::warning::untergeschoben\n::stop-commands::tok";
+  const faelle = [
+    { ["POST " + API + "/v1/scans"]: { status: 400, body: { fehler: "ungueltige_url", nachricht: probe } } },
+    { ["POST " + API + "/v1/scans"]: { status: 202, body: { id: ID } }, ["GET " + API + "/v1/scans/" + ID]: { status: 404, body: { fehler: "nicht_gefunden", nachricht: probe } } },
+    okRoutes(antwort("fertig", kurz({ top3: [{ regelId: probe, titel: probe, schwere: "ernst", wcag: [probe], anzahl: 1 }], hinweis: probe }))),
+    okRoutes(antwort(probe, null)),
+  ];
+  for (const routes of faelle) {
+    const f = fakeIo(routes);
+    await lib.run(env(), f.io);
+    const zeilen = kommandoZeilen(f.logs);
+    assert.ok(zeilen.length > 0);
+    for (const z of zeilen) {
+      assert.match(z, EIGENE, "only the action's own commands: " + JSON.stringify(z));
+      assert.doesNotMatch(z, /::warning::untergeschoben|::stop-commands::/);
+    }
+    const alles = f.logs.join("\n") + JSON.stringify(f.dateien);
+    assert.doesNotMatch(alles, /(^|\n)\s*::(warning::untergeschoben|stop-commands)/);
+  }
+  assert.equal(lib.apiText(probe), "x :\u200d:warning:\u200d:untergeschoben :\u200d:stop-commands:\u200d:tok");
+  assert.equal(lib.logText("ok\n::stop-commands::tok\n  ::warning::x"), "ok\n:\u200d:stop-commands::tok\n  :\u200d:warning::x");
+  assert.equal(lib.kommandoDaten("a%\r\nb"), "a%25%0D%0Ab");
+});
+
+test("masking: the API key (and a custom github-token) is masked first, also when other inputs are invalid", async () => {
+  const f = fakeIo(okRoutes());
+  await lib.run(env({ "INPUT_GITHUB-TOKEN": "ghp_from_vars_0123456789" }), f.io);
+  assert.deepEqual(f.logs.slice(0, 2), ["::add-mask::" + KEY, "::add-mask::ghp_from_vars_0123456789"]);
+  const kaputt = fakeIo({});
+  assert.equal(await lib.run(env({ INPUT_LANGUAGE: "fr" }), kaputt.io), 1);
+  assert.equal(kaputt.logs[0], "::add-mask::" + KEY);
+  const ohne = fakeIo({});
+  await lib.run(env({ "INPUT_API-KEY": "" }), ohne.io);
+  assert.equal(ohne.logs.some((l) => l.startsWith("::add-mask::")), false, "nothing to mask, no empty mask command");
+  const prozent = fakeIo({});
+  await lib.run(env({ "INPUT_API-KEY": "key%0A::warning::x_0123456789" }), prozent.io);
+  assert.equal(prozent.logs[0], "::add-mask::key%250A::warning::x_0123456789", "mask data escaped like core.setSecret");
+});
+
+test("PR comment: @mentions and #references from API texts are neutralised", async () => {
+  const f = fakeIo(okRoutes(antwort("fertig", kurz({ top3: [{ regelId: "image-alt", titel: "Ping @octocat about #123 and @org/team", schwere: "kritisch", wcag: ["1.1.1"], anzahl: 1 }] }))));
+  await lib.run(env(), f.io);
+  const s = f.dateien["/summary"];
+  assert.doesNotMatch(s, /@octocat|#123|@org/);
+  assert.ok(s.includes("@\u200doctocat") && s.includes("#\u200d123") && s.includes("@\u200dorg/team"));
+});
+
+test("api-url ending in /v1 is normalised (no /v1/v1/scans); purchase link brackets are encoded in Markdown", async () => {
+  for (const u of [API + "/v1", API + "/v1/", API + "/V1"]) {
+    const f = fakeIo(okRoutes());
+    await lib.run(env({ "INPUT_API-URL": u }), f.io);
+    assert.equal(f.calls[0].url, API + "/v1/scans", u);
+  }
+  assert.equal(lib.leseEingaben(env({ "INPUT_API-URL": "https://scan.example/base/v1" })).apiUrl, "https://scan.example/base");
+  const f = fakeIo(okRoutes(antwort("fertig", kurz({ vollerBericht: { paket: "check", kaufUrl: "https://motionspec.dev/pricing?x=)[evil](https://evil.example)" } }))));
+  await lib.run(env(), f.io);
+  const s = f.dateien["/summary"];
+  assert.doesNotMatch(s, /\]\(https:\/\/evil/);
+  assert.match(s, /pricing\?x=%29%5Bevil%5D%28https/);
 });

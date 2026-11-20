@@ -17,6 +17,7 @@ const SCHWERE_EN = { kritisch: "critical", ernst: "serious", mittel: "moderate",
 const EN_ZU_SCHWERE = { critical: "kritisch", serious: "ernst", moderate: "mittel", minor: "gering" };
 const SCHWERE_DE = { kritisch: "kritisch", ernst: "ernst", mittel: "mittel", gering: "gering" };
 const ID_MUSTER = /^scn_[0-9A-HJKMNP-TV-Z]{26}$/;
+const SCAN_STATUS = ["wartend", "laeuft", "fertig", "nicht_messbar", "fehler"];
 export const KOMMENTAR_MARKE = "<!-- motionspec-scan-action -->";
 const KAUF_HERKUNFT = "https://motionspec.dev";
 /* Ersatz, falls die API keinen Hinweis mitschickt (Vertrag der Scan-API 1.1.0). */
@@ -26,6 +27,25 @@ export const ABDECKUNGS_HINWEIS = {
 };
 
 export class AktionFehler extends Error {}
+
+/* ── Log-Sicherheit ───────────────────────────────────────────────────────── */
+/* Der Runner liest jede stdout-Zeile, die mit "::" beginnt, als Workflow-Kommando
+ * (::warning::, ::add-mask::, ::stop-commands:: …). Texte aus der API dürfen deshalb
+ * weder eine neue Zeile beginnen noch eine Zeile mit "::" eröffnen. */
+const ZWJ = "\u200d";
+/** Text aus der API: eine Zeile, kein "::"-Anfang, gekappt. */
+export function apiText(s, max = 300) {
+  return String(s == null ? "" : s).slice(0, max).replace(/[\r\n\u2028\u2029]+/g, " ").replace(/::/g, ":" + ZWJ + ":");
+}
+/** Daten in einem eigenen Kommando (wie escapeData in @actions/core). */
+export function kommandoDaten(s) {
+  return String(s).replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
+}
+/** Freitext fürs Log: keine Zeile darf mit "::" beginnen. */
+export function logText(s) {
+  return String(s).split(/\r\n|\r|\n/).map((z) => (/^\s*::/.test(z) ? z.replace("::", ":" + ZWJ + ":") : z)).join("\n");
+}
+const kommando = (art, text) => "::" + art + "::" + kommandoDaten(text);
 
 /* ── Eingaben ─────────────────────────────────────────────────────────────── */
 /** Liest INPUT_* wie @actions/core (Name groß, Leerzeichen → _, Bindestrich bleibt). */
@@ -59,7 +79,8 @@ export function leseEingaben(env) {
   if (!apiKey) throw new AktionFehler("Input api-key is required (MotionSpec API key; store it as a secret).");
   if (!apiUrl) throw new AktionFehler("Input api-url is required (base URL of the MotionSpec scan API).");
   const ziel = httpUrl(url, "url").href;
-  const basis = httpUrl(apiUrl, "api-url", { nurHttpsAusserLokal: true }).href.replace(/\/+$/, "");
+  /* Basis ohne /v1: wer ".../v1" einträgt, bekäme sonst Anfragen an /v1/v1/scans. */
+  const basis = httpUrl(apiUrl, "api-url", { nurHttpsAusserLokal: true }).href.replace(/\/+$/, "").replace(/\/v1$/i, "");
   const sprache = eingabe(env, "language") || "en";
   if (sprache !== "en" && sprache !== "de") throw new AktionFehler("Input language must be en or de.");
   const failOn = (eingabe(env, "fail-on") || "serious").toLowerCase();
@@ -103,7 +124,8 @@ export function kaufLink(roh) {
 export function bewerte(antwort, e) {
   const scan = (antwort && antwort.scan) || {};
   const k = (antwort && antwort.kurzergebnis) || null;
-  const status = typeof scan.status === "string" ? scan.status : (k && k.status) || "fehler";
+  const roh = typeof scan.status === "string" ? scan.status : (k && k.status);
+  const status = SCAN_STATUS.includes(roh) ? roh : "fehler";
   const je = {};
   for (const s of SCHWEREGRADE) je[s] = k && k.verstoesseJeSchwere ? Math.max(0, Math.floor(Number(k.verstoesseJeSchwere[s]) || 0)) : 0;
   const basis = { status, je, zuPruefen: k ? Math.max(0, Math.floor(Number(k.zuPruefen) || 0)) : 0,
@@ -120,11 +142,14 @@ export function bewerte(antwort, e) {
 
 /* ── Markdown ─────────────────────────────────────────────────────────────── */
 /* Text aus der API: HTML-Zeichen als Entitäten, Markdown-Zeichen mit Backslash, eine Zeile. */
-const esc = (s) => String(s == null ? "" : s).slice(0, 300)
+/* @user und #123 bekommen einen Zero-Width-Joiner: keine Benachrichtigung, kein Verweis
+ * im PR-Kommentar. */
+const esc = (s) => apiText(s)
   .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-  .replace(/[|`[\]\\*_]/g, (c) => "\\" + c).replace(/\r?\n/g, " ");
+  .replace(/[|`[\]\\*_]/g, (c) => "\\" + c)
+  .replace(/@(?=[A-Za-z0-9])/g, "@" + ZWJ).replace(/#(?=\d)/g, "#" + ZWJ);
 /* Für Code-Spannen: dort wirkt kein Backslash, also nur Backticks, Zeilen und HTML weg. */
-const code = (s) => String(s == null ? "" : s).slice(0, 100).replace(/[`\r\n|]/g, "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const code = (s) => apiText(s, 100).replace(/[`|]/g, "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const GRUND = {
   de: { bot_schutz: "Bot-Schutz", zeitlimit: "Zeitlimit", http_fehler: "HTTP-Fehler", nicht_erreichbar: "nicht erreichbar", anmeldung_noetig: "Anmeldung nötig" },
   en: { bot_schutz: "bot protection", zeitlimit: "timeout", http_fehler: "HTTP error", nicht_erreichbar: "not reachable", anmeldung_noetig: "login required" },
@@ -163,6 +188,8 @@ export function markdown(b, e, scanId) {
   z.push("");
   z.push("> " + esc(b.hinweis));
   if (b.kaufUrl) {
+    /* Klammern im Link kodieren, damit ein Markdown-Link nicht aufgebrochen werden kann. */
+    b = { ...b, kaufUrl: b.kaufUrl.replace(/[()[\]]/g, (c) => "%" + c.charCodeAt(0).toString(16).toUpperCase()) };
     z.push("");
     z.push(de
       ? `Voller Bericht mit allen Befunden und Korrekturvorschlägen: [49-€-Check](${b.kaufUrl}) (49 € zzgl. USt., B2B).`
@@ -200,7 +227,7 @@ const API_TEXT = {
 function apiFehlerText(a, schritt) {
   if (!a || a.status === 0) return `${schritt}: the scan API is not reachable.`;
   const code = a.daten && typeof a.daten.fehler === "string" && API_TEXT[a.daten.fehler] ? a.daten.fehler : null;
-  const nachricht = a.daten && typeof a.daten.nachricht === "string" ? " — " + a.daten.nachricht.slice(0, 200) : "";
+  const nachricht = a.daten && typeof a.daten.nachricht === "string" ? " — " + apiText(a.daten.nachricht, 200) : "";
   return `${schritt}: ${code ? API_TEXT[code] : "unexpected answer"} (HTTP ${a.status}${code ? ", " + code : ""})${nachricht}` +
     (a.retryAfter ? ` Retry-After: ${a.retryAfter}.` : "");
 }
@@ -262,11 +289,16 @@ function setzeAusgaben(io, env, werte) {
 
 /** Gesamter Lauf. Gibt den Exit-Code zurück (0/1). */
 export async function run(env, io) {
+  /* Schlüssel sofort maskieren (Ersatz für core.setSecret): kommt er aus `vars` oder im
+   * Klartext, maskiert GitHub ihn sonst nicht. Vor jeder anderen Ausgabe. */
+  for (const geheim of [eingabe(env, "api-key"), eingabe(env, "github-token")]) {
+    if (geheim) io.log(kommando("add-mask", geheim));
+  }
   let e;
   try {
     e = leseEingaben(env);
   } catch (err) {
-    io.log("::error::" + (err instanceof AktionFehler ? err.message : "Invalid inputs."));
+    io.log(kommando("error", err instanceof AktionFehler ? err.message : "Invalid inputs."));
     setzeAusgaben(io, env, { result: "error" });
     return 1;
   }
@@ -278,7 +310,7 @@ export async function run(env, io) {
     b = bewerte(s.antwort, e);
   } catch (err) {
     const msg = err instanceof AktionFehler ? err.message : "Unexpected error.";
-    io.log("::error::" + msg.split(e.apiKey).join("***"));
+    io.log(kommando("error", msg.split(e.apiKey).join("***")));
     setzeAusgaben(io, env, { result: "error", "scan-id": id });
     return 1;
   }
@@ -289,18 +321,18 @@ export async function run(env, io) {
     review: b.zuPruefen, violations: b.ueber, "report-url": b.kaufUrl || "",
   });
   if (env.GITHUB_STEP_SUMMARY) io.anhaengen(env.GITHUB_STEP_SUMMARY, md + "\n");
-  io.log(md.split("\n").slice(1).join("\n"));
+  io.log(logText(md.split("\n").slice(1).join("\n")));
   if (e.comment) {
     let ausgang;
     try { ausgang = await kommentiere(io, env, e, md); } catch { ausgang = "failed: network"; }
-    io.log((ausgang.startsWith("failed") ? "::warning::" : "") + "Pull request comment: " + ausgang);
+    io.log(ausgang.startsWith("failed") ? kommando("warning", "Pull request comment: " + ausgang) : logText("Pull request comment: " + ausgang));
   }
   if (b.result === "not-measurable") {
-    io.log((b.bestanden ? "::warning::" : "::error::") + "The page was not measurable — this is not a clean result.");
+    io.log(kommando(b.bestanden ? "warning" : "error", "The page was not measurable — this is not a clean result."));
   } else if (b.result === "error") {
-    io.log("::error::The scan ended with status " + b.status + ".");
+    io.log(kommando("error", "The scan ended with status " + apiText(b.status, 40) + "."));
   } else if (!b.bestanden) {
-    io.log(`::error::${b.ueber} violations at or above ${e.failOn} (allowed: ${e.maxViolations}).`);
+    io.log(kommando("error", `${b.ueber} violations at or above ${e.failOn} (allowed: ${e.maxViolations}).`));
   }
   return b.bestanden ? 0 : 1;
 }
