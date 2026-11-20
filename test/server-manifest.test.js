@@ -26,3 +26,21 @@ test("server.json npm package version matches package.json version", () => {
   assert.ok(npmPkg, "server.json must declare an npm package entry");
   assert.equal(npmPkg.version, pkg.version);
 });
+
+/* Beschreibungen für npm und die MCP-Registry: Die Registry lehnt mehr als 100 Zeichen ab
+ * (server.schema.json 2025-12-11, ServerDetail.description maxLength 100), und kein Text darf
+ * eine verbotene Aussage enthalten (Teilwort, Kleinschreibung — auch Verneinungen fallen durch). */
+const VERBOTENE_AUSSAGEN = ["konform", "conform", "compliant", "compliance", "garantiert barrierefrei", "guaranteed accessib",
+  "fully accessible", "100% barrierefrei", "100% accessible", "siegel", "seal of", "gütesiegel", "zertifiziert", "certified"];
+
+test("server.json description fits the registry limit (1..100 characters)", () => {
+  assert.equal(typeof server.description, "string");
+  assert.ok(server.description.length >= 1 && server.description.length <= 100, "length " + server.description.length);
+});
+
+test("npm and registry descriptions contain no forbidden claim", () => {
+  for (const [wo, text] of [["package.json", pkg.description], ["server.json", server.description], ["server.json title", server.title]]) {
+    const low = String(text).toLowerCase();
+    for (const w of VERBOTENE_AUSSAGEN) assert.equal(low.includes(w), false, wo + " contains '" + w + "'");
+  }
+});

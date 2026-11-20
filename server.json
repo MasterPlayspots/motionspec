@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.MasterPlayspots/motionspec",
   "title": "MotionSpec — web animation accessibility MCP",
-  "description": "Web animation accessibility MCP: GSAP, static CSS checks, prefers-reduced-motion, WCAG 2.2.2/2.3.3.",
+  "description": "Website scanner: WCAG 2.2 A/AA via axe-core plus WCAG 2.2.2 motion checks. Covers only part of WCAG.",
   "repository": {
     "url": "https://github.com/MasterPlayspots/motionspec",
     "source": "github"

@@ -1,6 +1,6 @@
 /* scan_site — the shared tool logic, without network: the scanner is an
  * in-memory fake client. Holds the output contract: short result only (counts per
- * severity, top 3), the coverage notice verbatim, the 49-€ Check link only for a finished
+ * severity, top 3), the coverage notice verbatim, the Website report link only for a finished
  * scan and only on motionspec.dev, "not measurable" never shown as clean, the brake runs
  * before the scanner, and the npm (stdio) path only points to the hosted endpoint. */
 import { test } from "node:test";
@@ -154,7 +154,7 @@ test("scan_site unconfigured (endpoint not connected): SCAN_UNAVAILABLE, telemet
   });
 });
 
-test("scan_site: start → finished — short result, notice verbatim, 49-€ Check link on motionspec.dev with src=mcp-scan_site", async () => {
+test("scan_site: start → finished — short result, notice verbatim, Website report link on motionspec.dev with src=mcp-scan_site", async () => {
   const f = fakeClient();
   let gebremst = 0;
   await withScan(fast({ client: f.client, bremse: async () => { gebremst++; return { ok: true }; } }), async (c, events) => {
@@ -182,7 +182,8 @@ test("scan_site: start → finished — short result, notice verbatim, 49-€ Ch
     assert.match(t, /Violations by severity: critical 2 · serious 5 · moderate 1 · minor 0/);
     assert.match(t, /To review by hand: 3/);
     assert.match(t, /1\. \[critical\] Images must have alternative text \(image-alt, WCAG 1\.1\.1\) — 2×/);
-    assert.match(t, /49-€ Check, EUR 49 \/ USD 49 excl\. VAT \(B2B\)/);
+    assert.match(t, /Full report with every finding and fix suggestions: Website report \(one website, up to 100 pages; EUR 13 \/ USD 13 excl\. VAT, B2B\): https:\/\/motionspec\.dev\//);
+    assert.match(t, /The full report is released only after you verify the domain \(DNS TXT record or file\)\./);
     assert.ok(t.includes(sc.kurzergebnis.vollerBericht.kaufUrl));
     assert.match(t, /Do not open it yourself or attempt checkout/);
     assertNoForbidden(t, "result text");
@@ -199,7 +200,8 @@ test("scan_site: German output when language is de; scanId reads use the scan's 
     assert.equal(f.calls.anlegen[0].sprache, "de");
     const t = r.content[0].text;
     assert.match(t, /Verstöße je Schwere: kritisch 2 · ernst 5 · mittel 1 · gering 0/);
-    assert.match(t, /49-€-Check, 49 € zzgl\. USt\. \(B2B\)/);
+    assert.match(t, /Voller Bericht mit allen Befunden und Korrekturvorschlägen: Website-Bericht \(eine Website, bis 100 Seiten; 13 € zzgl\. USt\., B2B\): https:\/\/motionspec\.dev\//);
+    assert.match(t, /Den vollen Bericht gibt es erst nach dem Nachweis, dass die Domain Ihnen gehört \(DNS-TXT-Eintrag oder Datei\)\./);
     assert.ok(t.includes(HINWEIS.de));
     const r2 = await call(c, { scanId: ID, language: "en" });
     assert.match(r2.content[0].text, /Von Hand zu prüfen: 3/, "a read renders in the scan's own language");
@@ -428,4 +430,30 @@ test("scan_site: finished without violations says so — only for the rules chec
     const r2 = await call(c, { url: "https://example.com/", language: "de" });
     assert.match(r2.content[0].text, /In den automatisch prüfbaren Regeln wurde kein Verstoß gefunden\./);
   });
+});
+
+/* Website-Bericht: 13 €/13 USD, bis 100 Seiten, voller Bericht nach Domain-Nachweis. */
+test("ANGEBOT: one place for name, scope, price and condition; no old price anywhere in texts or descriptions", async () => {
+  assert.deepEqual(JSON.parse(JSON.stringify(scan.ANGEBOT)), {
+    name: { de: "Website-Bericht", en: "Website report" },
+    umfang: { de: "eine Website, bis 100 Seiten", en: "one website, up to 100 pages" },
+    preis: { de: "13 € zzgl. USt., B2B", en: "EUR 13 / USD 13 excl. VAT, B2B" },
+    nachweis: {
+      de: "Den vollen Bericht gibt es erst nach dem Nachweis, dass die Domain Ihnen gehört (DNS-TXT-Eintrag oder Datei).",
+      en: "The full report is released only after you verify the domain (DNS TXT record or file).",
+    },
+  });
+  assert.ok(Object.isFrozen(scan.ANGEBOT) && Object.isFrozen(scan.ANGEBOT.preis));
+  const texte = [];
+  for (const scanSite of [{ client: null, grund: "local" }, { client: null, grund: "unconfigured" }, fast({ client: fakeClient().client })]) {
+    await withScan(scanSite, async (c) => {
+      const { tools } = await c.listTools();
+      texte.push(tools[0].title, tools[0].description);
+      for (const language of ["en", "de"]) texte.push((await call(c, { url: "https://example.com/", language })).content[0].text);
+    });
+  }
+  const alles = texte.join("\n");
+  assert.doesNotMatch(alles, /\b49\b|49-€|Check \(one URL\)|one public web page/, "no old price, no single-page claim");
+  assert.match(alles, /EUR 13 \/ USD 13 excl\. VAT, B2B/);
+  assert.match(alles, /the free scan covers a limited number of pages/, "free limit stated without a page count");
 });

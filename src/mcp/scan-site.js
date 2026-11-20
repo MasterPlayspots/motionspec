@@ -18,7 +18,7 @@
  *     nicht, und ein Schlüssel im npm-Paket wäre öffentlich.
  *
  * Ausgabe: nur das Kurzergebnis (Zählung je Schwere, Top 3), der Hinweis auf
- * Teilabdeckung WÖRTLICH und der Link zum 49-€-Check. Kein voller Bericht.
+ * Teilabdeckung WÖRTLICH und der Link zum Website-Bericht (ANGEBOT). Kein voller Bericht.
  * „nicht messbar“ wird nie als sauber dargestellt: keine Zahlen, Status und Grund stehen da.
  */
 const { z } = require("zod");
@@ -50,7 +50,22 @@ const HOSTED_ADD_CMD = "claude mcp add --transport http motionspec " + HOSTED_MC
 const KAUF_HERKUNFT = "https://motionspec.dev";
 /* Zuordnung im Funnel wie bei den übrigen Tools (reportUrlFor: src=mcp-<tool>). */
 const KAUF_SRC = "mcp-" + TOOL;
-const CHECK_PREIS = Object.freeze({ de: "49 € zzgl. USt. (B2B)", en: "EUR 49 / USD 49 excl. VAT (B2B)" });
+/* Das Angebot zum vollen Bericht — die EINE Stelle für Name, Umfang, Preis und Bedingung
+ * (Anzeige „13 € zzgl. USt.“ / „EUR 13 excl. VAT“; den vollen Bericht gibt es erst nach
+ * dem Domain-Nachweis). Texte und Tool-Beschreibung setzen sich nur hieraus zusammen. */
+const ANGEBOT = Object.freeze({
+  name: Object.freeze({ de: "Website-Bericht", en: "Website report" }),
+  umfang: Object.freeze({ de: "eine Website, bis 100 Seiten", en: "one website, up to 100 pages" }),
+  preis: Object.freeze({ de: "13 € zzgl. USt., B2B", en: "EUR 13 / USD 13 excl. VAT, B2B" }),
+  nachweis: Object.freeze({
+    de: "Den vollen Bericht gibt es erst nach dem Nachweis, dass die Domain Ihnen gehört (DNS-TXT-Eintrag oder Datei).",
+    en: "The full report is released only after you verify the domain (DNS TXT record or file).",
+  }),
+});
+/** „Website-Bericht (eine Website, bis 100 Seiten; 13 € zzgl. USt., B2B)“ */
+function angebot(s) {
+  return ANGEBOT.name[s] + " (" + ANGEBOT.umfang[s] + "; " + ANGEBOT.preis[s] + ")";
+}
 
 /* Warten im Aufruf: der Scanner prüft eine Seite meist in Sekunden; länger als
  * WARTEN_MS hält ein Tool-Aufruf nicht offen — dann kommt die scanId zum Nachfragen. */
@@ -173,8 +188,9 @@ function textFertig(r, s) {
   if (k.vollerBericht) {
     zeilen.push("");
     zeilen.push(s === "de"
-      ? "Voller Bericht mit allen Befunden und Korrekturvorschlägen: 49-€-Check, " + CHECK_PREIS.de + ": " + k.vollerBericht.kaufUrl
-      : "Full report with every finding and fix suggestions: the 49-€ Check, " + CHECK_PREIS.en + ": " + k.vollerBericht.kaufUrl);
+      ? "Voller Bericht mit allen Befunden und Korrekturvorschlägen: " + angebot(s) + ": " + k.vollerBericht.kaufUrl
+      : "Full report with every finding and fix suggestions: " + angebot(s) + ": " + k.vollerBericht.kaufUrl);
+    zeilen.push(ANGEBOT.nachweis[s]);
     zeilen.push(FOR_AGENTS[s]);
   }
   return zeilen.join("\n");
@@ -273,11 +289,12 @@ function scanErgebnis(r, s) {
 
 /* ── Beschreibungen ───────────────────────────────────────────────────────────── */
 const DESCRIPTION =
-  "Free accessibility scan of one public web page: the MotionSpec scanner loads the page in a real browser and checks it " +
-  "with axe-core against WCAG 2.2 A/AA plus a motion module (WCAG 2.2.2). Returns the short result only: violations " +
+  "Free accessibility scan starting from one public URL (the free scan covers a limited number of pages): the MotionSpec " +
+  "scanner loads the pages in a real browser and checks them with axe-core against WCAG 2.2 A/AA plus a motion module " +
+  "(WCAG 2.2.2). Returns the short result only: violations " +
   "counted by severity (critical, serious, moderate, minor), the number of findings to review by hand, the top 3 rules, " +
   "the coverage notice (relay it verbatim: automated testing finds only part of the possible barriers) and a link to " +
-  "the full report (the 49-€ Check, EUR 49 / USD 49 excl. VAT, B2B) for a human to open. Pass `url` to start a scan; " +
+  "the full report for a human to open: the " + angebot("en") + "; " + ANGEBOT.nachweis.en.replace(/^The/, "the").replace(/\.$/, "") + ". Pass `url` to start a scan; " +
   "it usually finishes within the call. If it is still running, the result carries `done:false` and a `scanId` — call " +
   "scan_site again with that `scanId` (no new scan). Status 'nicht_messbar' (not measurable: bot protection, login, " +
   "timeout) is NOT a clean result. Free scans are rate-limited per caller and per day. Returns structuredContent " +
@@ -327,7 +344,7 @@ function registerScanSite(server, deps) {
   if (!cfg.client) {
     const grund = cfg.grund === "local" ? "local" : "unconfigured";
     server.registerTool(TOOL, {
-      title: "Free accessibility scan of a web page (WCAG 2.2 A/AA)",
+      title: "Free accessibility scan of a website (WCAG 2.2 A/AA)",
       description: stubDescription(grund),
       inputSchema: { url: INPUT_SCHEMA.url, scanId: INPUT_SCHEMA.scanId, language: INPUT_SCHEMA.language },
       annotations: { readOnlyHint: true, openWorldHint: false },
@@ -347,7 +364,7 @@ function registerScanSite(server, deps) {
   const jetzt = cfg.jetzt || (() => Date.now());
 
   server.registerTool(TOOL, {
-    title: "Free accessibility scan of a web page (WCAG 2.2 A/AA)",
+    title: "Free accessibility scan of a website (WCAG 2.2 A/AA)",
     description: DESCRIPTION,
     inputSchema: INPUT_SCHEMA,
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
@@ -412,6 +429,7 @@ module.exports = {
   kaufLink,
   pruefeZielUrl,
   SCAN_SITE_TOOL: TOOL,
+  ANGEBOT,
   SCAN_ID_MUSTER,
   ABDECKUNGS_HINWEIS,
   SCHWEREGRADE,

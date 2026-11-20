@@ -113,7 +113,7 @@ The **Catalog Forge** (CI workflow, manual dispatch) picks the top telemetry-ran
 | `motion_compile` | deterministic spec → code; never emits on a failed validation |
 | `motion_audit` | static motion-a11y check of a live URL (read-only, open-world) |
 | `motion_stats` | telemetry summary (escalations = catalog growth signal) |
-| `scan_site` | free accessibility scan of one page (axe-core, WCAG 2.2 A/AA, plus motion) by the hosted MotionSpec scanner: counts per severity, top 3, coverage notice. Hosted only — the local server answers `HOSTED_ONLY` with the hosted endpoint. Automated testing finds only part of the possible barriers. |
+| `scan_site` | free accessibility scan starting from one public URL (axe-core, WCAG 2.2 A/AA, plus motion) by the hosted MotionSpec scanner: counts per severity, top 3, coverage notice. Hosted only — the local server answers `HOSTED_ONLY` with the hosted endpoint. Automated testing finds only part of the possible barriers. |
 
 Input is size-capped (`MS-INPUT-TOO-LARGE`, 64 KB). The stdio server exposes one tool factory as the single source of truth, contract-tested in `test/mcp.test.mjs`. A hosted MCP endpoint is live: keyless `motion_catalog`, `motion_validate`, `motion_compile` and `motion_audit` at `https://api.motionspec.dev/mcp`; `motion_stats` (operator telemetry) needs the operator key.
 
