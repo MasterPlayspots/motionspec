@@ -8,6 +8,10 @@ Code, comments, docs, and this changelog are English (EN migration 2026-07-03).
 
 ## [Unreleased]
 
+### Added
+- **`scan_site` — free accessibility scan of one page (axe-core, WCAG 2.2 A/AA, plus a motion module) by the hosted MotionSpec scanner.** New module `src/mcp/scan-site.js`, registered by `registerMotionspecTools` only when the caller passes `deps.scanSite`. The result is the short result only: violations per severity, the number to review by hand, the top 3 rules, the coverage notice verbatim ("Automated testing detects only part of the possible barriers under WCAG 2.2 A/AA …") and a link to the full report on motionspec.dev for a human to open. "Not measurable" (bot protection, login, timeout) is never shown as a clean result.
+- **Local stdio server:** `scan_site` is listed as a notice (`HOSTED_ONLY`) that names the hosted endpoint `https://api.motionspec.dev/mcp`; it does no network work. The scan needs the MotionSpec scanner with a real browser, which the npm package does not ship.
+
 ## [1.2.12] - 2026-11-02
 
 ### Fixed

@@ -20,7 +20,7 @@ The MIT compiler includes reduced-motion handling and loop pause controls by def
 - **Check CSS motion:** audit a URL for reduced-motion and pause-path candidates, then review the reported selectors and suggested fixes.
 - **Prevent regressions:** use the [CI example](examples/ci/motion-audit.yml) to compare findings against an explicitly accepted baseline.
 
-Local stdio MCP exposes all five tools without an API key (`npx -y motionspec`). The hosted endpoint at `https://api.motionspec.dev/mcp` provides keyless `motion_catalog`, `motion_validate`, `motion_compile` and `motion_audit`; only `motion_stats` (the operator's telemetry of the hosted service) requires the operator key. See the [installation guide](llms-install.md) and [motion accessibility guide](docs/motion-accessibility.md). Docs and product: https://motionspec.dev/docs.
+Local stdio MCP exposes all five motion tools without an API key (`npx -y motionspec`), plus `scan_site`, which locally only points to the hosted endpoint. The hosted endpoint at `https://api.motionspec.dev/mcp` provides keyless `motion_catalog`, `motion_validate`, `motion_compile` and `motion_audit`; only `motion_stats` (the operator's telemetry of the hosted service) requires the operator key. See the [installation guide](llms-install.md) and [motion accessibility guide](docs/motion-accessibility.md). Docs and product: https://motionspec.dev/docs.
 
 The thesis: **capability lives in the catalog, not the model.** A bigger model can write more elaborate specs, but it can never emit a primitive, parameter, or selector the Trust Boundary hasn't approved. The compiler trusts only what passes.
 
@@ -113,6 +113,7 @@ The **Catalog Forge** (CI workflow, manual dispatch) picks the top telemetry-ran
 | `motion_compile` | deterministic spec → code; never emits on a failed validation |
 | `motion_audit` | static motion-a11y check of a live URL (read-only, open-world) |
 | `motion_stats` | telemetry summary (escalations = catalog growth signal) |
+| `scan_site` | free accessibility scan of one page (axe-core, WCAG 2.2 A/AA, plus motion) by the hosted MotionSpec scanner: counts per severity, top 3, coverage notice. Hosted only — the local server answers `HOSTED_ONLY` with the hosted endpoint. Automated testing finds only part of the possible barriers. |
 
 Input is size-capped (`MS-INPUT-TOO-LARGE`, 64 KB). The stdio server exposes one tool factory as the single source of truth, contract-tested in `test/mcp.test.mjs`. A hosted MCP endpoint is live: keyless `motion_catalog`, `motion_validate`, `motion_compile` and `motion_audit` at `https://api.motionspec.dev/mcp`; `motion_stats` (operator telemetry) needs the operator key.
 
