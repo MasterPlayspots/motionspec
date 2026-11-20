@@ -83,6 +83,7 @@ const EXPECTED_FILES = [
   "src/forge/generate.js",
   "src/forge/prioritize.js",
   "src/mcp/register-tools.js",
+  "src/mcp/scan-site.js",
   "src/mcp/server.mjs",
   "src/router/cache.js",
   "src/router/clients.js",

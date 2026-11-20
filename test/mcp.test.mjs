@@ -27,11 +27,27 @@ const validSpec = {
   ],
 };
 
-test("MCP: lists 5 motion_ tools", async () => {
+test("MCP: lists the 5 motion_ tools plus the scan_site notice", async () => {
   await withClient(async (c) => {
     const { tools } = await c.listTools();
     const names = tools.map((t) => t.name).sort();
-    assert.deepEqual(names, ["motion_audit", "motion_catalog", "motion_compile", "motion_stats", "motion_validate"]);
+    assert.deepEqual(names, ["motion_audit", "motion_catalog", "motion_compile", "motion_stats", "motion_validate", "scan_site"]);
+  });
+});
+
+/* scan_site lokal: kein Scanner, kein Netz — nur der Hinweis auf den gehosteten Endpunkt. */
+test("MCP (stdio): scan_site answers HOSTED_ONLY with the hosted endpoint and does no network work", async () => {
+  await withClient(async (c) => {
+    const { tools } = await c.listTools();
+    const tool = tools.find((t) => t.name === "scan_site");
+    assert.equal(tool.annotations.readOnlyHint, true);
+    assert.equal(tool.annotations.openWorldHint, false);
+    assert.deepEqual(tool.inputSchema.required || [], []);
+    const r = await c.callTool({ name: "scan_site", arguments: { url: "https://example.com/" } });
+    assert.equal(r.isError, true);
+    assert.equal(r.structuredContent.error, "HOSTED_ONLY");
+    assert.equal(r.structuredContent.hostedEndpoint, "https://api.motionspec.dev/mcp");
+    assert.match(r.content[0].text, /claude mcp add --transport http motionspec https:\/\/api\.motionspec\.dev\/mcp/);
   });
 });
 
