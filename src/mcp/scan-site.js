@@ -3,7 +3,7 @@
  * scan-site — MCP-Tool `scan_site`: der Gratis-Check auf Barrieren (axe-core nach
  * WCAG 2.2 A/AA plus Motion-Modul) über die Scan-API von MotionSpec.
  *
- * Vertrag: Scan-API Version 1.1.0. Dieses Modul hängt nicht vom Vertragsquelltext ab:
+ * Vertrag: Scan-API Version 1.2.0. Dieses Modul hängt nicht vom Vertragsquelltext ab:
  * die nötigen Wertelisten stehen unten als Kopie, test/scan-site.test.mjs hält sie fest.
  *
  * Laufzeitneutral wie register-tools.js: kein fetch, kein env, kein Node-Modul. Den Weg
@@ -23,12 +23,12 @@
  */
 const { z } = require("zod");
 
-/* ── Wertelisten aus dem Vertrag der Scan-API 1.1.0 (Kopie, siehe Kopf) ───────── */
+/* ── Wertelisten aus dem Vertrag der Scan-API 1.2.0 (Kopie, siehe Kopf) ───────── */
 const SCHWEREGRADE = Object.freeze(["kritisch", "ernst", "mittel", "gering"]);
 const SCAN_STATUS = Object.freeze(["wartend", "laeuft", "fertig", "nicht_messbar", "fehler"]);
 const NICHT_MESSBAR_GRUENDE = Object.freeze(["bot_schutz", "zeitlimit", "http_fehler", "nicht_erreichbar", "anmeldung_noetig"]);
 const BEFUND_QUELLEN = Object.freeze(["axe", "motion"]);
-const API_FEHLER = Object.freeze(["ungueltige_url", "url_nicht_erlaubt", "nicht_angemeldet", "kein_zugriff",
+const API_FEHLER = Object.freeze(["ungueltige_anfrage", "ungueltige_url", "url_nicht_erlaubt", "nicht_angemeldet", "kein_zugriff",
   "limit_erreicht", "kostenbremse", "nicht_gefunden", "intern"]);
 const SPRACHEN = Object.freeze(["de", "en"]);
 /* ABDECKUNGS_HINWEIS — nur Ersatz, falls der Scanner keinen Hinweis mitschickt. */
@@ -222,7 +222,8 @@ const FEHLER_TEXT = {
 };
 
 /* Was der Aufrufer vom Scanner erfahren darf. nicht_angemeldet/kein_zugriff/intern sind
- * ein Konfigurationsfehler des Endpunkts → „intern“. */
+ * ein Konfigurationsfehler des Endpunkts → „intern“; ebenso ungueltige_anfrage (Vertrag
+ * 1.2.0): den Körper baut dieses Modul, nicht der Aufrufer. */
 const AN_AUFRUFER = ["ungueltige_url", "url_nicht_erlaubt", "limit_erreicht", "kostenbremse", "nicht_gefunden"];
 
 function ergebnis(out, txt, isError) {
@@ -254,8 +255,10 @@ function scanErgebnis(r, s) {
     return ergebnis(out, textFertig(r, s), false);
   }
   if (r.status === "nicht_messbar") {
+    /* kurzergebnis: null — die Nullen in verstoesseJeSchwere könnte ein Agent als „sauber“
+     * lesen. Es bleiben Status, Grund und der Hinweis. */
     const out = { ok: true, tool: TOOL, done: true, scanId: r.id, status: r.status, nichtMessbarGrund: r.nichtMessbarGrund,
-      kurzergebnis: r.kurzergebnis, hinweis: r.kurzergebnis ? r.kurzergebnis.hinweis : ABDECKUNGS_HINWEIS[s] };
+      kurzergebnis: null, hinweis: r.kurzergebnis ? r.kurzergebnis.hinweis : ABDECKUNGS_HINWEIS[s] };
     return ergebnis(out, textNichtMessbar(r, s), false);
   }
   if (r.status === "wartend" || r.status === "laeuft") {

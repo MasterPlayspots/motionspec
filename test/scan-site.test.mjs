@@ -18,7 +18,7 @@ const { loadCatalog, catalogVersion } = require("../src/compiler/catalog.js");
 const ID = "scn_01JD0000000000000000000000";
 const ID2 = "scn_01JD0000000000000000000001";
 
-/* Kopie aus dem Vertrag der Scan-API 1.1.0 (ABDECKUNGS_HINWEIS, VERBOTENE_AUSSAGEN). */
+/* Kopie aus dem Vertrag der Scan-API 1.2.0 (ABDECKUNGS_HINWEIS, VERBOTENE_AUSSAGEN). */
 const HINWEIS = {
   de: "Automatisierte Prüfung: Sie erkennt nur einen Teil der möglichen Barrieren nach WCAG 2.2 A/AA. Viele Kriterien kann nur ein Mensch beurteilen. Das Ergebnis bestätigt keine Barrierefreiheit und ist keine Rechtsberatung.",
   en: "Automated testing detects only part of the possible barriers under WCAG 2.2 A/AA. Many criteria can only be judged by a person. The result does not confirm accessibility and is not legal advice.",
@@ -290,6 +290,7 @@ test("scan_site: scanner errors map to safe codes; own configuration errors neve
     [{ status: 401, daten: { fehler: "nicht_angemeldet", nachricht: "API-Schlüssel ungültig oder widerrufen." } }, "intern", /not reachable/],
     [{ status: 403, daten: { fehler: "kein_zugriff", nachricht: "Über den Kanal gibt es nur den Gratis-Check." } }, "intern", /not reachable/],
     [{ status: 500, daten: { fehler: "erfunden" } }, "intern", /not reachable/],
+    [{ status: 400, daten: { fehler: "ungueltige_anfrage", nachricht: "Feld fehlt." } }, "intern", /not reachable/],
     [{ status: 202, daten: { id: "nope" } }, "intern", /not reachable/],
     [() => { throw new Error("network"); }, "intern", /not reachable/],
     [null, "intern", /not reachable/],
@@ -322,13 +323,27 @@ test("scan_site: 'nicht messbar' is never shown as clean — no counts, no offer
     const sc = r.structuredContent;
     assert.equal(sc.status, "nicht_messbar");
     assert.equal(sc.nichtMessbarGrund, "bot_schutz");
-    assert.equal(sc.kurzergebnis.vollerBericht, null, "no purchase offer for an unmeasured page");
+    assert.equal(sc.kurzergebnis, null, "no short result: zero counts could be read as clean");
+    assert.doesNotMatch(JSON.stringify(sc), /verstoesseJeSchwere|zuPruefen|kaufUrl|vollerBericht/, "no counts, no purchase offer");
     assert.equal(sc.hinweis, HINWEIS.en);
     const t = r.content[0].text;
     assert.match(t, /not measurable \(reason: bot protection\)/);
     assert.match(t, /NOT a clean result/);
     assert.doesNotMatch(t, /Violations by severity|critical 0|No violation/);
     assert.ok(t.includes(HINWEIS.en));
+  });
+});
+
+test("scan_site: 'nicht messbar' in German says 'KEIN sauberes Ergebnis', no counts", async () => {
+  const k = kurz({ status: "nicht_messbar", nichtMessbarGrund: "anmeldung_noetig", verstoesseJeSchwere: { kritisch: 0, ernst: 0, mittel: 0, gering: 0 }, top3: [], hinweis: HINWEIS.de });
+  const f = fakeClient({ lesen: [{ status: 200, daten: antwort("nicht_messbar", k, { nichtMessbarGrund: "anmeldung_noetig", sprache: "de" }) }] });
+  await withScan(fast({ client: f.client }), async (c) => {
+    const r = await call(c, { url: "https://example.com/", language: "de" });
+    const t = r.content[0].text;
+    assert.match(t, /Status: nicht messbar \(Grund: Anmeldung nötig\)\. Die Seite ließ sich nicht prüfen\. Das ist KEIN sauberes Ergebnis; es wurden keine Verstöße gezählt\./);
+    assert.doesNotMatch(t, /Verstöße je Schwere|kritisch 0/);
+    assert.ok(t.includes(HINWEIS.de));
+    assert.equal(r.structuredContent.kurzergebnis, null);
   });
 });
 
@@ -382,11 +397,11 @@ test("kuerzeKurzergebnis: contract fields only, capped texts, foreign purchase l
   assert.equal(scan.kuerzeAntwort(null).status, "fehler");
 });
 
-test("contract copies: lists and notice match the scan API contract 1.1.0", () => {
+test("contract copies: lists and notice match the scan API contract 1.2.0", () => {
   assert.deepEqual(scan.SCHWEREGRADE, ["kritisch", "ernst", "mittel", "gering"]);
   assert.deepEqual(scan.SCAN_STATUS, ["wartend", "laeuft", "fertig", "nicht_messbar", "fehler"]);
   assert.deepEqual(scan.NICHT_MESSBAR_GRUENDE, ["bot_schutz", "zeitlimit", "http_fehler", "nicht_erreichbar", "anmeldung_noetig"]);
-  assert.deepEqual(scan.API_FEHLER, ["ungueltige_url", "url_nicht_erlaubt", "nicht_angemeldet", "kein_zugriff", "limit_erreicht", "kostenbremse", "nicht_gefunden", "intern"]);
+  assert.deepEqual(scan.API_FEHLER, ["ungueltige_anfrage", "ungueltige_url", "url_nicht_erlaubt", "nicht_angemeldet", "kein_zugriff", "limit_erreicht", "kostenbremse", "nicht_gefunden", "intern"]);
   assert.deepEqual({ ...scan.ABDECKUNGS_HINWEIS }, HINWEIS);
   assert.ok(scan.SCAN_ID_MUSTER.test(ID));
 });
