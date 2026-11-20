@@ -67,7 +67,7 @@ outputs:
   violations:
     description: Number of violations at or above fail-on.
   report-url:
-    description: Link to the full report (49-EUR Check) for a human to open, if offered.
+    description: Link to the full report (Website report) for a human to open, if offered.
 
 runs:
   using: node24

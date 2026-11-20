@@ -19,6 +19,18 @@ const SCHWERE_DE = { kritisch: "kritisch", ernst: "ernst", mittel: "mittel", ger
 const ID_MUSTER = /^scn_[0-9A-HJKMNP-TV-Z]{26}$/;
 const SCAN_STATUS = ["wartend", "laeuft", "fertig", "nicht_messbar", "fehler"];
 export const KOMMENTAR_MARKE = "<!-- motionspec-scan-action -->";
+/* Das Angebot zum vollen Bericht — eine Stelle für Name, Umfang, Preis und Bedingung
+ * (Website-Bericht, Anzeige „13 € zzgl. USt.“ / „EUR 13 excl. VAT“; voller Bericht erst nach
+ * dem Domain-Nachweis). Gleicher Wortlaut wie scan_site (src/mcp/scan-site.js ANGEBOT). */
+export const ANGEBOT = Object.freeze({
+  name: Object.freeze({ de: "Website-Bericht", en: "Website report" }),
+  umfang: Object.freeze({ de: "eine Website, bis 100 Seiten", en: "one website, up to 100 pages" }),
+  preis: Object.freeze({ de: "13 € zzgl. USt., B2B", en: "EUR 13 / USD 13 excl. VAT, B2B" }),
+  nachweis: Object.freeze({
+    de: "Den vollen Bericht gibt es erst nach dem Nachweis, dass die Domain Ihnen gehört (DNS-TXT-Eintrag oder Datei).",
+    en: "The full report is released only after you verify the domain (DNS TXT record or file).",
+  }),
+});
 const KAUF_HERKUNFT = "https://motionspec.dev";
 /* Ersatz, falls die API keinen Hinweis mitschickt (Vertrag der Scan-API 1.1.0). */
 export const ABDECKUNGS_HINWEIS = {
@@ -192,8 +204,8 @@ export function markdown(b, e, scanId) {
     b = { ...b, kaufUrl: b.kaufUrl.replace(/[()[\]]/g, (c) => "%" + c.charCodeAt(0).toString(16).toUpperCase()) };
     z.push("");
     z.push(de
-      ? `Voller Bericht mit allen Befunden und Korrekturvorschlägen: [49-€-Check](${b.kaufUrl}) (49 € zzgl. USt., B2B).`
-      : `Full report with every finding and fix suggestions: [49-€ Check](${b.kaufUrl}) (EUR 49 / USD 49 excl. VAT, B2B).`);
+      ? `Voller Bericht mit allen Befunden und Korrekturvorschlägen: [${ANGEBOT.name.de}](${b.kaufUrl}) (${ANGEBOT.umfang.de}; ${ANGEBOT.preis.de}). ${ANGEBOT.nachweis.de}`
+      : `Full report with every finding and fix suggestions: [${ANGEBOT.name.en}](${b.kaufUrl}) (${ANGEBOT.umfang.en}; ${ANGEBOT.preis.en}). ${ANGEBOT.nachweis.en}`);
   }
   return z.join("\n");
 }
