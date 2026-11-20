@@ -1,0 +1,74 @@
+name: MotionSpec accessibility scan
+description: >-
+  Scans one public page with the MotionSpec scanner (axe-core, WCAG 2.2 A/AA, plus a motion
+  module) and fails the job when violations at or above a severity threshold are found.
+  Automated testing finds only part of the possible barriers.
+author: MotionSpec
+branding:
+  icon: eye
+  color: blue
+
+inputs:
+  url:
+    description: Public http(s) URL of the page to scan (for example your preview or production URL).
+    required: true
+  api-key:
+    description: MotionSpec API key (sent as Authorization Bearer). Store it as a repository secret.
+    required: true
+  api-url:
+    description: Base URL of the MotionSpec scan API (without /v1).
+    required: true
+  language:
+    description: Language of rule titles and the coverage notice, en or de.
+    required: false
+    default: en
+  fail-on:
+    description: Lowest severity that counts against the threshold - critical, serious, moderate, minor, or none (never fail on violations).
+    required: false
+    default: serious
+  max-violations:
+    description: Number of violations at or above fail-on that is still accepted.
+    required: false
+    default: "0"
+  fail-on-not-measurable:
+    description: Fail when the page could not be measured (bot protection, login, timeout). A page that was not measured is never a clean result.
+    required: false
+    default: "true"
+  timeout-seconds:
+    description: How long to wait for the scan result.
+    required: false
+    default: "300"
+  comment:
+    description: Post or update a comment with the short result on the pull request (needs permissions pull-requests write).
+    required: false
+    default: "false"
+  github-token:
+    description: Token for the pull request comment.
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  result:
+    description: passed, failed, not-measurable or error.
+  scan-id:
+    description: ID of the scan (scn_...).
+  status:
+    description: Scan status from the API (fertig, nicht_messbar, fehler, ...).
+  critical:
+    description: Number of critical violations.
+  serious:
+    description: Number of serious violations.
+  moderate:
+    description: Number of moderate violations.
+  minor:
+    description: Number of minor violations.
+  review:
+    description: Number of findings to review by hand (never counted as violations).
+  violations:
+    description: Number of violations at or above fail-on.
+  report-url:
+    description: Link to the full report (49-EUR Check) for a human to open, if offered.
+
+runs:
+  using: node24
+  main: index.mjs
