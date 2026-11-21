@@ -20,15 +20,16 @@ const ID_MUSTER = /^scn_[0-9A-HJKMNP-TV-Z]{26}$/;
 const SCAN_STATUS = ["wartend", "laeuft", "fertig", "nicht_messbar", "fehler"];
 export const KOMMENTAR_MARKE = "<!-- motionspec-scan-action -->";
 /* Das Angebot zum vollen Bericht — eine Stelle für Name, Umfang, Preis und Bedingung
- * (Website-Bericht, Anzeige „13 € zzgl. USt.“ / „EUR 13 excl. VAT“; voller Bericht erst nach
- * dem Domain-Nachweis). Gleicher Wortlaut wie scan_site (src/mcp/scan-site.js ANGEBOT). */
+ * (Website-Bericht, Anzeige „13 € zzgl. USt.“ / „EUR 13 excl. VAT“; erst nachweisen, dann
+ * kaufen: ohne bestätigten Domain-Nachweis kein Kauf). Gleicher Wortlaut wie scan_site
+ * (src/mcp/scan-site.js ANGEBOT). */
 export const ANGEBOT = Object.freeze({
   name: Object.freeze({ de: "Website-Bericht", en: "Website report" }),
   umfang: Object.freeze({ de: "eine Website, bis 100 Seiten", en: "one website, up to 100 pages" }),
   preis: Object.freeze({ de: "13 € zzgl. USt., B2B", en: "EUR 13 / USD 13 excl. VAT, B2B" }),
   nachweis: Object.freeze({
-    de: "Den vollen Bericht gibt es erst nach dem Nachweis, dass die Domain Ihnen gehört (DNS-TXT-Eintrag oder Datei).",
-    en: "The full report is released only after you verify the domain (DNS TXT record or file).",
+    de: "Vor dem Kauf weisen Sie nach, dass Sie die Domain verwalten (DNS-TXT-Eintrag oder Datei). Den Website-Bericht gibt es nur für nachgewiesene Domains.",
+    en: "Before purchase, you verify that you control the domain (DNS TXT record or file); the Website report is sold only for verified domains.",
   }),
 });
 const KAUF_HERKUNFT = "https://motionspec.dev";

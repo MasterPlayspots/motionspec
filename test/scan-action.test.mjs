@@ -114,7 +114,7 @@ test("run: violations above the threshold → exit 1, outputs, summary with the 
   assert.match(s, /\| 1 \| 2 \| 3 \| 4 \| 5 \|/);
   assert.match(s, /❌ 3 violations at or above "serious", allowed: 0\./);
   assert.match(s, /1\. \[critical\] Images must have alternative text \(`image-alt`, WCAG 1\.1\.1\) — 1×/);
-  assert.match(s, /\[Website report\]\(https:\/\/motionspec\.dev\/pricing\?scan=scn_\w+&src=scan-action\) \(one website, up to 100 pages; EUR 13 \/ USD 13 excl\. VAT, B2B\)\. The full report is released only after you verify the domain \(DNS TXT record or file\)\./);
+  assert.match(s, /\[Website report\]\(https:\/\/motionspec\.dev\/pricing\?scan=scn_\w+&src=scan-action\) \(one website, up to 100 pages; EUR 13 \/ USD 13 excl\. VAT, B2B\)\. Before purchase, you verify that you control the domain \(DNS TXT record or file\); the Website report is sold only for verified domains\./);
   assert.doesNotMatch(s + JSON.stringify(f.dateien), /\b49\b/, "no old price");
   assert.ok(f.logs.some((l) => l.startsWith("::error::3 violations at or above serious")));
   assert.equal(f.logs[0], "::add-mask::" + KEY, "the key is masked before any other output");
@@ -139,7 +139,7 @@ test("run: German summary when language is de", async () => {
   const s = f.dateien["/summary"];
   assert.match(s, /MotionSpec Barrierefreiheits-Check/);
   assert.match(s, /\| kritisch \| ernst \| mittel \| gering \| von Hand prüfen \|/);
-  assert.match(s, /\[Website-Bericht\]\(.*\) \(eine Website, bis 100 Seiten; 13 € zzgl\. USt\., B2B\)\. Den vollen Bericht gibt es erst nach dem Nachweis, dass die Domain Ihnen gehört \(DNS-TXT-Eintrag oder Datei\)\./);
+  assert.match(s, /\[Website-Bericht\]\(.*\) \(eine Website, bis 100 Seiten; 13 € zzgl\. USt\., B2B\)\. Vor dem Kauf weisen Sie nach, dass Sie die Domain verwalten \(DNS-TXT-Eintrag oder Datei\)\. Den Website-Bericht gibt es nur für nachgewiesene Domains\./);
   assert.match(s, /❌ 3 Verstöße ab „ernst“, erlaubt: 0\./);
 });
 
