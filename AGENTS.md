@@ -109,7 +109,7 @@ A minimal spec:
   `motion_validate` only. It does not compile or check websites; for that, use the hosted
   endpoint or the local server. No MotionSpec tool certifies accessibility. Listing:
   <https://chatgpt.com/plugins/plugin_asdk_app_6ad7946fedac819183fb38ac85520e4b>
-- **Local, all five tools, no key:** `npx -y motionspec` runs the same server over stdio on your
+- **Local, all five motion tools, no key** (`scan_site` is listed locally but only points to the hosted endpoint): `npx -y motionspec` runs the same server over stdio on your
   machine. Compilation and the audit are MIT and run locally.
 - Free site check: https://motionspec.dev/motion-check. Optional paid Motion Report (9 USD,
   one-time): https://motionspec.dev/pricing?src=mcp#p-report.
