@@ -38,6 +38,8 @@ const AUTHORING_RULES = [
 
 /* Catalog summary from the shared source (TASK-026). */
 const { catalogSummary } = require("../compiler/catalog.js");
+/* scan_site: Gratis-Check auf Barrieren über die Scan-API — eigenes Modul. */
+const { registerScanSite } = require("./scan-site.js");
 
 /* 2026-10-26 — no subscriptions any more. The Dev Key and Agency plans are off
  * sale (decision of 26.10.2026); motion_compile and motion_audit are free on the
@@ -361,6 +363,14 @@ function registerMotionspecTools(server, deps) {
       return { content: [{ type: "text", text: JSON.stringify(out, null, 2) }], structuredContent: out };
     }
   );
+
+  /* scan_site nur, wenn der Aufrufer einen Weg zum Scanner (oder den Hinweis-Stub)
+   * mitbringt — ohne deps.scanSite bleibt die Liste bei den fünf motion_-Tools. Die
+   * Freigabe-Liste `only` gilt auch hier: der gehostete Endpunkt nimmt scan_site in
+   * seine Liste auf. */
+  if (deps.scanSite && (!only || only.includes("scan_site"))) {
+    registerScanSite(server, { scanSite: deps.scanSite, log: (e) => telemetry.log(e) });
+  }
 }
 
 module.exports = { registerMotionspecTools, AUTHORING_RULES, MAX_SPEC_BYTES, stubHint, stubDescription, describeCaller, upgradeInfo, reportUrlFor, auditResult, AUDIT_OPTS, CHECK_URL, PRICING_SRC_URL, REPORT_OFFER, LOCAL_COMPILE_CMD, LOCAL_ALTERNATIVES };
