@@ -39,7 +39,9 @@ process.on("SIGHUP", () => {
 });
 
 const server = new McpServer({ name: "motionspec-mcp-server", version: pkg.version });
-registerMotionspecTools(server, { getCatalog: () => catalog, getCatVer: () => catVer });
+/* scan_site gibt es lokal nur als Hinweis auf den gehosteten Endpunkt: der Gratis-Scan
+ * braucht den Scanner (Browser) und dessen internen Kanal — beides nicht im npm-Paket. */
+registerMotionspecTools(server, { getCatalog: () => catalog, getCatVer: () => catVer, scanSite: { client: null, grund: "local" } });
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
