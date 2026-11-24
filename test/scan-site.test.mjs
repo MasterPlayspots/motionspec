@@ -182,7 +182,7 @@ test("scan_site: start → finished — short result, notice verbatim, Website r
     assert.match(t, /Violations by severity: critical 2 · serious 5 · moderate 1 · minor 0/);
     assert.match(t, /To review by hand: 3/);
     assert.match(t, /1\. \[critical\] Images must have alternative text \(image-alt, WCAG 1\.1\.1\) — 2×/);
-    assert.match(t, /Full report with every finding and fix suggestions: Website report \(one website, up to 100 pages; EUR 13 \/ USD 13 excl\. VAT, B2B\): https:\/\/motionspec\.dev\//);
+    assert.match(t, /Full report with every finding and fix suggestions: Website report \(one website, up to 100 pages; EUR 12\.90 \/ USD 12\.90 excl\. VAT, B2B\): https:\/\/motionspec\.dev\//);
     assert.match(t, /Before purchase, you verify that you control the domain \(DNS TXT record or file\); the Website report is sold only for verified domains\./);
     assert.ok(t.includes(sc.kurzergebnis.vollerBericht.kaufUrl));
     assert.match(t, /Do not open it yourself or attempt checkout/);
@@ -200,7 +200,7 @@ test("scan_site: German output when language is de; scanId reads use the scan's 
     assert.equal(f.calls.anlegen[0].sprache, "de");
     const t = r.content[0].text;
     assert.match(t, /Verstöße je Schwere: kritisch 2 · ernst 5 · mittel 1 · gering 0/);
-    assert.match(t, /Voller Bericht mit allen Befunden und Korrekturvorschlägen: Website-Bericht \(eine Website, bis 100 Seiten; 13 € zzgl\. USt\., B2B\): https:\/\/motionspec\.dev\//);
+    assert.match(t, /Voller Bericht mit allen Befunden und Korrekturvorschlägen: Website-Bericht \(eine Website, bis 100 Seiten; 12,90 € zzgl\. USt\., B2B\): https:\/\/motionspec\.dev\//);
     assert.match(t, /Vor dem Kauf weisen Sie nach, dass Sie die Domain verwalten \(DNS-TXT-Eintrag oder Datei\)\. Den Website-Bericht gibt es nur für nachgewiesene Domains\./);
     assert.ok(t.includes(HINWEIS.de));
     const r2 = await call(c, { scanId: ID, language: "en" });
@@ -432,12 +432,13 @@ test("scan_site: finished without violations says so — only for the rules chec
   });
 });
 
-/* Website-Bericht: 13 €/13 USD, bis 100 Seiten, voller Bericht nach Domain-Nachweis. */
+/* Website-Bericht: 12,90 €/12,90 USD netto, bis 100 Seiten, voller Bericht nach Domain-Nachweis
+ * (vorher 13 €/13 USD, nie live verkauft). */
 test("ANGEBOT: one place for name, scope, price and condition; no old price anywhere in texts or descriptions", async () => {
   assert.deepEqual(JSON.parse(JSON.stringify(scan.ANGEBOT)), {
     name: { de: "Website-Bericht", en: "Website report" },
     umfang: { de: "eine Website, bis 100 Seiten", en: "one website, up to 100 pages" },
-    preis: { de: "13 € zzgl. USt., B2B", en: "EUR 13 / USD 13 excl. VAT, B2B" },
+    preis: { de: "12,90 € zzgl. USt., B2B", en: "EUR 12.90 / USD 12.90 excl. VAT, B2B" },
     nachweis: {
       de: "Vor dem Kauf weisen Sie nach, dass Sie die Domain verwalten (DNS-TXT-Eintrag oder Datei). Den Website-Bericht gibt es nur für nachgewiesene Domains.",
       en: "Before purchase, you verify that you control the domain (DNS TXT record or file); the Website report is sold only for verified domains.",
@@ -454,6 +455,7 @@ test("ANGEBOT: one place for name, scope, price and condition; no old price anyw
   }
   const alles = texte.join("\n");
   assert.doesNotMatch(alles, /\b49\b|49-€|Check \(one URL\)|one public web page/, "no old price, no single-page claim");
-  assert.match(alles, /EUR 13 \/ USD 13 excl\. VAT, B2B/);
+  assert.match(alles, /EUR 12\.90 \/ USD 12\.90 excl\. VAT, B2B/);
+  assert.doesNotMatch(alles, /EUR 13 \/ USD 13\b|\b13 € zzgl/, "old Website report price (ms_check_v2) is gone");
   assert.match(alles, /the free scan covers a limited number of pages/, "free limit stated without a page count");
 });

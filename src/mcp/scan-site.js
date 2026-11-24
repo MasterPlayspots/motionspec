@@ -51,19 +51,19 @@ const KAUF_HERKUNFT = "https://motionspec.dev";
 /* Zuordnung im Funnel wie bei den übrigen Tools (reportUrlFor: src=mcp-<tool>). */
 const KAUF_SRC = "mcp-" + TOOL;
 /* Das Angebot zum vollen Bericht — die EINE Stelle für Name, Umfang, Preis und Bedingung
- * (Anzeige „13 € zzgl. USt.“ / „EUR 13 excl. VAT“; erst nachweisen, dann kaufen: ohne
+ * (Anzeige „12,90 € zzgl. USt.“ / „EUR 12.90 / USD 12.90 excl. VAT“, netto; erst nachweisen, dann kaufen: ohne
  * bestätigten Domain-Nachweis kein Kauf). „verwalten/control“ statt „gehört Ihnen“.
  * Texte und Tool-Beschreibung setzen sich nur hieraus zusammen. */
 const ANGEBOT = Object.freeze({
   name: Object.freeze({ de: "Website-Bericht", en: "Website report" }),
   umfang: Object.freeze({ de: "eine Website, bis 100 Seiten", en: "one website, up to 100 pages" }),
-  preis: Object.freeze({ de: "13 € zzgl. USt., B2B", en: "EUR 13 / USD 13 excl. VAT, B2B" }),
+  preis: Object.freeze({ de: "12,90 € zzgl. USt., B2B", en: "EUR 12.90 / USD 12.90 excl. VAT, B2B" }),
   nachweis: Object.freeze({
     de: "Vor dem Kauf weisen Sie nach, dass Sie die Domain verwalten (DNS-TXT-Eintrag oder Datei). Den Website-Bericht gibt es nur für nachgewiesene Domains.",
     en: "Before purchase, you verify that you control the domain (DNS TXT record or file); the Website report is sold only for verified domains.",
   }),
 });
-/** „Website-Bericht (eine Website, bis 100 Seiten; 13 € zzgl. USt., B2B)“ */
+/** „Website-Bericht (eine Website, bis 100 Seiten; 12,90 € zzgl. USt., B2B)“ */
 function angebot(s) {
   return ANGEBOT.name[s] + " (" + ANGEBOT.umfang[s] + "; " + ANGEBOT.preis[s] + ")";
 }
